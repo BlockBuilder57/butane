@@ -9,6 +9,8 @@
 
 #include <core/sdl/Window.hpp>
 
+#include <core/filesystem/Filesystem.hpp>
+
 namespace core = engine::core;
 namespace sdl = core::sdl;
 namespace gl = core::gl;
@@ -65,30 +67,18 @@ int main(int argc, char** argv) {
 
 	// vertex/fragment shaders
 
-	const char *vertexShaderSource = R"(
-	#version 330 core
-	layout (location = 0) in vec3 aPos;
+	auto vsFile = core::filesystem::Filesystem::The().OpenReadFile(core::filesystem::stdfs::path("shaders") / "demo.vert");
+	auto fsFile = core::filesystem::Filesystem::The().OpenReadFile(core::filesystem::stdfs::path("shaders") / "demo.frag");
 
-	uniform vec2 time;
-
-	void main() {
-   		gl_Position = vec4(aPos.x, aPos.y + (sin(time.x) * 0.2f) + cos((aPos.x+0.5)+time.x)*0.2f, aPos.z, 1.0);
-	})";
-
-	const char* fragmentShaderSource = R"(
-	#version 330 core
-	out vec4 FragColor;
-
-	uniform vec2 time;
-
-	void main() {
-		FragColor = vec4(mod(time.x, 1.0f), 0.5f, 0.2f, 1.0f);
-	})";
+	if(!vsFile || !fsFile) {
+		core::LogFatal("could not open files");
+		return 1;
+	}
 
 	gl::Shader vertexShader(gl::Shader::Kind::Vertex);
 	gl::Shader fragmentShader(gl::Shader::Kind::Fragment);
-	vertexShader.SetSource(vertexShaderSource);
-	fragmentShader.SetSource(fragmentShaderSource);
+	vertexShader.SetSource(vsFile->ReadString());
+	fragmentShader.SetSource(fsFile->ReadString());
 
 	if(!vertexShader.Compile()) {
 		core::LogInfo("Vertex shader compilation failure: {}", vertexShader.GetInfoLog());
@@ -124,7 +114,7 @@ int main(int argc, char** argv) {
 	
 	// This is essentially how many update ticks we run (when we can)
 	// This should be made a configurable value later on
-	constexpr static float UpdateRate = 1. / 66.; 
+	constexpr static float UpdateRate = 1. / 66.;
 
 	float deltaTime = 0.f;
 	float lastTime = SDL_GetTicks64() / 1000.f;

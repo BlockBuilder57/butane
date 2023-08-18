@@ -7,44 +7,50 @@
 #include <core/StdoutSink.hpp>
 #include <core/Types.hpp>
 
+#include <core/sdl/Window.hpp>
 
-int main(int argc, char** argv) {
-	engine::core::LoggerAttachStdout();
+namespace core = engine::core;
+namespace sdl = core::sdl;
+namespace gl = core::gl;
 
-	if(SDL_Init(SDL_INIT_EVERYTHING) > 0) {
-		engine::core::LogFatal("brugh");
-		return 1;
-	}
-
-	engine::core::LogInfo("no brugh");
-
-
-	auto window = SDL_CreateWindow("engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_OPENGL);
-	auto glc = SDL_GL_CreateContext(window);
-
-	// open gl contxxt and of ?
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
-	gladLoadGLLoader(SDL_GL_GetProcAddress);
-
-
+void DumpOglInfo() {
 	int maj;
 	int min;
 
-	engine::core::LogInfo("Vendor   : {}", reinterpret_cast<const char*>(glGetString(GL_VENDOR)));
-	engine::core::LogInfo("Renderer : {}", reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
-	engine::core::LogInfo("Version  : {}", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
-	engine::core::LogInfo("GLSL     : {}", reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)));
+	core::LogInfo("OpenGL Information:");
+	core::LogInfo("Vendor   : {}", reinterpret_cast<const char*>(glGetString(GL_VENDOR)));
+	core::LogInfo("Renderer : {}", reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
+	core::LogInfo("Version  : {}", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
+	core::LogInfo("GLSL     : {}", reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)));
 
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &maj);
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &min);
-	engine::core::LogInfo("Context  : {}.{}", maj, min);
+	core::LogInfo("Context  : {}.{}", maj, min);
 
 	glGetIntegerv(GL_MAJOR_VERSION, &maj);
 	glGetIntegerv(GL_MINOR_VERSION, &min);
-	engine::core::LogInfo("OpenGL   : {}.{}", maj, min);
+	core::LogInfo("OpenGL   : {}.{}", maj, min);
+}
 
-	bool run = true;
+
+int main(int argc, char** argv) {
+	static_cast<void>(argc);
+	static_cast<void>(argv);
+
+	core::LoggerAttachStdout();
+
+	if(SDL_Init(SDL_INIT_EVERYTHING) > 0) {
+		core::LogFatal("Failed to initialize SDL; giving up");
+		return 1;
+	}
+
+	auto window = sdl::Window{"engine", 800, 600};
+
+	// By this point the Window class has setup OpenGL and made the context it created current,
+	// so now we can load OpenGL APIs.
+	gladLoadGLLoader(SDL_GL_GetProcAddress);
+
+	DumpOglInfo();
 
 	glClearColor(0.f, 0.f, 0.f, 1.f);
 	glViewport(0, 0, 800, 600);
@@ -56,6 +62,8 @@ int main(int argc, char** argv) {
 		0.5f, -0.5f, 0.0f,
 		0.0f,  0.5f, 0.0f
 	};
+
+	// vertex/fragment shaders
 
 	const char *vertexShaderSource = R"(
 	#version 330 core
@@ -77,26 +85,20 @@ int main(int argc, char** argv) {
 		FragColor = vec4(mod(time.x, 1.0f), 0.5f, 0.2f, 1.0f);
 	})";
 
-	// compile errors
-	char infoLog[512];
-
-
-	engine::core::gl::Shader vertexShader(engine::core::gl::Shader::Kind::Vertex);
-	engine::core::gl::Shader fragmentShader(engine::core::gl::Shader::Kind::Fragment);
+	gl::Shader vertexShader(gl::Shader::Kind::Vertex);
+	gl::Shader fragmentShader(gl::Shader::Kind::Fragment);
 	vertexShader.SetSource(vertexShaderSource);
 	fragmentShader.SetSource(fragmentShaderSource);
 
 	if(!vertexShader.Compile()) {
-		glGetShaderInfoLog(vertexShader.Get(), 512, nullptr, infoLog);
-		engine::core::LogInfo("Vertex shader compilation failure: {}", infoLog);
+		core::LogInfo("Vertex shader compilation failure: {}", vertexShader.GetInfoLog());
 	}
 
 	if(!fragmentShader.Compile()) {
-		glGetShaderInfoLog(fragmentShader.Get(), 512, nullptr, infoLog);
-		engine::core::LogInfo("fragment shader compilation failure: {}", infoLog);
+		core::LogInfo("fragment shader compilation failure: {}", fragmentShader.GetInfoLog());
 	}
 
-	engine::core::gl::Program program;
+	gl::ShaderProgram program;
 	program.AttachShader(vertexShader);
 	program.AttachShader(fragmentShader);
 	program.Link();
@@ -116,50 +118,52 @@ int main(int argc, char** argv) {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
 	glEnableVertexAttribArray(0);
 
-	constexpr static float UpdateRate = 1. / 60.;
+	// loop variables
+
+	bool run = true;
+	
+	// This is essentially how many update ticks we run (when we can)
+	// This should be made a configurable value later on
+	constexpr static float UpdateRate = 1. / 66.; 
 
 	float deltaTime = 0.f;
 	float lastTime = SDL_GetTicks64() / 1000.f;
 	float nowTime;
 
+	// Assign window event handlers
+	window.On(SDL_QUIT, [&](auto& ev) {
+		static_cast<void>(ev);
+		run = false;
+	});
+
 	while(run) {
-		SDL_Event ev;
-
-		// run update loop
-		lastTime = nowTime;
-
-		// run SDL event loop
-		while(SDL_PollEvent(&ev) > 0) {
-			switch(ev.type) {
-				case SDL_EventType::SDL_QUIT:
-					run = false;
-					break;
-
-				default:
-					break;
-			}
+		// Fixed timestep updates.
+		//
+		// Note that this loop is not "greedy"; it only executes
+		// updates for the times it can, and does not otherwise.
+		while(deltaTime >= 1.) {
+			core::LogInfo("Update {}", deltaTime);
+			deltaTime--;
 		}
 
-		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
 		nowTime = SDL_GetTicks64() / 1000.f;
+		deltaTime += (nowTime - lastTime) / UpdateRate;
+		lastTime = nowTime;
 
-		//deltaTime += (nowTime - lastTime) / UpdateRate;
-
-		engine::core::LogInfo("delta time: {}", 1.f/(nowTime - lastTime));
-
-		program.SetUniform("time", nowTime, std::chrono::system_clock::now().time_since_epoch().count());
+		//core::LogInfo("delta time: {}", 1.f/(nowTime - lastTime));
 
 		// do actual drawing now
+		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+		program.SetUniform("time", nowTime, std::chrono::system_clock::now().time_since_epoch().count());
 		program.Bind();
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
+		window.Swap();
 
-		SDL_GL_SwapWindow(window);
+		// Run the SDL window event loop last
+		window.Poll();
 	}
 
-	SDL_GL_DeleteContext(glc);
-	SDL_DestroyWindow(window);
 	SDL_Quit();
     return 0;
 }

@@ -7,10 +7,10 @@ namespace engine::core::gl {
 
 	struct Shader;
 
-	struct Program {
-		Program() { glProgramObject = glCreateProgram(); }
+	struct ShaderProgram {
+		ShaderProgram() { glProgramObject = glCreateProgram(); }
 
-		~Program() { glDeleteProgram(glProgramObject); }
+		~ShaderProgram() { glDeleteProgram(glProgramObject); }
 
 		void AttachShader(Shader& shader);
 
@@ -56,6 +56,8 @@ namespace engine::core::gl {
 		}
 
 		bool Compile();
+
+		std::string GetInfoLog();
 
 		void SetSource(const std::string& source);
 

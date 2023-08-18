@@ -2,12 +2,12 @@
 
 namespace engine::core::gl {
 
-	void Program::AttachShader(engine::core::gl::Shader& shader) {
+	void ShaderProgram::AttachShader(engine::core::gl::Shader& shader) {
 		shaderObjects.push_back(&shader);
 		glAttachShader(glProgramObject, shader.Get());
 	}
 
-	void Program::Link() {
+	void ShaderProgram::Link() {
 		glLinkProgram(glProgramObject);
 		for(auto* shader : shaderObjects)
 			shader->Done();
@@ -15,18 +15,18 @@ namespace engine::core::gl {
 		shaderObjects.resize(0);
 	}
 
-	void Program::Bind() {
+	void ShaderProgram::Bind() {
 		glUseProgram(glProgramObject);
 	}
 
-	void Program::Unbind() {
+	void ShaderProgram::Unbind() {
 		glUseProgram(0);
 	}
 
-	void Program::SetUniform(const std::string& uniform, float value) {
+	void ShaderProgram::SetUniform(const std::string& uniform, float value) {
 		glUniform1f(glGetUniformLocation(glProgramObject, uniform.c_str()), value);
 	}
-	void Program::SetUniform(const std::string& uniform, float x, float y) {
+	void ShaderProgram::SetUniform(const std::string& uniform, float x, float y) {
 		glUniform2f(glGetUniformLocation(glProgramObject, uniform.c_str()), x, y);
 	}
 
@@ -35,6 +35,14 @@ namespace engine::core::gl {
 		i32 success {};
 		glGetShaderiv(glShaderObject, GL_COMPILE_STATUS, &success);
 		return success;
+	}
+
+	std::string Shader::GetInfoLog() {
+		char log[4096] {};
+		GLsizei len;
+		glGetShaderInfoLog(glShaderObject, sizeof(log), &len, &log[0]);
+
+		return { log, static_cast<usize>(len) };
 	}
 
 	void Shader::SetSource(const std::string& source) {

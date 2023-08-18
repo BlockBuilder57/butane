@@ -3,6 +3,10 @@ add_library(engine_core
 		Logger.cpp
 		StdoutSink.cpp
 
+		# SDL abstractions
+		sdl/Window.cpp
+
+		# OpenGL abstractions
 		gl/Shader.cpp
 		)
 

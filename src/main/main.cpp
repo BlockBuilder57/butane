@@ -4,6 +4,7 @@
 #include <SDL2/SDL_image.h>
 #include <core/gl/GLHeaders.hpp>
 #include <core/gl/Shader.hpp>
+#include <core/gl/Texture.hpp>
 #include <core/Logger.hpp>
 #include <core/StdoutSink.hpp>
 #include <core/Types.hpp>
@@ -126,43 +127,10 @@ int main(int argc, char** argv) {
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 
-	//
 	// textures
-	//
-
-	u32 IMG1, IMG2;
-
-
-	glGenTextures(1, &IMG1);
-	glBindTexture(GL_TEXTURE_2D, IMG1);
-
-	// horsie
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	auto img1filename = (core::filesystem::Filesystem::The().GetDataDir() / "textures" / "test.png");
-	SDL_Surface* img1 = IMG_Load(img1filename.c_str());
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,img1->w,img1->h,0,GL_RGBA,GL_UNSIGNED_BYTE,img1->pixels);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	SDL_FreeSurface(img1);
-
-
-	glGenTextures(1, &IMG2);
-	glBindTexture(GL_TEXTURE_2D, IMG2);
-
-	// horsie
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	auto img2filename = (core::filesystem::Filesystem::The().GetDataDir() / "textures" / "test2.png");
-	SDL_Surface* img2 = IMG_Load(img2filename.c_str());
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,img2->w,img2->h,0,GL_RGBA,GL_UNSIGNED_BYTE,img2->pixels);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	SDL_FreeSurface(img2);
+	gl::Texture image1, image2;
+	image1.LoadTexture(core::filesystem::Filesystem::The().GetDataDir() / "textures" / "test.png");
+	image2.LoadTexture(core::filesystem::Filesystem::The().GetDataDir() / "textures" / "test2.png");
 
 	// set up uniforms
 	program.Bind();
@@ -207,9 +175,9 @@ int main(int argc, char** argv) {
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, IMG1);
+		image1.Bind();
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, IMG2);
+		image2.Bind();
 
 		program.Bind();
 		program.SetUniform("time", nowTime, std::chrono::system_clock::now().time_since_epoch().count());

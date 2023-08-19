@@ -8,8 +8,12 @@ out vec2 texcoord;
 
 uniform vec2 time;
 
+uniform mat4 matModel;
+uniform mat4 matView;
+uniform mat4 matProjection;
+
 void main() {
-	gl_Position = vec4(aPos.x, aPos.y + (tan(time.x) * 0.2f) + cos((aPos.x+0.5)+time.x)*0.2f, aPos.z, 1.0);
+	gl_Position = matProjection * matView * matModel * vec4(aPos, 1.0);
 	//gl_Position = vec4(aPos, 1.0);
 	vertexColor = vec4(aColor, 1.0);
 

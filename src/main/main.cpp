@@ -6,12 +6,12 @@
 #include <core/gl/Shader.hpp>
 #include <core/gl/Texture.hpp>
 #include <core/Logger.hpp>
+#include <core/sdl/Window.hpp>
 #include <core/StdoutSink.hpp>
 #include <core/Types.hpp>
-
-#include <core/sdl/Window.hpp>
-
-#include <core/filesystem/Filesystem.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace core = engine::core;
 namespace sdl = core::sdl;
@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
-	auto window = sdl::Window{"engine", 800, 600};
+	auto window = sdl::Window { "engine", 800, 600 };
 
 	// By this point the Window class has setup OpenGL and made the context it created current,
 	// so now we can load OpenGL APIs.
@@ -121,7 +121,7 @@ int main(int argc, char** argv) {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 	// color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3* sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 	// uv attribute
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
@@ -140,7 +140,7 @@ int main(int argc, char** argv) {
 	// loop variables
 
 	bool run = true;
-	
+
 	// This is essentially how many update ticks we run (when we can)
 	// This should be made a configurable value later on
 	constexpr static float UpdateRate = 1. / 66.;
@@ -172,7 +172,7 @@ int main(int argc, char** argv) {
 		//core::LogInfo("delta time: {}", 1.f/(nowTime - lastTime));
 
 		// do actual drawing now
-		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glActiveTexture(GL_TEXTURE0);
 		image1.Bind();
@@ -181,6 +181,24 @@ int main(int argc, char** argv) {
 
 		program.Bind();
 		program.SetUniform("time", nowTime, std::chrono::system_clock::now().time_since_epoch().count());
+
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, nowTime * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+
+		glm::mat4 view = glm::mat4(1.0f);
+		// note that we're translating the scene in the reverse direction of where we want to move
+		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+		glm::mat4 projection;
+		projection = glm::perspective(glm::radians(45.0f), 800.f / 600.f, 0.1f, 100.0f);
+
+		unsigned int modelLoc = glGetUniformLocation(program.GetID(), "matModel");
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		unsigned int viewLoc = glGetUniformLocation(program.GetID(), "matView");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		unsigned int projLoc = glGetUniformLocation(program.GetID(), "matProjection");
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		window.Swap();
@@ -190,5 +208,5 @@ int main(int argc, char** argv) {
 	}
 
 	SDL_Quit();
-    return 0;
+	return 0;
 }

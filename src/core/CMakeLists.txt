@@ -18,6 +18,7 @@ custengine_setup_target(engine_core)
 
 target_link_libraries(engine_core PUBLIC
 		glad::glad
+		glm::glm
 		)
 
 

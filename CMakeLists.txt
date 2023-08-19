@@ -25,6 +25,7 @@ endif()
 custengine_set_alternate_linker()
 
 add_subdirectory(third_party/glad)
+add_subdirectory(third_party/glm)
 
 add_subdirectory(src/core)
 add_subdirectory(src/main)

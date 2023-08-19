@@ -4,10 +4,11 @@ namespace engine::core::sdl {
 
         Window::Window(const std::string_view title, u32 width, u32 height) {
 			window = SDL_CreateWindow(title.data(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
-			context = SDL_GL_CreateContext(window);
 			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
-			SDL_GL_MakeCurrent(window, context);
+	        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
+	        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	        context = SDL_GL_CreateContext(window);
+	        SDL_GL_MakeCurrent(window, context);
 
             // Disable VSync by default; later on this probably should be configurable
             SDL_GL_SetSwapInterval(0);

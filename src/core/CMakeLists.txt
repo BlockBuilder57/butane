@@ -3,7 +3,10 @@ add_library(engine_core
 		Logger.cpp
 		StdoutSink.cpp
 
+		System.cpp
+
 		filesystem/Filesystem.cpp
+		filesystem/WatchSystem.cpp
 
 		# SDL abstractions
 		sdl/Window.cpp

@@ -24,7 +24,7 @@ namespace engine::core {
 	#define ENGINE_ASSERT(expr, fmt, ...)                                                                                                           \
 		if(!(expr)) [[unlikely]] {                                                                                                                  \
 			auto msg = std::format("Assertion \"{}\" @ {}:{} failed with message: {}", #expr, __FILE__, __LINE__, std::format(fmt, ##__VA_ARGS__)); \
-			::lucore::ExitMsg(msg.c_str());                                                                                                         \
+			::engine::core::ExitMsg(msg.c_str());                                                                                                         \
 		}
 #else
 	#define ENGINE_ASSERT(expr, format, ...)
@@ -33,5 +33,8 @@ namespace engine::core {
 #define ENGINE_CHECK(expr, fmt, ...)                                                                                                        \
 	if(!(expr)) [[unlikely]] {                                                                                                              \
 		auto msg = std::format("Check \"{}\" @ {}:{} failed with message: {}", #expr, __FILE__, __LINE__, std::format(fmt, ##__VA_ARGS__)); \
-		::lucore::ExitMsg(msg.c_str());                                                                                                     \
+		::engine::core::ExitMsg(msg.c_str());                                                                                                     \
 	}
+
+#define ENGINE_TODO() \
+	ENGINE_CHECK(false, "TODO <3");

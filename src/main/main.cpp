@@ -2,6 +2,9 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+
+#include <core/filesystem/Filesystem.hpp>
+#include <core/filesystem/WatchSystem.hpp>
 #include <core/gl/GLHeaders.hpp>
 #include <core/gl/Shader.hpp>
 #include <core/gl/Texture.hpp>
@@ -36,6 +39,9 @@ void DumpOglInfo() {
 	core::LogInfo("OpenGL   : {}.{}", maj, min);
 }
 
+void TestThing(const std::filesystem::path& path, core::filesystem::Watch::Event ev) {
+	core::LogInfo("Got event for \"{}\" event {}", path.string(), static_cast<i32>(ev));
+}
 
 int main(int argc, char** argv) {
 	static_cast<void>(argc);
@@ -137,6 +143,16 @@ int main(int argc, char** argv) {
 	glUniform1i(glGetUniformLocation(program.GetID(), "texture1"), 0);
 	glUniform1i(glGetUniformLocation(program.GetID(), "texture2"), 1);
 
+
+	auto system = new core::filesystem::WatchSystem;
+	auto watch = new core::filesystem::Watch(  core::filesystem::Filesystem::The().GetDataDir() / "shaders"  );
+
+	watch->SetCallback(TestThing);
+
+	core::SystemManager::The().Add(static_cast<engine::core::PerTickSystem*>(system));
+
+	system->AddWatch(watch);
+
 	// loop variables
 
 	bool run = true;
@@ -155,6 +171,10 @@ int main(int argc, char** argv) {
 		run = false;
 	});
 
+	//SDL_Surface* windowSurface = SDL_GetWindowSurface(window.Raw());
+
+	core::SystemManager::The().Init();
+
 	while(run) {
 		// Fixed timestep updates.
 		//
@@ -162,6 +182,7 @@ int main(int argc, char** argv) {
 		// updates for the times it can, and does not otherwise.
 		while(deltaTime >= 1.) {
 			//core::LogInfo("Update {}", deltaTime);
+			core::SystemManager::The().Tick();
 			deltaTime--;
 		}
 

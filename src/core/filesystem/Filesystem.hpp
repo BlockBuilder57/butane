@@ -8,6 +8,7 @@ namespace engine::core::filesystem {
 	namespace stdfs = std::filesystem;
 
 	struct Filesystem {
+	   public:
 		static Filesystem& The();
 
 		stdfs::path GetDataDir();

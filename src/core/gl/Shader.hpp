@@ -21,6 +21,8 @@ namespace engine::core::gl {
 		void Bind();
 		void Unbind();
 
+		GLuint GetID() { return glProgramObject; }
+
 		// TODO:
 		// (proper) float2/float3 overloads
 		// vec3/vec4 overloads

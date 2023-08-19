@@ -1,6 +1,7 @@
 // Created by block on 8/14/23.
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include <core/gl/GLHeaders.hpp>
 #include <core/gl/Shader.hpp>
 #include <core/Logger.hpp>
@@ -60,9 +61,15 @@ int main(int argc, char** argv) {
 	// init stuff
 
 	float vertices[] = {
-		-0.5f, -0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f,
-		0.0f,  0.5f, 0.0f
+		// positions          // colors           // texture coords
+		 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+		 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+		-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
+	};
+	unsigned int indices[] = {  // note that we start from 0!
+		0, 1, 3,   // first triangle
+		1, 2, 3    // second triangle
 	};
 
 	// vertex/fragment shaders
@@ -95,18 +102,72 @@ int main(int argc, char** argv) {
 
 	program.Bind();
 
-	u32 VAO, VBO;
+	u32 VAO, VBO, EBO;
+
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
 
 	glBindVertexArray(VAO);
 
-	//
+	// bind buffers
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+	// position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+	// color attribute
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3* sizeof(float)));
+	glEnableVertexAttribArray(1);
+	// uv attribute
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+
+	//
+	// textures
+	//
+
+	u32 IMG1, IMG2;
+
+
+	glGenTextures(1, &IMG1);
+	glBindTexture(GL_TEXTURE_2D, IMG1);
+
+	// horsie
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	auto img1filename = (core::filesystem::Filesystem::The().GetDataDir() / "textures" / "test.png");
+	SDL_Surface* img1 = IMG_Load(img1filename.c_str());
+	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,img1->w,img1->h,0,GL_RGBA,GL_UNSIGNED_BYTE,img1->pixels);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	SDL_FreeSurface(img1);
+
+
+	glGenTextures(1, &IMG2);
+	glBindTexture(GL_TEXTURE_2D, IMG2);
+
+	// horsie
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	auto img2filename = (core::filesystem::Filesystem::The().GetDataDir() / "textures" / "test2.png");
+	SDL_Surface* img2 = IMG_Load(img2filename.c_str());
+	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,img2->w,img2->h,0,GL_RGBA,GL_UNSIGNED_BYTE,img2->pixels);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	SDL_FreeSurface(img2);
+
+	// set up uniforms
+	program.Bind();
+	glUniform1i(glGetUniformLocation(program.GetID(), "texture1"), 0);
+	glUniform1i(glGetUniformLocation(program.GetID(), "texture2"), 1);
 
 	// loop variables
 
@@ -132,7 +193,7 @@ int main(int argc, char** argv) {
 		// Note that this loop is not "greedy"; it only executes
 		// updates for the times it can, and does not otherwise.
 		while(deltaTime >= 1.) {
-			core::LogInfo("Update {}", deltaTime);
+			//core::LogInfo("Update {}", deltaTime);
 			deltaTime--;
 		}
 
@@ -144,10 +205,16 @@ int main(int argc, char** argv) {
 
 		// do actual drawing now
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-		program.SetUniform("time", nowTime, std::chrono::system_clock::now().time_since_epoch().count());
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, IMG1);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, IMG2);
+
 		program.Bind();
+		program.SetUniform("time", nowTime, std::chrono::system_clock::now().time_since_epoch().count());
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		window.Swap();
 
 		// Run the SDL window event loop last

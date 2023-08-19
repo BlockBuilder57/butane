@@ -13,6 +13,7 @@ include(ProjectFuncs)
 find_package(Threads REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(SDL2_mixer REQUIRED)
+find_package(SDL2_image REQUIRED)
 
 # default linker
 if(NOT CUSTENGINE_LINKER AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")

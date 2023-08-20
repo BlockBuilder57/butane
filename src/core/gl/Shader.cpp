@@ -20,7 +20,6 @@ namespace engine::core::gl {
 	void ShaderProgram::Bind() {
 		glUseProgram(glProgramObject);
 	}
-
 	void ShaderProgram::Unbind() {
 		glUseProgram(0);
 	}
@@ -28,8 +27,17 @@ namespace engine::core::gl {
 	void ShaderProgram::SetUniform(const std::string& uniform, float value) {
 		glUniform1f(glGetUniformLocation(glProgramObject, uniform.c_str()), value);
 	}
-	void ShaderProgram::SetUniform(const std::string& uniform, float x, float y) {
-		glUniform2f(glGetUniformLocation(glProgramObject, uniform.c_str()), x, y);
+	void ShaderProgram::SetUniform(const std::string& uniform, const glm::vec2& vec) {
+		glUniform2f(glGetUniformLocation(glProgramObject, uniform.c_str()), vec.x, vec.y);
+	}
+	void ShaderProgram::SetUniform(const std::string& uniform, const glm::vec3& vec) {
+		glUniform3f(glGetUniformLocation(glProgramObject, uniform.c_str()), vec.x, vec.y, vec.z);
+	}
+	void ShaderProgram::SetUniform(const std::string& uniform, const glm::vec4& vec) {
+		glUniform4f(glGetUniformLocation(glProgramObject, uniform.c_str()), vec.x, vec.y, vec.z, vec.w);
+	}
+	void ShaderProgram::SetUniform(const std::string& uniform, const glm::mat4& mat) {
+		glUniformMatrix4fv(glGetUniformLocation(glProgramObject, uniform.c_str()), 1, false, &mat[0][0]);
 	}
 
 	bool Shader::Compile() {

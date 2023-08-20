@@ -1,8 +1,14 @@
 #pragma once
+
 #include <core/filesystem/Filesystem.hpp>
 #include <core/filesystem/WatchSystem.hpp>
 #include <core/gl/GLHeaders.hpp>
 #include <core/Types.hpp>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <vector>
 
 namespace engine::core::gl {
@@ -30,10 +36,11 @@ namespace engine::core::gl {
 		// mat3/mat4 overloads
 
 		void SetUniform(const std::string& uniform, float value);
-
-		void SetUniform(const std::string& uniform, float x, float y); // for now
-
-		void SetUniform(const std::string& uniform, double value);
+		void SetUniform(const std::string& uniform, const glm::vec2& vec);
+		void SetUniform(const std::string& uniform, const glm::vec3& vec);
+		void SetUniform(const std::string& uniform, const glm::vec4& vec);
+		void SetUniform(const std::string& uniform, const glm::mat4& mat);
+		//void SetUniform(const std::string& uniform, double value);
 
 	   private:
 		u32 glProgramObject {};

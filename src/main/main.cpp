@@ -40,7 +40,7 @@ void DumpOglInfo() {
 }
 
 void TestThing(const std::filesystem::path& path, core::filesystem::Watch::Event ev) {
-	core::LogInfo("Got event for \"{}\" event {}", path.string(), static_cast<i32>(ev));
+	//core::LogInfo("Got event for \"{}\" event {}", path.string(), static_cast<i32>(ev));
 }
 
 int main(int argc, char** argv) {
@@ -53,6 +53,10 @@ int main(int argc, char** argv) {
 		core::LogFatal("Failed to initialize SDL; giving up");
 		return 1;
 	}
+
+	// Create watch system once
+	core::filesystem::watchSystem = new core::filesystem::WatchSystem;
+	core::SystemManager::The().Add(static_cast<core::PerTickSystem*>(core::filesystem::watchSystem));
 
 	auto window = sdl::Window { "engine", 800, 600 };
 
@@ -91,7 +95,7 @@ int main(int argc, char** argv) {
 	}
 
 	if(!fragmentShader.Compile()) {
-		core::LogInfo("fragment shader compilation failure: {}", fragmentShader.GetInfoLog());
+		core::LogInfo("Fragment shader compilation failure: {}", fragmentShader.GetInfoLog());
 	}
 
 	gl::ShaderProgram program;
@@ -136,14 +140,10 @@ int main(int argc, char** argv) {
 	glUniform1i(glGetUniformLocation(program.GetID(), "texture2"), 1);
 
 
-	auto system = new core::filesystem::WatchSystem;
-	auto watch = new core::filesystem::Watch(  core::filesystem::Filesystem::The().GetDataDir() / "shaders"  );
-
+	auto watch = new core::filesystem::Watch(core::filesystem::Filesystem::The().GetAbsolutePathFor("shaders"));
 	watch->SetCallback(TestThing);
 
-	core::SystemManager::The().Add(static_cast<engine::core::PerTickSystem*>(system));
-
-	system->AddWatch(watch);
+	core::filesystem::watchSystem->AddWatch(watch);
 
 	// loop variables
 
@@ -196,7 +196,7 @@ int main(int argc, char** argv) {
 		program.SetUniform("time", nowTime, std::chrono::system_clock::now().time_since_epoch().count());
 
 		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::rotate(model, nowTime * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(sin(nowTime) * 50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
 
 		glm::mat4 view = glm::mat4(1.0f);
 		// note that we're translating the scene in the reverse direction of where we want to move

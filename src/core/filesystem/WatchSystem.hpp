@@ -32,7 +32,7 @@ namespace engine::core::filesystem {
 		friend struct WatchSystem;
 		void Update();
 	   private:
-		constexpr static auto IMPL_SIZE = 224; // change if required
+		constexpr static auto IMPL_SIZE = 224; // change to largest sizeof(impl) when required
 		u8 implData__[IMPL_SIZE]{};
 
 		template<class T, class ...Args>
@@ -69,4 +69,5 @@ namespace engine::core::filesystem {
 		std::vector<Watch*> watches;
 	};
 
+	extern WatchSystem* watchSystem;
 }

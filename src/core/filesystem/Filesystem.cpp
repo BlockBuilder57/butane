@@ -17,12 +17,12 @@ namespace engine::core::filesystem {
 	}
 
 	Unique<sdl::File> Filesystem::OpenAbsoluteFile(const stdfs::path& path) {
-		LogInfo("Attempting to open resource file \"{}\"", path.string());
+		LogInfo("Attempting to open absolute file \"{}\"", path.string());
 		return sdl::File::OpenFile(path, "rb");
 	}
 
 	Unique<sdl::File> Filesystem::OpenRelativeFile(const stdfs::path& path) {
-		LogInfo("Attempting to open resource file \"{}\"", (GetDataDir() / path).string());
+		LogInfo("Attempting to open data file \"{}\"", path.string());
 		return sdl::File::OpenFile(GetDataDir() / path, "rb");
 	}
 

@@ -1,5 +1,6 @@
 #pragma once
 #include <core/filesystem/Filesystem.hpp>
+#include <core/filesystem/WatchSystem.hpp>
 #include <core/gl/GLHeaders.hpp>
 #include <core/Types.hpp>
 #include <vector>
@@ -15,8 +16,7 @@ namespace engine::core::gl {
 
 		void AttachShader(Shader& shader);
 
-		/// Link the program. Note that this finalizes all
-		/// attached shader objects, since they are no longer needed
+		/// Link the program.
 		void Link();
 
 		void Bind();
@@ -51,6 +51,8 @@ namespace engine::core::gl {
 
 		~Shader() { Done(); }
 
+		void SetProgram(ShaderProgram* program) { ourProgram = program; }
+
 		void Done() {
 			if(glShaderObject != INVALID) {
 				glDeleteShader(glShaderObject);
@@ -68,9 +70,12 @@ namespace engine::core::gl {
 		[[nodiscard]] u32 Get() { return glShaderObject; }
 
 	   private:
+		ShaderProgram* ourProgram {};
+		core::filesystem::Watch* fileWatch {};
+
 		constexpr static u32 INVALID = static_cast<u32>(-1);
 		u32 glShaderObject { INVALID };
-		filesystem::stdfs::path filePath {};
+		i32 compileSuccess {};
 	};
 
 } // namespace engine::core::gl

@@ -4,16 +4,17 @@
 namespace engine::core::gl {
 
 	void ShaderProgram::AttachShader(engine::core::gl::Shader& shader) {
+		shader.SetProgram(this);
 		shaderObjects.push_back(&shader);
 		glAttachShader(glProgramObject, shader.Get());
 	}
 
 	void ShaderProgram::Link() {
 		glLinkProgram(glProgramObject);
-		for(auto* shader : shaderObjects)
+		/*for(auto* shader : shaderObjects)
 			shader->Done();
 
-		shaderObjects.resize(0);
+		shaderObjects.resize(0);*/
 	}
 
 	void ShaderProgram::Bind() {
@@ -32,10 +33,15 @@ namespace engine::core::gl {
 	}
 
 	bool Shader::Compile() {
+		// delete the existing shader, if possible
+		if(glShaderObject != INVALID && compileSuccess) {
+			glDeleteShader(glShaderObject);
+			compileSuccess = 0;
+		}
+
 		glCompileShader(glShaderObject);
-		i32 success {};
-		glGetShaderiv(glShaderObject, GL_COMPILE_STATUS, &success);
-		return success;
+		glGetShaderiv(glShaderObject, GL_COMPILE_STATUS, &compileSuccess);
+		return compileSuccess;
 	}
 
 	std::string Shader::GetInfoLog() {
@@ -43,16 +49,33 @@ namespace engine::core::gl {
 		GLsizei len;
 		glGetShaderInfoLog(glShaderObject, sizeof(log), &len, &log[0]);
 
-		return { log, static_cast<usize>(len) };
+		return { log, static_cast<usize>(std::min<usize>(sizeof(log), len)) };
 	}
 
 	void Shader::SetPath(const filesystem::stdfs::path& path) {
-		filePath = path;
-		auto file = core::filesystem::Filesystem::The().OpenAbsoluteFile(filePath);
+		auto file = core::filesystem::Filesystem::The().OpenAbsoluteFile(path);
 
 		if (!file) {
 			LogError("Failed to open {} for shader", path.string());
 			return;
+		}
+
+		if(!fileWatch) {
+			// set up filewatch for hotloads
+			fileWatch = new core::filesystem::Watch(path);
+			fileWatch->SetCallback([&](const core::filesystem::stdfs::path& path, core::filesystem::Watch::Event ev) {
+				if (ev == core::filesystem::Watch::Event::Modify) {
+					SetPath(path);
+
+					if(!Compile()) {
+						core::LogInfo("Shader hotload compilation failure: {}", GetInfoLog());
+						return;
+					}
+
+					ourProgram->Link();
+				}
+			});
+			core::filesystem::watchSystem->AddWatch(fileWatch);
 		}
 
 		SetSource(file->ReadString());

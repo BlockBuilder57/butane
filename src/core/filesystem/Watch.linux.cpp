@@ -47,16 +47,21 @@ namespace engine::core::filesystem {
 		void HandleActionImpl(inotify_event* event) const {
 			ENGINE_CHECK(eventCallback, "Please assign a event callback before adding this watch");
 
+			// files do not have an event name
+			auto path = root;
+			if (event->name[0] != '\0')
+				path /= event->name;
+
 			if(event->mask & IN_CLOSE_WRITE) {
-				eventCallback(root / event->name, Watch::Event::Modify);
+				eventCallback(path, Watch::Event::Modify);
 			}
 
 			if(event->mask & IN_MOVED_TO || event->mask & IN_CREATE) {
-				eventCallback(root / event->name, Watch::Event::Add);
+				eventCallback(path, Watch::Event::Add);
 			}
 
 			if(event->mask & IN_MOVED_FROM || event->mask & IN_DELETE) {
-				eventCallback(root / event->name, Watch::Event::Rem);
+				eventCallback(path, Watch::Event::Rem);
 			}
 		}
 

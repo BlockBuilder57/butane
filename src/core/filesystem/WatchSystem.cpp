@@ -26,6 +26,8 @@ namespace engine::core::filesystem {
 		ToImpl<WatchImpl>()->Update();
 	}
 
+	WatchSystem* watchSystem = nullptr;
+
 	void WatchSystem::Init() {
 
 	}

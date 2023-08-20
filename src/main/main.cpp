@@ -81,18 +81,10 @@ int main(int argc, char** argv) {
 
 	// vertex/fragment shaders
 
-	auto vsFile = core::filesystem::Filesystem::The().OpenReadFile(core::filesystem::stdfs::path("shaders") / "demo.vert");
-	auto fsFile = core::filesystem::Filesystem::The().OpenReadFile(core::filesystem::stdfs::path("shaders") / "demo.frag");
-
-	if(!vsFile || !fsFile) {
-		core::LogFatal("could not open files");
-		return 1;
-	}
-
 	gl::Shader vertexShader(gl::Shader::Kind::Vertex);
 	gl::Shader fragmentShader(gl::Shader::Kind::Fragment);
-	vertexShader.SetSource(vsFile->ReadString());
-	fragmentShader.SetSource(fsFile->ReadString());
+	vertexShader.SetPath(core::filesystem::Filesystem::The().GetAbsolutePathFor("shaders/demo.vert"));
+	fragmentShader.SetPath(core::filesystem::Filesystem::The().GetAbsolutePathFor("shaders/demo.frag"));
 
 	if(!vertexShader.Compile()) {
 		core::LogInfo("Vertex shader compilation failure: {}", vertexShader.GetInfoLog());
@@ -135,8 +127,8 @@ int main(int argc, char** argv) {
 
 	// textures
 	gl::Texture image1, image2;
-	image1.LoadTexture(core::filesystem::Filesystem::The().GetDataDir() / "textures" / "test.png");
-	image2.LoadTexture(core::filesystem::Filesystem::The().GetDataDir() / "textures" / "test2.png");
+	image1.LoadTexture(core::filesystem::Filesystem::The().GetAbsolutePathFor("textures/test.png"));
+	image2.LoadTexture(core::filesystem::Filesystem::The().GetAbsolutePathFor("textures/test2.png"));
 
 	// set up uniforms
 	program.Bind();

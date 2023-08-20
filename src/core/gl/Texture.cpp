@@ -17,9 +17,11 @@ namespace engine::core::gl {
 
 		// auto img1filename = (core::filesystem::Filesystem::The().GetDataDir() / "textures" / "test.png");
 		SDL_Surface* surface = IMG_Load(path.c_str());
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface->w, surface->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, surface->pixels);
-		glGenerateMipmap(GL_TEXTURE_2D);
-		SDL_FreeSurface(surface);
+		if (surface) {
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface->w, surface->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, surface->pixels);
+			glGenerateMipmap(GL_TEXTURE_2D);
+			SDL_FreeSurface(surface);
+		}
 	}
 
 	void Texture::FreeTexture() {

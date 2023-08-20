@@ -1,4 +1,5 @@
 #pragma once
+#include <core/filesystem/Filesystem.hpp>
 #include <core/gl/GLHeaders.hpp>
 #include <core/Types.hpp>
 #include <vector>
@@ -61,6 +62,7 @@ namespace engine::core::gl {
 
 		std::string GetInfoLog();
 
+		void SetPath(const filesystem::stdfs::path& path);
 		void SetSource(const std::string& source);
 
 		[[nodiscard]] u32 Get() { return glShaderObject; }
@@ -68,6 +70,7 @@ namespace engine::core::gl {
 	   private:
 		constexpr static u32 INVALID = static_cast<u32>(-1);
 		u32 glShaderObject { INVALID };
+		filesystem::stdfs::path filePath {};
 	};
 
 } // namespace engine::core::gl

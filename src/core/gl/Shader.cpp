@@ -1,4 +1,5 @@
 #include <core/gl/Shader.hpp>
+#include <core/Logger.hpp>
 
 namespace engine::core::gl {
 
@@ -43,6 +44,18 @@ namespace engine::core::gl {
 		glGetShaderInfoLog(glShaderObject, sizeof(log), &len, &log[0]);
 
 		return { log, static_cast<usize>(len) };
+	}
+
+	void Shader::SetPath(const filesystem::stdfs::path& path) {
+		filePath = path;
+		auto file = core::filesystem::Filesystem::The().OpenAbsoluteFile(filePath);
+
+		if (!file) {
+			LogError("Failed to open {} for shader", path.string());
+			return;
+		}
+
+		SetSource(file->ReadString());
 	}
 
 	void Shader::SetSource(const std::string& source) {

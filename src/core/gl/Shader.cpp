@@ -4,7 +4,7 @@
 namespace engine::core::gl {
 
 	void ShaderProgram::AttachShader(engine::core::gl::Shader& shader) {
-		shader.SetProgram(this);
+		shader.AddProgram(this);
 		shaderObjects.push_back(&shader);
 		glAttachShader(glProgramObject, shader.Get());
 	}
@@ -80,7 +80,9 @@ namespace engine::core::gl {
 						return;
 					}
 
-					ourProgram->Link();
+					for(auto prog : programs) {
+						prog->Link();
+					}
 				}
 			});
 			core::filesystem::watchSystem->AddWatch(fileWatch);

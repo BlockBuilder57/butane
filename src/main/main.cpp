@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
 
 	DumpOglInfo();
 
-	glClearColor(0.f, 0.f, 0.f, 1.f);
+	glClearColor(0.05f, 0.05f, 0.05f, 1.f);
 	glViewport(0, 0, 800, 600);
 
 	// init stuff
@@ -75,74 +75,63 @@ int main(int argc, char** argv) {
 
 	theScene.SetCamera(theCam);
 
-	theCam->transform.SetPosRot({0, 0, 3}, glm::identity<glm::quat>());
-	theCam->SetFovNearFar(60.f, 0.1f, 1000.f);
+	theCam->transform.SetPosRot({}, glm::identity<glm::quat>());
+	theCam->SetFovNearFar(45.f, 0.1f, 1000.f);
 
 	float vertices[] = {
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		// position           // normal             // uvs
+		-0.5f, -0.5f, -0.5f,   0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,   0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,   0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,   0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,   0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,   0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
 
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,   0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,   0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,   0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,   0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,   0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,   0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
 
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,   1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,   1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,   1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,   1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,   1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,   1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,   0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,   0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+	 	 0.5f, -0.5f,  0.5f,   0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+	 	 0.5f, -0.5f,  0.5f,   0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,   0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,   0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
 
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+		-0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+	 	 0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+	 	 0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,  0.0f, 1.0f
 	};
 
-
-	glm::vec3 cubePositions[] = {
-		glm::vec3( 0.0f,  0.0f,  0.0f),
-		glm::vec3( 2.0f,  5.0f, -15.0f),
-		glm::vec3(-1.5f, -2.2f, -2.5f),
-		glm::vec3(-3.8f, -2.0f, -12.3f),
-		glm::vec3( 2.4f, -0.4f, -3.5f),
-		glm::vec3(-1.7f,  3.0f, -7.5f),
-		glm::vec3( 1.3f, -2.0f, -2.5f),
-		glm::vec3( 1.5f,  2.0f, -2.5f),
-		glm::vec3( 1.5f,  0.2f, -1.5f),
-		glm::vec3(-1.3f,  1.0f, -1.5f)
-	};
 
 	// model
 
 	u32 VAO, VBO, EBO;
+	u32 lightVAO;
 
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
+	//glGenBuffers(1, &EBO);
 
 	glBindVertexArray(VAO);
 
@@ -153,31 +142,51 @@ int main(int argc, char** argv) {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	// texture coord attribute
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	// normal attribute
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
+	// texture coord attribute
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+
+	// light
+	glGenVertexArrays(1, &lightVAO);
+	glBindVertexArray(lightVAO);
+	// we only need to bind to the VBO, the container's VBO's data already contains the data.
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	// set the vertex attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
 
 	// vertex/fragment shaders
 	gl::Shader vertexShader(gl::Shader::Kind::Vertex);
 	gl::Shader fragmentShader(gl::Shader::Kind::Fragment);
-	vertexShader.SetPath(core::filesystem::Filesystem::The().GetAbsolutePathFor("shaders/demo.vert"));
-	fragmentShader.SetPath(core::filesystem::Filesystem::The().GetAbsolutePathFor("shaders/demo.frag"));
+	gl::Shader lightFragmentShader(gl::Shader::Kind::Fragment);
+	vertexShader.SetPath(core::filesystem::Filesystem::The().GetAbsolutePathFor("shaders/default.vert"));
+	fragmentShader.SetPath(core::filesystem::Filesystem::The().GetAbsolutePathFor("shaders/default.frag"));
+	lightFragmentShader.SetPath(core::filesystem::Filesystem::The().GetAbsolutePathFor("shaders/light.frag"));
 
 	if(!vertexShader.Compile()) {
 		core::LogInfo("Vertex shader compilation failure: {}", vertexShader.GetInfoLog());
 	}
-
 	if(!fragmentShader.Compile()) {
 		core::LogInfo("Fragment shader compilation failure: {}", fragmentShader.GetInfoLog());
 	}
+	if(!lightFragmentShader.Compile()) {
+		core::LogInfo("Light fragment shader compilation failure: {}", lightFragmentShader.GetInfoLog());
+	}
 
-	gl::ShaderProgram program;
-	program.AttachShader(vertexShader);
-	program.AttachShader(fragmentShader);
-	program.Link();
-	program.Bind();
+	gl::ShaderProgram cubeProgram;
+	cubeProgram.AttachShader(vertexShader);
+	cubeProgram.AttachShader(fragmentShader);
+	cubeProgram.Link();
+
+	gl::ShaderProgram lightProgram;
+	lightProgram.AttachShader(vertexShader);
+	lightProgram.AttachShader(lightFragmentShader);
+	lightProgram.Link();
 
 	// textures
 	gl::Texture image1, image2;
@@ -186,18 +195,13 @@ int main(int argc, char** argv) {
 	image1.LoadTexture(core::filesystem::Filesystem::The().GetAbsolutePathFor("textures/test.png"));
 	image2.LoadTexture(core::filesystem::Filesystem::The().GetAbsolutePathFor("textures/test2.png"));
 
-	// set up uniforms
-	program.Bind();
-	glUniform1i(glGetUniformLocation(program.GetID(), "texture1"), 0);
-	glUniform1i(glGetUniformLocation(program.GetID(), "texture2"), 1);
-
 	// loop variables
 
 	bool run = true;
 
 	// This is essentially how many update ticks we run (when we can)
 	// This should be made a configurable value later on
-	constexpr static float UpdateRate = 1. / 66.;
+	constexpr static float UpdateRate = 1. / 120.;
 
 	float deltaTime = 0.f;
 	float lastTime = SDL_GetTicks64() / 1000.f;
@@ -213,6 +217,8 @@ int main(int argc, char** argv) {
 
 	glEnable(GL_DEPTH_TEST);
 
+	const glm::vec3 lightPos = {1.2f, 1.4f, 2.0f};
+
 	while(run) {
 		// Fixed timestep updates.
 		//
@@ -222,6 +228,10 @@ int main(int argc, char** argv) {
 			//core::LogInfo("Update {}", deltaTime);
 			core::SystemManager::The().Tick();
 			deltaTime--;
+
+			theCam->transform.SetPosRot({cos(nowTime * 1.2f) * 3.f, 0.2f, sin(nowTime) * 3.f}, glm::identity<glm::quat>());
+			theCam->transform.LookAtTarget({});
+			theCam->transform.SetPos(theCam->transform.metaPos + glm::vec3(0, 0.5, 0));
 		}
 
 		nowTime = SDL_GetTicks64() / 1000.f;
@@ -238,28 +248,33 @@ int main(int argc, char** argv) {
 		glActiveTexture(GL_TEXTURE1);
 		image2.Bind();
 
-		program.Bind();
-		program.SetUniform("time", glm::vec2(nowTime, std::chrono::system_clock::now().time_since_epoch().count()));
-
-		theCam->transform.SetPos({sin(nowTime), 0, 3.f + cos(nowTime)});
-		theCam->transform.LookAtTarget({0,0,0}, sin(nowTime) * 25.f);
-
-		program.SetUniform("matProjection", theScene.GetCameraProjection());
-		program.SetUniform("matView", theScene.GetCameraView());
+		cubeProgram.Bind();
+		glUniform1i(glGetUniformLocation(cubeProgram.GetID(), "texture1"), 0);
+		glUniform1i(glGetUniformLocation(cubeProgram.GetID(), "texture2"), 1);
+		cubeProgram.SetUniform("viewPos", theCam->transform.metaPos);
+		cubeProgram.SetUniform("lightPos", lightPos);
+		cubeProgram.SetUniform("objectColor", {1.0f, 0.5f, 0.31f});
+		cubeProgram.SetUniform("lightColor",  {1.0f, 1.0f, 1.0f});
+		cubeProgram.SetUniform("time", glm::vec2(nowTime, std::chrono::system_clock::now().time_since_epoch().count()));
+		cubeProgram.SetUniform("matProjection", theScene.GetCameraProjection());
+		cubeProgram.SetUniform("matView", theScene.GetCameraView());
+		cubeProgram.SetUniform("matModel", glm::identity<glm::mat4>());
 
 		glBindVertexArray(VAO);
-		for(unsigned int i = 0; i < 10; i++)
-		{
-			auto model = glm::mat4(1.0f);
-			//model = glm::translate(model, cubePositions[i] + glm::vec3(0, sin(nowTime * tan(i)), 0));
-			model = glm::translate(model, cubePositions[i]);
-			float angle = 20.0f * i;
-			//angle += tan(nowTime) * 40.f;
-			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-			program.SetUniform("matModel", model);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
+		lightProgram.Bind();
+		lightProgram.SetUniform("time", glm::vec2(nowTime, std::chrono::system_clock::now().time_since_epoch().count()));
+		lightProgram.SetUniform("matProjection", theScene.GetCameraProjection());
+		lightProgram.SetUniform("matView", theScene.GetCameraView());
+
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, lightPos);
+		model = glm::scale(model, glm::vec3(0.2f));
+		lightProgram.SetUniform("matModel", model);
+
+		glBindVertexArray(lightVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		window.Swap();
 		// Run the SDL window event loop last

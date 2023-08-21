@@ -58,12 +58,13 @@ namespace engine::core::gl {
 
 		~Shader() { Done(); }
 
-		void SetProgram(ShaderProgram* program) { ourProgram = program; }
+		void AddProgram(ShaderProgram* program) { programs.push_back(program); }
 
 		void Done() {
 			if(glShaderObject != INVALID) {
 				glDeleteShader(glShaderObject);
 				glShaderObject = INVALID;
+				programs.clear();
 			}
 		}
 
@@ -77,7 +78,7 @@ namespace engine::core::gl {
 		[[nodiscard]] u32 Get() { return glShaderObject; }
 
 	   private:
-		ShaderProgram* ourProgram {};
+		std::vector<ShaderProgram*> programs {};
 		core::filesystem::Watch* fileWatch {};
 
 		constexpr static u32 INVALID = static_cast<u32>(-1);

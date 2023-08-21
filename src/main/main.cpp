@@ -9,6 +9,7 @@
 #include <core/gl/Shader.hpp>
 #include <core/gl/Texture.hpp>
 #include <core/Logger.hpp>
+#include <core/scene/Scene.hpp>
 #include <core/sdl/Window.hpp>
 #include <core/StdoutSink.hpp>
 #include <core/Types.hpp>
@@ -68,6 +69,15 @@ int main(int argc, char** argv) {
 	glViewport(0, 0, 800, 600);
 
 	// init stuff
+
+	auto& theScene = core::scene::Scene::The();
+	auto theCam = new core::scene::Camera();
+
+	theScene.SetCamera(theCam);
+
+	theCam->SetPosRot({0, 0, 3}, glm::identity<glm::quat>());
+	theCam->SetFovNearFar(60.f, 0.1f, 1000.f);
+
 
 	float vertices[] = {
 		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -230,24 +240,18 @@ int main(int argc, char** argv) {
 		program.Bind();
 		program.SetUniform("time", glm::vec2(nowTime, std::chrono::system_clock::now().time_since_epoch().count()));
 
-		//glm::mat4 model = glm::mat4(1.0f);
-		//model = glm::rotate(model, glm::radians(sin(nowTime) * 50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+		theCam->SetPos({sin(nowTime), 0, 3.f + cos(nowTime)});
+		theCam->LookAtTarget({0,0,0}, sin(nowTime) * 25.f);
 
-		glm::mat4 view = glm::mat4(1.0f);
-		// note that we're translating the scene in the reverse direction of where we want to move
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-
-		glm::mat4 projection = glm::perspective(glm::radians(90.0f), 800.f / 600.f, 0.1f, 100.0f);
-
-		program.SetUniform("matProjection", projection);
-		program.SetUniform("matView", view);
-		//program.SetUniform("matModel", model);
+		program.SetUniform("matProjection", theScene.GetCameraProjection());
+		program.SetUniform("matView", theScene.GetCameraView());
 
 		glBindVertexArray(VAO);
 		for(unsigned int i = 0; i < 10; i++)
 		{
 			auto model = glm::mat4(1.0f);
-			model = glm::translate(model, cubePositions[i] + glm::vec3(0, sin(nowTime * tan(i)), 0));
+			//model = glm::translate(model, cubePositions[i] + glm::vec3(0, sin(nowTime * tan(i)), 0));
+			model = glm::translate(model, cubePositions[i]);
 			float angle = 20.0f * i;
 			//angle += tan(nowTime) * 40.f;
 			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));

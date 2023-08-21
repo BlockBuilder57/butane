@@ -15,6 +15,10 @@ add_library(engine_core
 		# OpenGL abstractions
 		gl/Shader.cpp
 		gl/Texture.cpp
+
+		# Scene
+		scene/Scene.cpp
+		scene/Camera.cpp
 		)
 
 custengine_setup_target(engine_core)

@@ -18,6 +18,7 @@ add_library(engine_core
 
 		# Scene
 		scene/Scene.cpp
+		scene/Transform.cpp
 		scene/Camera.cpp
 		)
 

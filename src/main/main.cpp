@@ -75,9 +75,8 @@ int main(int argc, char** argv) {
 
 	theScene.SetCamera(theCam);
 
-	theCam->SetPosRot({0, 0, 3}, glm::identity<glm::quat>());
+	theCam->transform.SetPosRot({0, 0, 3}, glm::identity<glm::quat>());
 	theCam->SetFovNearFar(60.f, 0.1f, 1000.f);
-
 
 	float vertices[] = {
 		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -182,6 +181,8 @@ int main(int argc, char** argv) {
 
 	// textures
 	gl::Texture image1, image2;
+	image1.WrapModeU = GL_REPEAT;
+	image1.WrapModeV = GL_REPEAT;
 	image1.LoadTexture(core::filesystem::Filesystem::The().GetAbsolutePathFor("textures/test.png"));
 	image2.LoadTexture(core::filesystem::Filesystem::The().GetAbsolutePathFor("textures/test2.png"));
 
@@ -240,8 +241,8 @@ int main(int argc, char** argv) {
 		program.Bind();
 		program.SetUniform("time", glm::vec2(nowTime, std::chrono::system_clock::now().time_since_epoch().count()));
 
-		theCam->SetPos({sin(nowTime), 0, 3.f + cos(nowTime)});
-		theCam->LookAtTarget({0,0,0}, sin(nowTime) * 25.f);
+		theCam->transform.SetPos({sin(nowTime), 0, 3.f + cos(nowTime)});
+		theCam->transform.LookAtTarget({0,0,0}, sin(nowTime) * 25.f);
 
 		program.SetUniform("matProjection", theScene.GetCameraProjection());
 		program.SetUniform("matView", theScene.GetCameraView());
@@ -259,7 +260,6 @@ int main(int argc, char** argv) {
 
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
-
 
 		window.Swap();
 		// Run the SDL window event loop last

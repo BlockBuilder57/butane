@@ -10,13 +10,13 @@ namespace engine::core::scene {
 	}
 
 	glm::mat4 Scene::GetCameraView() {
-		if (cam != nullptr)
+		if(cam != nullptr)
 			return cam->GetView();
 
 		return glm::identity<glm::mat4>();
 	}
 	glm::mat4 Scene::GetCameraProjection() {
-		if (cam != nullptr)
+		if(cam != nullptr)
 			return cam->GetProjection();
 
 		return glm::identity<glm::mat4>();

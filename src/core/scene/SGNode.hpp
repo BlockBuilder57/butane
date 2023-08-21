@@ -5,12 +5,12 @@
 
 namespace engine::core::scene {
 
-	template<class T>
+	template <class T>
 	struct SGNodeMixin {
 		using SmartType = std::unique_ptr<T>;
 		using ListType = std::vector<SmartType>;
 
-		template<class TOther = T, class... Args>
+		template <class TOther = T, class... Args>
 		inline SmartType& AddParent(const std::string& name, Args&&... args) {
 			static_assert(std::is_base_of_v<T, TOther>, "TOther must inherit from root scene graph type");
 			auto& back = children.template emplace_back(std::make_unique<TOther>(std::forward(args)...));
@@ -21,20 +21,16 @@ namespace engine::core::scene {
 			return back;
 		}
 
-		[[nodiscard]] const std::string_view GetName() const {
-			return name;
-		}
+		[[nodiscard]] const std::string_view GetName() const { return name; }
 
-		void SetName(const std::string& newName) {
-			name = newName;
-		}
+		void SetName(const std::string& newName) { name = newName; }
 
-		template<class U>
+		template <class U>
 		inline bool Is() {
 			return dynamic_cast<U*>(static_cast<T*>(this)) != nullptr;
 		}
 
-		template<class U>
+		template <class U>
 		inline U* As() {
 			assert(Is<U>());
 			return dynamic_cast<U*>(static_cast<T*>(this));
@@ -45,7 +41,7 @@ namespace engine::core::scene {
 		//		Also, it would be a good idea to be able to compute/query node depth.
 		//		Maybe API to query/set parent (make sure the parent is inside the tree?)
 
-		template<class Callback>
+		template <class Callback>
 		void Traverse(Callback&& cb) {
 			auto* head = parent;
 
@@ -83,9 +79,9 @@ namespace engine::core::scene {
 		}
 
 	   private:
-		std::string name{};
+		std::string name {};
 
-		T* parent{nullptr}; // who created me
-		ListType children;  // adjacent to me.
+		T* parent { nullptr }; // who created me
+		ListType children;	   // adjacent to me.
 	};
-}
+} // namespace engine::core::scene

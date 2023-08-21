@@ -3,11 +3,9 @@
 #pragma once
 
 #include <core/gl/GLHeaders.hpp>
-#include <core/Types.hpp>
-
 #include <core/scene/Camera.hpp>
 #include <core/scene/SGNode.hpp>
-
+#include <core/Types.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -15,8 +13,7 @@
 namespace engine::core::scene {
 
 	/// root class for all scene graph nodes
-	struct Node : public SGNodeMixin<Node> {
-	};
+	struct Node : public SGNodeMixin<Node> {};
 
 	class Scene {
 	   public:

@@ -18,11 +18,11 @@ namespace engine::core::gl {
 
 		GLuint GetID() { return texID; }
 
-	   private:
 		u16 WrapModeU = GL_CLAMP_TO_EDGE;
 		u16 WrapModeV = GL_CLAMP_TO_EDGE;
 		u16 TexFilterScaleMin = GL_NEAREST;
 		u16 TexFilterScaleMax = GL_NEAREST;
+	   private:
 
 		GLuint texID {};
 	};

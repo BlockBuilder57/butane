@@ -4,10 +4,13 @@ add_executable(engine
 
 custengine_setup_target(engine)
 
+target_include_directories(engine PRIVATE ${IMGUI_DIR})
+
 target_link_libraries(engine
 		engine::core
 		SDL2::SDL2
 		SDL2::SDL2main
 		SDL2_mixer::SDL2_mixer
 		SDL2_image::SDL2_image
+		imgui
 		)

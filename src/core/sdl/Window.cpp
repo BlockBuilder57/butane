@@ -1,3 +1,4 @@
+#include <backends/imgui_impl_sdl2.h>
 #include <core/sdl/Window.hpp>
 
 namespace engine::core::sdl {
@@ -10,8 +11,8 @@ namespace engine::core::sdl {
 	        context = SDL_GL_CreateContext(window);
 	        SDL_GL_MakeCurrent(window, context);
 
-            // Disable VSync by default; later on this probably should be configurable
-            SDL_GL_SetSwapInterval(0);
+            // Enable VSync by default; later on this probably should be configurable
+            SDL_GL_SetSwapInterval(1);
 		}
 
         Window::~Window() {
@@ -25,6 +26,8 @@ namespace engine::core::sdl {
 		void Window::Poll() {
 			SDL_Event ev;
 			while(SDL_PollEvent(&ev) > 0) {
+				ImGui_ImplSDL2_ProcessEvent(&ev);
+
 				// Call the given event handler if found
 				if(events.find(ev.type) != events.end()) {
 					events[ev.type](ev);

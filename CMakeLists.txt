@@ -15,6 +15,22 @@ find_package(SDL2 REQUIRED)
 find_package(SDL2_mixer REQUIRED)
 find_package(SDL2_image REQUIRED)
 
+set(IMGUI_DIR "${CMAKE_SOURCE_DIR}/third_party/imgui")
+
+add_library(imgui
+		"${IMGUI_DIR}/imgui.cpp"
+		"${IMGUI_DIR}/imgui_demo.cpp"
+		"${IMGUI_DIR}/imgui_draw.cpp"
+		"${IMGUI_DIR}/imgui_tables.cpp"
+		"${IMGUI_DIR}/imgui_widgets.cpp"
+
+		"${IMGUI_DIR}/backends/imgui_impl_sdl2.cpp"
+		"${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp"
+		)
+
+target_link_libraries(imgui SDL2::SDL2)
+target_include_directories(imgui PRIVATE ${IMGUI_DIR})
+
 # default linker
 if(NOT CUSTENGINE_LINKER AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(CUSTENGINE_LINKER "lld")

@@ -3,6 +3,10 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
+#include <imgui.h>
+#include <backends/imgui_impl_sdl2.h>
+#include <backends/imgui_impl_opengl3.h>
+
 #include <core/filesystem/Filesystem.hpp>
 #include <core/filesystem/WatchSystem.hpp>
 #include <core/gl/GLHeaders.hpp>
@@ -65,8 +69,18 @@ int main(int argc, char** argv) {
 
 	DumpOglInfo();
 
-	glClearColor(0.05f, 0.05f, 0.05f, 1.f);
-	glViewport(0, 0, 800, 600);
+	// imgui init
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	io.IniFilename = "data/imgui.ini";
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+	ImGui::StyleColorsDark();
+
+	ImGui_ImplSDL2_InitForOpenGL(window.Raw(), window.GlContext());
+	ImGui_ImplOpenGL3_Init("#version 330");
 
 	// init stuff
 
@@ -75,7 +89,7 @@ int main(int argc, char** argv) {
 
 	theScene.SetCamera(theCam);
 
-	theCam->transform.SetPosRot({}, glm::identity<glm::quat>());
+	theCam->transform.SetPosRot({0.f, 0.7f, 0.f}, glm::identity<glm::quat>());
 	theCam->SetFovNearFar(45.f, 0.1f, 1000.f);
 
 	float vertices[] = {
@@ -215,9 +229,14 @@ int main(int argc, char** argv) {
 
 	//SDL_Surface* windowSurface = SDL_GetWindowSurface(window.Raw());
 
+	glClearColor(0.05f, 0.05f, 0.05f, 1.f);
+	glViewport(0, 0, 800, 600);
 	glEnable(GL_DEPTH_TEST);
 
-	const glm::vec3 lightPos = {1.2f, 1.4f, 2.0f};
+	bool animateCam = true;
+	bool lookAtTarget = true;
+	glm::vec3 camPos = {-2.f, 1.f, -2.5f};
+	glm::vec3 lightPos = {1.2f, 1.4f, 2.0f};
 
 	while(run) {
 		// Fixed timestep updates.
@@ -228,11 +247,11 @@ int main(int argc, char** argv) {
 			//core::LogInfo("Update {}", deltaTime);
 			core::SystemManager::The().Tick();
 			deltaTime--;
-
-			theCam->transform.SetPosRot({cos(nowTime * 1.2f) * 3.f, 0.2f, sin(nowTime) * 3.f}, glm::identity<glm::quat>());
-			theCam->transform.LookAtTarget({});
-			theCam->transform.SetPos(theCam->transform.metaPos + glm::vec3(0, 0.5, 0));
 		}
+
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplSDL2_NewFrame();
+		ImGui::NewFrame();
 
 		nowTime = SDL_GetTicks64() / 1000.f;
 		deltaTime += (nowTime - lastTime) / UpdateRate;
@@ -240,8 +259,37 @@ int main(int argc, char** argv) {
 
 		//core::LogInfo("delta time: {}", 1.f/(nowTime - lastTime));
 
-		// do actual drawing now
+		if (animateCam) {
+			theCam->transform.SetPos({cos(nowTime * 1.2f) * 3.f, theCam->transform.metaPos.y, sin(nowTime) * 3.f});
+			if (lookAtTarget)
+				theCam->transform.LookAtTarget({});
+			camPos = theCam->transform.metaPos;
+		}
+		else {
+			theCam->transform.SetPos(camPos);
+			if (lookAtTarget)
+				theCam->transform.LookAtTarget({});
+		}
+
+		// imgui drawing
+
+		{
+			ImGui::Begin("Blah");
+
+			ImGui::Text("Frame time: %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+			ImGui::Checkbox("animate cam", &animateCam);
+			ImGui::Checkbox("look at target", &lookAtTarget);
+			ImGui::DragFloat3("cam", &camPos.x, 0.1f);
+			ImGui::DragFloat3("light", &lightPos.x, 0.1f);
+
+			ImGui::End();
+		}
+
+		ImGui::Render();
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// do actual drawing now
 
 		glActiveTexture(GL_TEXTURE0);
 		image1.Bind();
@@ -276,10 +324,16 @@ int main(int argc, char** argv) {
 		glBindVertexArray(lightVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
+
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		window.Swap();
 		// Run the SDL window event loop last
 		window.Poll();
 	}
+
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplSDL2_Shutdown();
+	ImGui::DestroyContext();
 
 	SDL_Quit();
 	return 0;

@@ -24,9 +24,12 @@ add_library(engine_core
 
 custengine_setup_target(engine_core)
 
+target_include_directories(engine_core PRIVATE ${IMGUI_DIR})
+
 target_link_libraries(engine_core PUBLIC
 		glad::glad
 		glm::glm
+		imgui
 		)
 
 

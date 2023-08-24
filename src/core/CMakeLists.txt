@@ -3,6 +3,7 @@ add_library(engine_core
 		Logger.cpp
 		StdoutSink.cpp
 
+		InputSystem.cpp
 		System.cpp
 
 		filesystem/Filesystem.cpp

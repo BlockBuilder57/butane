@@ -1,3 +1,5 @@
+#pragma once
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include <SDL2/SDL_video.h>
@@ -12,6 +14,8 @@ namespace engine::core::sdl {
 	struct Window {
         // use function_ref?
 		using EventHandlerFn = std::function<void(SDL_Event&)>;
+
+		static Window* CurrentWindow;
 
 		Window(const std::string_view title, u32 width, u32 height);
 
@@ -32,5 +36,7 @@ namespace engine::core::sdl {
 		SDL_GLContext context {};
 		std::unordered_map<u32, EventHandlerFn> events {};
 	};
+
+
 
 } // namespace engine::core::sdl

@@ -11,12 +11,12 @@ namespace engine::core::scene {
 
 	struct Transform {
 	   public:
-		const glm::vec3 Up =      {  0,  1, 0 };
-		const glm::vec3 Down =    {  0, -1, 0 };
-		const glm::vec3 Left =    {  1,  0, 0 };
-		const glm::vec3 Right =   { -1,  0, 0 };
-		const glm::vec3 Forward = {  0,  0, 1 };
-		const glm::vec3 Back =    {  0,  0,-1 };
+		static const glm::vec3 Up;
+		static const glm::vec3 Down;
+		static const glm::vec3 Left;
+		static const glm::vec3 Right;
+		static const glm::vec3 Forward;
+		static const glm::vec3 Back;
 
 		void SetPos(const glm::vec3& pos);
 		void SetRot(const glm::quat& rot);

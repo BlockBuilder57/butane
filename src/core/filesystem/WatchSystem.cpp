@@ -36,7 +36,7 @@ namespace engine::core::filesystem {
 		ENGINE_TODO();
 	}
 
-	void WatchSystem::Tick() {
+	void WatchSystem::StartTick() {
 		for(auto watch : watches) {
 			watch->Update();
 		}

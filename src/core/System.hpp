@@ -13,7 +13,8 @@ namespace engine::core {
 
 	/// A [System] which runs on every update tick
 	struct PerTickSystem : System {
-		virtual void Tick() = 0;
+		virtual void StartTick() = 0;
+		virtual void EndTick() = 0;
 	};
 
 	/// Manager for all [System]s.
@@ -26,7 +27,8 @@ namespace engine::core {
 		void Init();
 		void Shutdown();
 
-		void Tick();
+		void StartTick();
+		void EndTick();
 
 	   private:
 		std::vector<System*> systems;

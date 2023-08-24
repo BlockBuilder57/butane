@@ -11,6 +11,8 @@ namespace engine::core::gl {
 	class Texture {
 	   public:
 		void LoadTexture(const std::filesystem::path& path);
+		void LoadTexture(int width, int height, void* data);
+
 		void FreeTexture();
 
 		void Bind();

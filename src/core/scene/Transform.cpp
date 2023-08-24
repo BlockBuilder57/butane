@@ -4,6 +4,13 @@
 
 namespace engine::core::scene {
 
+	const glm::vec3 Transform::Up =      {  0,  1, 0 };
+	const glm::vec3 Transform::Down =    {  0, -1, 0 };
+	const glm::vec3 Transform::Left =    { -1,  0, 0 };
+	const glm::vec3 Transform::Right =   {  1,  0, 0 };
+	const glm::vec3 Transform::Forward = {  0,  0,-1 };
+	const glm::vec3 Transform::Back =    {  0,  0, 1 };
+
 	void Transform::SetPos(const glm::vec3& pos) {
 		SetPosRot(pos, metaRot);
 	}

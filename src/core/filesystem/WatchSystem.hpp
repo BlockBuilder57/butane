@@ -60,7 +60,8 @@ namespace engine::core::filesystem {
 		// implementation of [core::PerTickSystem] interface
 		void Init() override;
 		void Shutdown() override;
-		void Tick() override;
+		void StartTick() override;
+		void EndTick() override {};
 
 		void AddWatch(Watch* watch);
 		void RemoveWatch(Watch* watch);

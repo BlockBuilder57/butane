@@ -1,17 +1,16 @@
 // Created by block on 8/14/23.
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-
-#include <imgui.h>
-#include <backends/imgui_impl_sdl2.h>
 #include <backends/imgui_impl_opengl3.h>
+#include <backends/imgui_impl_sdl2.h>
+#include <imgui.h>
+#include <SDL2/SDL.h>
 
 #include <core/filesystem/Filesystem.hpp>
 #include <core/filesystem/WatchSystem.hpp>
 #include <core/gl/GLHeaders.hpp>
 #include <core/gl/Shader.hpp>
 #include <core/gl/Texture.hpp>
+#include <core/InputSystem.hpp>
 #include <core/Logger.hpp>
 #include <core/scene/Scene.hpp>
 #include <core/sdl/Window.hpp>
@@ -57,11 +56,15 @@ int main(int argc, char** argv) {
 
 	core::SystemManager::The().Init();
 
-	// Create watch system once
+	// Create file watch system
 	core::filesystem::watchSystem = new core::filesystem::WatchSystem;
 	core::SystemManager::The().Add(static_cast<core::PerTickSystem*>(core::filesystem::watchSystem));
 
+	// Create input system
+	core::SystemManager::The().Add(static_cast<core::PerTickSystem*>(&core::InputSystem::The()));
+
 	auto window = sdl::Window { "engine", 800, 600 };
+	sdl::Window::CurrentWindow = &window;
 
 	// By this point the Window class has setup OpenGL and made the context it created current,
 	// so now we can load OpenGL APIs.
@@ -203,7 +206,9 @@ int main(int argc, char** argv) {
 	lightProgram.Link();
 
 	// textures
-	gl::Texture image1, image2;
+	gl::Texture blank, image1, image2;
+	const unsigned char colorWhite[4] = { 255, 255, 255, 255 };
+	blank.LoadTexture(1, 1, (void*)&colorWhite[0]);
 	image1.WrapModeU = GL_REPEAT;
 	image1.WrapModeV = GL_REPEAT;
 	image1.LoadTexture(core::filesystem::Filesystem::The().GetAbsolutePathFor("textures/test.png"));
@@ -215,16 +220,23 @@ int main(int argc, char** argv) {
 
 	// This is essentially how many update ticks we run (when we can)
 	// This should be made a configurable value later on
-	constexpr static float UpdateRate = 1. / 120.;
+	constexpr static float UpdateRate = 1. / 100.;
 
 	float deltaTime = 0.f;
 	float lastTime = SDL_GetTicks64() / 1000.f;
 	float nowTime;
 
 	// Assign window event handlers
-	window.On(SDL_QUIT, [&](auto& ev) {
+	window.On(SDL_QUIT, [&](SDL_Event& ev) {
 		static_cast<void>(ev);
 		run = false;
+	});
+
+	window.On(SDL_KEYDOWN, [&](SDL_Event& ev) {
+		core::InputSystem::The().KeyEvent(ev.key);
+	});
+	window.On(SDL_KEYUP, [&](SDL_Event& ev) {
+		core::InputSystem::The().KeyEvent(ev.key);
 	});
 
 	//SDL_Surface* windowSurface = SDL_GetWindowSurface(window.Raw());
@@ -233,9 +245,11 @@ int main(int argc, char** argv) {
 	glViewport(0, 0, 800, 600);
 	glEnable(GL_DEPTH_TEST);
 
-	bool animateCam = true;
+	bool animateCam = false;
 	bool lookAtTarget = true;
 	glm::vec3 camPos = {-2.f, 1.f, -2.5f};
+	glm::quat camRot = glm::identity<glm::quat>();
+	float camSpeed = 5.f;
 	glm::vec3 lightPos = {1.2f, 1.4f, 2.0f};
 
 	while(run) {
@@ -243,10 +257,65 @@ int main(int argc, char** argv) {
 		//
 		// Note that this loop is not "greedy"; it only executes
 		// updates for the times it can, and does not otherwise.
-		while(deltaTime >= 1.) {
+		while(deltaTime >= UpdateRate) {
 			//core::LogInfo("Update {}", deltaTime);
-			core::SystemManager::The().Tick();
-			deltaTime--;
+			core::SystemManager::The().StartTick();
+
+			if(core::InputSystem::The().ButtonDown(SDL_Scancode::SDL_SCANCODE_L, SDL_Keymod::KMOD_CTRL)) {
+				core::InputSystem::The().SetMouseLock(!core::InputSystem::The().IsMouseLocked());
+			}
+
+			if(core::InputSystem::The().IsMouseLocked()) {
+				glm::vec2 look = core::InputSystem::The().GetMouseDelta();
+				if (look.length() > 0) {
+					look = {-look.y, -look.x}; // fix axies
+					look *= deltaTime * 8.f; // sensitivity
+
+					// yaw is in world space
+					float yawDeg = glm::radians(look.y);
+					glm::quat yawRot = glm::angleAxis(yawDeg, glm::vec3(0, 1, 0));
+
+					// pitch is in local space
+					float pitchDeg = glm::radians(look.x);
+					glm::quat pitchRot = glm::angleAxis(pitchDeg, camRot * glm::vec3(1, 0, 0));
+
+					camRot = yawRot * pitchRot * camRot;
+				}
+
+				bool forward = core::InputSystem::The().ButtonHeld(SDL_Scancode::SDL_SCANCODE_W);
+				bool back = core::InputSystem::The().ButtonHeld(SDL_Scancode::SDL_SCANCODE_S);
+				bool left = core::InputSystem::The().ButtonHeld(SDL_Scancode::SDL_SCANCODE_A);
+				bool right = core::InputSystem::The().ButtonHeld(SDL_Scancode::SDL_SCANCODE_D);
+
+				bool up = core::InputSystem::The().ButtonHeld(SDL_Scancode::SDL_SCANCODE_SPACE);
+				bool down = core::InputSystem::The().ButtonHeld(SDL_Scancode::SDL_SCANCODE_C);
+
+				glm::vec3 move = {};
+
+				if (forward)
+					move += core::scene::Transform::Forward;
+				else if (back)
+					move += core::scene::Transform::Back;
+
+				if (left)
+					move += core::scene::Transform::Left;
+				else if (right)
+					move += core::scene::Transform::Right;
+
+				if (up)
+					move += core::scene::Transform::Up;
+				else if (down)
+					move += core::scene::Transform::Down;
+
+
+				move = camRot * move;
+				move *= camSpeed * deltaTime;
+
+				camPos += move;
+			}
+
+			core::SystemManager::The().EndTick();
+			deltaTime = 0;
 		}
 
 		ImGui_ImplOpenGL3_NewFrame();
@@ -254,7 +323,7 @@ int main(int argc, char** argv) {
 		ImGui::NewFrame();
 
 		nowTime = SDL_GetTicks64() / 1000.f;
-		deltaTime += (nowTime - lastTime) / UpdateRate;
+		deltaTime += (nowTime - lastTime);
 		lastTime = nowTime;
 
 		//core::LogInfo("delta time: {}", 1.f/(nowTime - lastTime));
@@ -264,11 +333,10 @@ int main(int argc, char** argv) {
 			if (lookAtTarget)
 				theCam->transform.LookAtTarget({});
 			camPos = theCam->transform.metaPos;
+			camRot = theCam->transform.metaRot;
 		}
 		else {
-			theCam->transform.SetPos(camPos);
-			if (lookAtTarget)
-				theCam->transform.LookAtTarget({});
+			theCam->transform.SetPosRot(camPos, camRot);
 		}
 
 		// imgui drawing
@@ -279,8 +347,11 @@ int main(int argc, char** argv) {
 			ImGui::Text("Frame time: %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
 			ImGui::Checkbox("animate cam", &animateCam);
 			ImGui::Checkbox("look at target", &lookAtTarget);
-			ImGui::DragFloat3("cam", &camPos.x, 0.1f);
+			ImGui::DragFloat3("cam pos", &camPos.x, 0.1f);
+			ImGui::DragFloat("cam speed", &camSpeed, 0.1f);
 			ImGui::DragFloat3("light", &lightPos.x, 0.1f);
+
+
 
 			ImGui::End();
 		}
@@ -292,7 +363,7 @@ int main(int argc, char** argv) {
 		// do actual drawing now
 
 		glActiveTexture(GL_TEXTURE0);
-		image1.Bind();
+		blank.Bind();
 		glActiveTexture(GL_TEXTURE1);
 		image2.Bind();
 

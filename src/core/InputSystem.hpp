@@ -8,9 +8,8 @@
 #include <array>
 #include <core/sdl/Window.hpp>
 #include <core/StaticVector.hpp>
-#include <vector>
-
 #include <glm/glm.hpp>
+#include <vector>
 
 #include "Logger.hpp"
 #include "System.hpp"
@@ -18,6 +17,8 @@
 namespace engine::core {
 
 	constexpr static auto MAX_KEY_COUNT = 64;
+
+	struct Bind;
 
 	struct InputSystem : public core::PerTickSystem {
 		static InputSystem& The();
@@ -30,12 +31,11 @@ namespace engine::core {
 
 		bool IsMouseLocked() { return isMouseLocked; }
 		void SetMouseLock(bool val) {
-			if (sdl::Window::CurrentWindow != nullptr) {
+			if(sdl::Window::CurrentWindow != nullptr) {
 				isMouseLocked = val;
-				SDL_SetRelativeMouseMode((SDL_bool) isMouseLocked);
-				SDL_SetWindowGrab(sdl::Window::CurrentWindow->Raw(), (SDL_bool) isMouseLocked);
-			}
-			else {
+				SDL_SetRelativeMouseMode((SDL_bool)isMouseLocked);
+				SDL_SetWindowGrab(sdl::Window::CurrentWindow->Raw(), (SDL_bool)isMouseLocked);
+			} else {
 				core::LogError("Null window when trying to set mouse lock!");
 			}
 		}
@@ -44,20 +44,28 @@ namespace engine::core {
 
 		glm::vec<2, int> GetMouseDelta();
 
-		bool ButtonDown(SDL_Scancode key, SDL_Keymod modifiers = SDL_Keymod::KMOD_NONE);
-		bool ButtonHeld(SDL_Scancode key, SDL_Keymod modifiers = SDL_Keymod::KMOD_NONE);
-		bool ButtonUp(SDL_Scancode key, SDL_Keymod modifiers = SDL_Keymod::KMOD_NONE);
+		bool ButtonDown(SDL_Scancode key);
+		bool ButtonHeld(SDL_Scancode key);
+		bool ButtonUp(SDL_Scancode key);
+
+		bool ButtonDown(SDL_Scancode key, SDL_Keymod modifiers);
+		bool ButtonHeld(SDL_Scancode key, SDL_Keymod modifiers);
+		bool ButtonUp(SDL_Scancode key, SDL_Keymod modifiers);
+
+		Bind* RegisterBind(std::string name, std::vector<SDL_Scancode> keys, SDL_Keymod modifiers);
+
+		void ImGuiBindStatus();
 
 	   private:
 		struct InputStatus {
 			// keyboard
-			std::vector<SDL_Scancode> keys;
-			SDL_Keymod modifiers;
+			std::vector<SDL_Scancode> keys {};
+			SDL_Keymod modifiers {};
 
 			// mouse
-			unsigned int mouseButtons;
-			glm::vec<2, int> mouseRelative;
-			glm::vec<2, int> mouseDelta;
+			unsigned int mouseButtons {};
+			glm::vec<2, int> mouseRelative {};
+			glm::vec<2, int> mouseDelta {};
 
 			// controller
 			// todo
@@ -88,8 +96,61 @@ namespace engine::core {
 		static InputStatus statusCurrent;
 		static InputStatus statusLast;
 		bool isMouseLocked;
+
+		std::vector<Bind*> registeredBinds;
 	};
 
 	extern InputSystem* inputSystem;
+
+	struct Bind {
+		std::string name {};
+		std::vector<SDL_Scancode> keyArray {};
+		SDL_Keymod keyModifiers {};
+
+		Bind(std::string name, std::vector<SDL_Scancode> keys, SDL_Keymod modifiers, InputSystem* isPtr) {
+			this->name = name;
+			keyArray = keys;
+			keyModifiers = modifiers;
+			pInputSystem = isPtr;
+		}
+
+		bool Down() {
+			if(pInputSystem == nullptr)
+				return false;
+
+			for(SDL_Scancode key : keyArray) {
+				if(!pInputSystem->ButtonDown(key, keyModifiers))
+					return false;
+			}
+
+			return true;
+		}
+		bool Held() {
+			if(pInputSystem == nullptr)
+				return false;
+
+			for(SDL_Scancode key : keyArray) {
+				if(!pInputSystem->ButtonHeld(key, keyModifiers))
+					return false;
+			}
+
+			return true;
+		}
+		bool Up() {
+			if(pInputSystem == nullptr)
+				return false;
+
+			for(SDL_Scancode key : keyArray) {
+				if(!pInputSystem->ButtonUp(key, keyModifiers))
+					return false;
+			}
+
+			return true;
+		}
+
+	   private:
+		// nasty link
+		InputSystem* pInputSystem {};
+	};
 
 } // namespace engine::core

@@ -2,6 +2,8 @@
 
 #include "InputSystem.hpp"
 
+#include <imgui.h>
+
 namespace engine::core {
 
 	InputSystem::InputStatus InputSystem::statusCurrent = {};
@@ -28,7 +30,7 @@ namespace engine::core {
 
 		if (IsMouseLocked() && sdl::Window::CurrentWindow != nullptr) {
 			// lock to screen
-			SDL_WarpMouseInWindow(sdl::Window::CurrentWindow->Raw(), 800 / 2, 600 / 2);
+			SDL_WarpMouseInWindow(sdl::Window::CurrentWindow->Raw(), 1280 / 2, 720 / 2);
 		}
 	}
 
@@ -65,14 +67,82 @@ namespace engine::core {
 		return statusCurrent.mouseDelta;
 	}
 
-	bool InputSystem::ButtonDown(SDL_Scancode key, SDL_Keymod modifiers /*= SDL_Keymod::KMOD_NONE*/) {
+	bool InputSystem::ButtonDown(SDL_Scancode key) {
+		return statusCurrent.KeyPressed(key) && !statusLast.KeyPressed(key);
+	}
+	bool InputSystem::ButtonHeld(SDL_Scancode key) {
+		return statusCurrent.KeyPressed(key);
+	}
+	bool InputSystem::ButtonUp(SDL_Scancode key) {
+		return !statusCurrent.KeyPressed(key) && statusLast.KeyPressed(key);
+	}
+
+	bool InputSystem::ButtonDown(SDL_Scancode key, SDL_Keymod modifiers) {
 		return statusCurrent.KeyPressed(key, modifiers) && !statusLast.KeyPressed(key, modifiers);
 	}
-	bool InputSystem::ButtonHeld(SDL_Scancode key, SDL_Keymod modifiers /*= SDL_Keymod::KMOD_NONE*/) {
+	bool InputSystem::ButtonHeld(SDL_Scancode key, SDL_Keymod modifiers) {
 		return statusCurrent.KeyPressed(key, modifiers);
 	}
-	bool InputSystem::ButtonUp(SDL_Scancode key, SDL_Keymod modifiers /*= SDL_Keymod::KMOD_NONE*/) {
+	bool InputSystem::ButtonUp(SDL_Scancode key, SDL_Keymod modifiers) {
 		return !statusCurrent.KeyPressed(key, modifiers) && statusLast.KeyPressed(key, modifiers);
+	}
+
+	Bind* InputSystem::RegisterBind(std::string name, std::vector<SDL_Scancode> keys, SDL_Keymod modifiers) {
+		return registeredBinds.emplace_back(new Bind(name, keys, modifiers, this));
+	}
+
+	void InputSystem::ImGuiBindStatus() {
+		ImGui::SeparatorText("Binds");
+
+		ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders;
+
+		if (ImGui::BeginTable("table", 5, flags)) {
+			ImGui::TableSetupColumn("Name");
+			ImGui::TableSetupColumn("Keys");
+			ImGui::TableSetupColumn("Down");
+			ImGui::TableSetupColumn("Held");
+			ImGui::TableSetupColumn("Up");
+			ImGui::TableHeadersRow();
+
+			for(Bind* bind : registeredBinds) {
+				ImGui::TableNextRow();
+
+				ImGui::TableSetColumnIndex(0);
+				ImGui::TextUnformatted(bind->name.c_str());
+
+				ImGui::TableSetColumnIndex(1);
+				std::string keystr = "";
+
+				if ((bind->keyModifiers & SDL_Keymod::KMOD_CTRL) != 0)
+					keystr += "CTRL+";
+				if ((bind->keyModifiers & SDL_Keymod::KMOD_SHIFT) != 0)
+					keystr += "SHIFT+";
+				if ((bind->keyModifiers & SDL_Keymod::KMOD_ALT) != 0)
+					keystr += "ALT+";
+				if ((bind->keyModifiers & SDL_Keymod::KMOD_GUI) != 0)
+					keystr += "GUI+";
+
+				for(int i = 0; i < bind->keyArray.size(); i++) {
+					keystr += SDL_GetKeyName(SDL_GetKeyFromScancode(bind->keyArray[i]));
+					keystr += "+";
+				}
+
+				// lazy stripping
+				if (keystr.ends_with('+'))
+					keystr = keystr.substr(0, keystr.size() - 1);
+
+				ImGui::TextUnformatted(keystr.c_str());
+
+				ImGui::TableSetColumnIndex(2);
+				ImGui::Text("%d", bind->Down());
+				ImGui::TableSetColumnIndex(3);
+				ImGui::Text("%d", bind->Held());
+				ImGui::TableSetColumnIndex(4);
+				ImGui::Text("%d", bind->Up());
+			}
+
+			ImGui::EndTable();
+		}
 	}
 
 } // namespace engine::core

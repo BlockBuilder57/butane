@@ -304,6 +304,16 @@ int main(int argc, char** argv) {
 	glViewport(0, 0, 1280, 720);
 	glEnable(GL_DEPTH_TEST);
 
+	auto bind_forward = core::InputSystem::The().RegisterBind("forward", {SDL_Scancode::SDL_SCANCODE_W}, SDL_Keymod::KMOD_NONE);
+	auto bind_back = core::InputSystem::The().RegisterBind("back", {SDL_Scancode::SDL_SCANCODE_S}, SDL_Keymod::KMOD_NONE);
+	auto bind_left = core::InputSystem::The().RegisterBind("left", {SDL_Scancode::SDL_SCANCODE_A}, SDL_Keymod::KMOD_NONE);
+	auto bind_right = core::InputSystem::The().RegisterBind("right", {SDL_Scancode::SDL_SCANCODE_D}, SDL_Keymod::KMOD_NONE);
+
+	auto bind_up = core::InputSystem::The().RegisterBind("up", {SDL_Scancode::SDL_SCANCODE_SPACE}, SDL_Keymod::KMOD_NONE);
+	auto bind_down = core::InputSystem::The().RegisterBind("down", {SDL_Scancode::SDL_SCANCODE_C}, SDL_Keymod::KMOD_NONE);
+
+	auto bind_lock = core::InputSystem::The().RegisterBind("lock", {SDL_Scancode::SDL_SCANCODE_L}, SDL_Keymod::KMOD_CTRL);
+
 	bool animateCam = false;
 	bool lookAtTarget = true;
 	glm::vec3 camPos = {-2.f, 1.f, -2.5f};
@@ -320,7 +330,7 @@ int main(int argc, char** argv) {
 			//core::LogInfo("Update {}", deltaTime);
 			core::SystemManager::The().StartTick();
 
-			if(core::InputSystem::The().ButtonDown(SDL_Scancode::SDL_SCANCODE_L, SDL_Keymod::KMOD_CTRL)) {
+			if(bind_lock->Down()) {
 				core::InputSystem::The().SetMouseLock(!core::InputSystem::The().IsMouseLocked());
 			}
 
@@ -341,13 +351,13 @@ int main(int argc, char** argv) {
 					camRot = yawRot * pitchRot * camRot;
 				}
 
-				bool forward = core::InputSystem::The().ButtonHeld(SDL_Scancode::SDL_SCANCODE_W);
-				bool back = core::InputSystem::The().ButtonHeld(SDL_Scancode::SDL_SCANCODE_S);
-				bool left = core::InputSystem::The().ButtonHeld(SDL_Scancode::SDL_SCANCODE_A);
-				bool right = core::InputSystem::The().ButtonHeld(SDL_Scancode::SDL_SCANCODE_D);
+				bool forward = bind_forward->Held();
+				bool back = bind_back->Held();
+				bool left = bind_left->Held();
+				bool right = bind_right->Held();
 
-				bool up = core::InputSystem::The().ButtonHeld(SDL_Scancode::SDL_SCANCODE_SPACE);
-				bool down = core::InputSystem::The().ButtonHeld(SDL_Scancode::SDL_SCANCODE_C);
+				bool up = bind_up->Held();
+				bool down = bind_down->Held();
 
 				glm::vec3 move = {};
 
@@ -412,7 +422,7 @@ int main(int argc, char** argv) {
 			ImGui::DragFloat("cam speed", &camSpeed, 0.1f);
 			ImGui::DragFloat3("light", &lightPos.x, 0.1f);
 
-
+			engine::core::InputSystem::The().ImGuiBindStatus();
 
 			ImGui::End();
 		}

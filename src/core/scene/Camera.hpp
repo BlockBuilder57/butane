@@ -14,18 +14,19 @@ namespace engine::core::scene {
 
 	class Camera {
 	   public:
-		std::string Name;
+		Camera();
 
 		glm::mat4 GetView() { return glm::inverse(transform.matrix); }
 		glm::mat4 GetProjection() { return matProjection; }
 
 		void SetFovNearFar(float fieldofview, float near, float far);
 
+		std::string Name;
 		Transform transform {};
 
 	   private:
 		glm::mat4 matProjection {};
-		float fov { 60.f };
+		float fov { 70.f };
 		float zNear { 0.1f };
 		float zFar { 1000.f };
 	};

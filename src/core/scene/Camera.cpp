@@ -4,12 +4,17 @@
 
 namespace engine::core::scene {
 
+	Camera::Camera() {
+		// init with defaults
+		SetFovNearFar(fov, zNear, zFar);
+	}
+
 	void Camera::SetFovNearFar(float fieldofview, float near, float far) {
 		fov = fieldofview;
 		zNear = near;
 		zFar = far;
 
-		matProjection = glm::perspective(glm::radians(fov), 800.f / 600.f, zNear, zFar);
+		matProjection = glm::perspective(glm::radians(fov), 1280.f / 720.f, zNear, zFar);
 	}
 
 } // namespace engine::core::scene

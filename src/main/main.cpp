@@ -84,7 +84,6 @@ int main(int argc, char** argv) {
 
 	ImGuiStyle& style = ImGui::GetStyle();
 
-
 	style.Colors[ImGuiCol_Text]                   = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
 	style.Colors[ImGuiCol_TextDisabled]           = ImVec4(0.86f, 0.81f, 0.75f, 0.60f);
 	style.Colors[ImGuiCol_WindowBg]               = ImVec4(0.24f, 0.22f, 0.17f, 0.90f);
@@ -314,12 +313,13 @@ int main(int argc, char** argv) {
 
 	auto bind_lock = core::InputSystem::The().RegisterBind("lock", {SDL_Scancode::SDL_SCANCODE_L}, SDL_Keymod::KMOD_CTRL);
 
-	bool animateCam = false;
+	bool animateCam = true;
 	bool lookAtTarget = true;
 	glm::vec3 camPos = {-2.f, 1.f, -2.5f};
 	glm::quat camRot = glm::identity<glm::quat>();
 	float camSpeed = 5.f;
 	glm::vec3 lightPos = {1.2f, 1.4f, 2.0f};
+	glm::vec3 lightColor = {1.0f, 1.0f, 1.0f};
 
 	while(run) {
 		// Fixed timestep updates.
@@ -420,7 +420,8 @@ int main(int argc, char** argv) {
 			ImGui::Checkbox("look at target", &lookAtTarget);
 			ImGui::DragFloat3("cam pos", &camPos.x, 0.1f);
 			ImGui::DragFloat("cam speed", &camSpeed, 0.1f);
-			ImGui::DragFloat3("light", &lightPos.x, 0.1f);
+			ImGui::DragFloat3("light pos", &lightPos.x, 0.1f);
+			ImGui::DragFloat3("light color", &lightColor.x, 0.1f);
 
 			engine::core::InputSystem::The().ImGuiBindStatus();
 
@@ -442,9 +443,14 @@ int main(int argc, char** argv) {
 		glUniform1i(glGetUniformLocation(cubeProgram.GetID(), "texture1"), 0);
 		glUniform1i(glGetUniformLocation(cubeProgram.GetID(), "texture2"), 1);
 		cubeProgram.SetUniform("viewPos", theCam->transform.metaPos);
-		cubeProgram.SetUniform("lightPos", lightPos);
-		cubeProgram.SetUniform("objectColor", {1.0f, 0.5f, 0.31f});
-		cubeProgram.SetUniform("lightColor",  {1.0f, 1.0f, 1.0f});
+		cubeProgram.SetUniform("light.position", lightPos);
+		cubeProgram.SetUniform("light.ambient", {0.2f, 0.2f, 0.2f});
+		cubeProgram.SetUniform("light.diffuse", {0.5f, 0.5f, 0.5f}); // darken diffuse light a bit
+		cubeProgram.SetUniform("light.specular", {1.0f, 1.0f, 1.0f});
+		cubeProgram.SetUniform("material.ambient", {1.0f, 0.5f, 0.31f});
+		cubeProgram.SetUniform("material.diffuse", {1.0f, 0.5f, 0.31f});
+		cubeProgram.SetUniform("material.specular", {0.5f, 0.5f, 0.5f});
+		cubeProgram.SetUniform("material.shininess", 32.0f);
 		cubeProgram.SetUniform("time", glm::vec2(nowTime, std::chrono::system_clock::now().time_since_epoch().count()));
 		cubeProgram.SetUniform("matProjection", theScene.GetCameraProjection());
 		cubeProgram.SetUniform("matView", theScene.GetCameraView());
@@ -454,6 +460,7 @@ int main(int argc, char** argv) {
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		lightProgram.Bind();
+		lightProgram.SetUniform("lightColor",  lightColor);
 		lightProgram.SetUniform("time", glm::vec2(nowTime, std::chrono::system_clock::now().time_since_epoch().count()));
 		lightProgram.SetUniform("matProjection", theScene.GetCameraProjection());
 		lightProgram.SetUniform("matView", theScene.GetCameraView());

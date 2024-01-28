@@ -264,13 +264,14 @@ int main(int argc, char** argv) {
 	lightProgram.Link();
 
 	// textures
-	gl::Texture blank, image1, image2;
+	gl::Texture blank = gl::Texture();
 	const unsigned char colorWhite[4] = { 255, 255, 255, 255 };
 	blank.LoadTexture(1, 1, (void*)&colorWhite[0]);
-	image1.WrapModeU = GL_REPEAT;
-	image1.WrapModeV = GL_REPEAT;
-	image1.LoadTexture(core::filesystem::Filesystem::The().GetAbsolutePathFor("textures/test.png"));
-	image2.LoadTexture(core::filesystem::Filesystem::The().GetAbsolutePathFor("textures/test2.png"));
+
+	gl::Texture test = gl::Texture(GL_REPEAT, GL_REPEAT, core::filesystem::Filesystem::The().GetAbsolutePathFor("textures/test.png"));
+	gl::Texture crate_diffuse = gl::Texture(GL_REPEAT, GL_REPEAT, core::filesystem::Filesystem::The().GetAbsolutePathFor("textures/container2.png"));
+	gl::Texture crate_specular = gl::Texture(GL_REPEAT, GL_REPEAT, core::filesystem::Filesystem::The().GetAbsolutePathFor("textures/container2_specular.png"));
+	gl::Texture crate_emission = gl::Texture(GL_REPEAT, GL_REPEAT, core::filesystem::Filesystem::The().GetAbsolutePathFor("textures/matrix.jpg"));
 
 	// loop variables
 
@@ -332,6 +333,7 @@ int main(int argc, char** argv) {
 
 			if(bind_lock->Down()) {
 				core::InputSystem::The().SetMouseLock(!core::InputSystem::The().IsMouseLocked());
+				animateCam = lookAtTarget = !core::InputSystem::The().IsMouseLocked();
 			}
 
 			if(core::InputSystem::The().IsMouseLocked()) {
@@ -435,21 +437,21 @@ int main(int argc, char** argv) {
 		// do actual drawing now
 
 		glActiveTexture(GL_TEXTURE0);
-		image1.Bind();
+		crate_diffuse.Bind();
 		glActiveTexture(GL_TEXTURE1);
-		image2.Bind();
+		crate_specular.Bind();
+		glActiveTexture(GL_TEXTURE2);
+		crate_emission.Bind();
 
 		cubeProgram.Bind();
-		glUniform1i(glGetUniformLocation(cubeProgram.GetID(), "texture1"), 0);
-		glUniform1i(glGetUniformLocation(cubeProgram.GetID(), "texture2"), 1);
 		cubeProgram.SetUniform("viewPos", theCam->transform.metaPos);
 		cubeProgram.SetUniform("light.position", lightPos);
 		cubeProgram.SetUniform("light.ambient", {0.2f, 0.2f, 0.2f});
 		cubeProgram.SetUniform("light.diffuse", {0.5f, 0.5f, 0.5f}); // darken diffuse light a bit
 		cubeProgram.SetUniform("light.specular", {1.0f, 1.0f, 1.0f});
-		cubeProgram.SetUniform("material.ambient", {1.0f, 0.5f, 0.31f});
-		cubeProgram.SetUniform("material.diffuse", {1.0f, 0.5f, 0.31f});
-		cubeProgram.SetUniform("material.specular", {0.5f, 0.5f, 0.5f});
+		cubeProgram.SetUniform("material.diffuse", 0);
+		cubeProgram.SetUniform("material.specular", 1);
+		cubeProgram.SetUniform("material.emission", 2);
 		cubeProgram.SetUniform("material.shininess", 32.0f);
 		cubeProgram.SetUniform("time", glm::vec2(nowTime, std::chrono::system_clock::now().time_since_epoch().count()));
 		cubeProgram.SetUniform("matProjection", theScene.GetCameraProjection());

@@ -107,50 +107,36 @@ namespace engine::core {
 		std::vector<SDL_Scancode> keyArray {};
 		SDL_Keymod keyModifiers {};
 
-		Bind(std::string name, std::vector<SDL_Scancode> keys, SDL_Keymod modifiers, InputSystem* isPtr) {
+		Bind(std::string name, std::vector<SDL_Scancode> keys, SDL_Keymod modifiers) {
 			this->name = name;
 			keyArray = keys;
 			keyModifiers = modifiers;
-			pInputSystem = isPtr;
 		}
 
 		bool Down() {
-			if(pInputSystem == nullptr)
-				return false;
-
 			for(SDL_Scancode key : keyArray) {
-				if(!pInputSystem->ButtonDown(key, keyModifiers))
+				if(!InputSystem::The().ButtonDown(key, keyModifiers))
 					return false;
 			}
 
 			return true;
 		}
 		bool Held() {
-			if(pInputSystem == nullptr)
-				return false;
-
 			for(SDL_Scancode key : keyArray) {
-				if(!pInputSystem->ButtonHeld(key, keyModifiers))
+				if(!InputSystem::The().ButtonHeld(key, keyModifiers))
 					return false;
 			}
 
 			return true;
 		}
 		bool Up() {
-			if(pInputSystem == nullptr)
-				return false;
-
 			for(SDL_Scancode key : keyArray) {
-				if(!pInputSystem->ButtonUp(key, keyModifiers))
+				if(!InputSystem::The().ButtonUp(key, keyModifiers))
 					return false;
 			}
 
 			return true;
 		}
-
-	   private:
-		// nasty link
-		InputSystem* pInputSystem {};
 	};
 
 } // namespace engine::core

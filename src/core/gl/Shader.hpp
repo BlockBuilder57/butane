@@ -35,6 +35,7 @@ namespace engine::core::gl {
 		// vec3/vec4 overloads
 		// mat3/mat4 overloads
 
+		void SetUniform(const std::string& uniform, int value);
 		void SetUniform(const std::string& uniform, float value);
 		void SetUniform(const std::string& uniform, const glm::vec2& vec);
 		void SetUniform(const std::string& uniform, const glm::vec3& vec);

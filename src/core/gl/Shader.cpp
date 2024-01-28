@@ -24,6 +24,9 @@ namespace engine::core::gl {
 		glUseProgram(0);
 	}
 
+	void ShaderProgram::SetUniform(const std::string& uniform, int value) {
+		glUniform1i(glGetUniformLocation(glProgramObject, uniform.c_str()), value);
+	}
 	void ShaderProgram::SetUniform(const std::string& uniform, float value) {
 		glUniform1f(glGetUniformLocation(glProgramObject, uniform.c_str()), value);
 	}

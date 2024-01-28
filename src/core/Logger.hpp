@@ -86,7 +86,14 @@ namespace engine::core {
 		Logger() = default;
 		void VOut(MessageSeverity severity, std::string_view format, std::format_args args);
 
-		MessageSeverity logLevel { MessageSeverity::Info };
+
+		MessageSeverity logLevel {
+#if _DEBUG
+			MessageSeverity::Debug
+#else
+			MessageSeverity::Info
+#endif
+		};
 		std::vector<Sink*> sinks;
 	};
 

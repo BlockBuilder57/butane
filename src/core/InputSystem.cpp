@@ -88,7 +88,7 @@ namespace engine::core {
 	}
 
 	Bind* InputSystem::RegisterBind(std::string name, std::vector<SDL_Scancode> keys, SDL_Keymod modifiers) {
-		return registeredBinds.emplace_back(new Bind(name, keys, modifiers, this));
+		return registeredBinds.emplace_back(new Bind(name, keys, modifiers));
 	}
 
 	void InputSystem::ImGuiBindStatus() {

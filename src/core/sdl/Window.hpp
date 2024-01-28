@@ -25,6 +25,9 @@ namespace engine::core::sdl {
 
 		SDL_GLContext GlContext() const { return context; }
 
+		SDL_Rect GetRect();
+		float GetAspectRatio();
+
 		void Swap();
 
 		void Poll();

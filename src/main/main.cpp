@@ -141,7 +141,7 @@ int main(int argc, char** argv) {
 	style.Colors[ImGuiCol_ModalWindowDimBg]       = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
 
 	ImGui_ImplSDL2_InitForOpenGL(window.Raw(), window.GlContext());
-	ImGui_ImplOpenGL3_Init("#version 330");
+	ImGui_ImplOpenGL3_Init("#version 330 core");
 
 	// init stuff
 
@@ -299,9 +299,10 @@ int main(int argc, char** argv) {
 	});
 
 	//SDL_Surface* windowSurface = SDL_GetWindowSurface(window.Raw());
+	SDL_Rect windowRect = window.GetRect();
 
 	glClearColor(0.05f, 0.05f, 0.05f, 1.f);
-	glViewport(0, 0, 1280, 720);
+	glViewport(0, 0, windowRect.w, windowRect.h);
 	glEnable(GL_DEPTH_TEST);
 
 	auto bind_forward = core::InputSystem::The().RegisterBind("forward", {SDL_Scancode::SDL_SCANCODE_W}, SDL_Keymod::KMOD_NONE);

@@ -19,6 +19,7 @@ namespace engine::core::scene {
 		glm::mat4 GetView() { return glm::inverse(transform.matrix); }
 		glm::mat4 GetProjection() { return matProjection; }
 
+		void SetAspect(float ratio);
 		void SetFovNearFar(float fieldofview, float near, float far);
 
 		std::string Name;
@@ -29,6 +30,7 @@ namespace engine::core::scene {
 		float fov { 70.f };
 		float zNear { 0.1f };
 		float zFar { 1000.f };
+		float aspect { 1.f };
 	};
 
 } // namespace engine::core::scene

@@ -30,7 +30,8 @@ namespace engine::core {
 
 		if (IsMouseLocked() && sdl::Window::CurrentWindow != nullptr) {
 			// lock to screen
-			SDL_WarpMouseInWindow(sdl::Window::CurrentWindow->Raw(), 1280 / 2, 720 / 2);
+			SDL_Rect rect = sdl::Window::CurrentWindow->GetRect();
+			SDL_WarpMouseInWindow(sdl::Window::CurrentWindow->Raw(), rect.w / 2, rect.h / 2);
 		}
 	}
 

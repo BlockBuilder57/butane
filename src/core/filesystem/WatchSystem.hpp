@@ -56,6 +56,7 @@ namespace engine::core::filesystem {
 
 
 	struct WatchSystem : public core::PerTickSystem {
+		char* GetName() override { return STRINGIFY(WatchSystem); }
 
 		// implementation of [core::PerTickSystem] interface
 		void Init() override;

@@ -1,14 +1,20 @@
 #pragma once
 #include <core/Types.hpp>
+#include <core/Util.hpp>
 #include <vector>
+#include <imgui.h>
 
 namespace engine::core {
 
 	struct System {
 		virtual ~System() = default;
+		virtual char* GetName() = 0;
 
 		virtual void Init() = 0;
 		virtual void Shutdown() = 0;
+
+		virtual void ImGuiDebug() {};
+		bool ImGuiDebugFlag = false;
 	};
 
 	/// A [System] which runs on every update tick
@@ -26,6 +32,7 @@ namespace engine::core {
 
 		void Init();
 		void Shutdown();
+		void ImGuiDebug();
 
 		void StartTick();
 		void EndTick();

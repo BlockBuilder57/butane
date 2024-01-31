@@ -314,9 +314,11 @@ int main(int argc, char** argv) {
 	auto bind_down = core::InputSystem::The().RegisterBind("down", {SDL_Scancode::SDL_SCANCODE_C}, SDL_Keymod::KMOD_NONE);
 
 	auto bind_lock = core::InputSystem::The().RegisterBind("lock", {SDL_Scancode::SDL_SCANCODE_L}, SDL_Keymod::KMOD_CTRL);
+	auto debug_menu = core::InputSystem::The().RegisterBind("debug_menu", {SDL_Scancode::SDL_SCANCODE_M}, SDL_Keymod::KMOD_CTRL);
 
 	bool animateCam = true;
 	bool lookAtTarget = true;
+	bool debugMenuFlag = true;
 	glm::vec3 camPos = {-2.f, 1.f, -2.5f};
 	glm::quat camRot = glm::identity<glm::quat>();
 	float camSpeed = 5.f;
@@ -335,6 +337,10 @@ int main(int argc, char** argv) {
 			if(bind_lock->Down()) {
 				core::InputSystem::The().SetMouseLock(!core::InputSystem::The().IsMouseLocked());
 				animateCam = lookAtTarget = !core::InputSystem::The().IsMouseLocked();
+			}
+
+			if (debug_menu->Down()) {
+				debugMenuFlag = !debugMenuFlag;
 			}
 
 			if(core::InputSystem::The().IsMouseLocked()) {
@@ -412,23 +418,27 @@ int main(int argc, char** argv) {
 		}
 
 		// imgui drawing
-		//ImGui::ShowDemoWindow();
+		static bool show_demo = false;
+		static bool camera_controls = false;
+		if(debugMenuFlag && ImGui::BeginMainMenuBar()) {
+			engine::core::SystemManager::The().ImGuiDebug();
 
-		{
-			static ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar;
-			ImGui::Begin("Blah", nullptr, window_flags);
+			if (ImGui::BeginMenu("Camera")) {
+				ImGui::Checkbox("animate cam", &animateCam);
+				ImGui::Checkbox("look at target", &lookAtTarget);
+				ImGui::DragFloat3("cam pos", &camPos.x, 0.1f);
+				ImGui::DragFloat("cam speed", &camSpeed, 0.1f);
+				ImGui::DragFloat3("light pos", &lightPos.x, 0.1f);
+				ImGui::DragFloat3("light color", &lightColor.x, 0.1f);
 
-			ImGui::Text("Frame time: %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-			ImGui::Checkbox("animate cam", &animateCam);
-			ImGui::Checkbox("look at target", &lookAtTarget);
-			ImGui::DragFloat3("cam pos", &camPos.x, 0.1f);
-			ImGui::DragFloat("cam speed", &camSpeed, 0.1f);
-			ImGui::DragFloat3("light pos", &lightPos.x, 0.1f);
-			ImGui::DragFloat3("light color", &lightColor.x, 0.1f);
+				ImGui::EndMenu();
+			}
 
-			engine::core::InputSystem::The().ImGuiBindStatus();
+			ImGui::MenuItem("ImGui Demo", "", &show_demo);
 
-			ImGui::End();
+			ImGui::TextDisabled("%.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+
+			ImGui::EndMainMenuBar();
 		}
 
 		ImGui::Render();

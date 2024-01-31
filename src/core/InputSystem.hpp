@@ -22,10 +22,12 @@ namespace engine::core {
 
 	struct InputSystem : public core::PerTickSystem {
 		static InputSystem& The();
+		char* GetName() override { return STRINGIFY(InputSystem); }
 
 		// implementation of [core::PerTickSystem] interface
 		void Init() override;
 		void Shutdown() override;
+		void ImGuiDebug() override;
 		void StartTick() override;
 		void EndTick() override;
 
@@ -53,8 +55,6 @@ namespace engine::core {
 		bool ButtonUp(SDL_Scancode key, SDL_Keymod modifiers);
 
 		Bind* RegisterBind(std::string name, std::vector<SDL_Scancode> keys, SDL_Keymod modifiers);
-
-		void ImGuiBindStatus();
 
 	   private:
 		struct InputStatus {

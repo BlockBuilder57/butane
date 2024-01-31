@@ -2,6 +2,8 @@
 #include <core/System.hpp>
 #include <vector>
 
+#include "imgui_internal.h"
+
 namespace engine::core {
 
 	SystemManager& SystemManager::The() {
@@ -29,6 +31,30 @@ namespace engine::core {
 			system->Shutdown();
 		for(auto system : tickSystems)
 			system->Shutdown();
+	}
+
+	void SystemManager::ImGuiDebug() {
+		ImGui::PushItemFlag(ImGuiItemFlags_SelectableDontClosePopup, true);
+		if (ImGui::BeginMenu("Systems")) {
+			ImGui::TextDisabled("Systems");
+			for(auto system : systems)
+				ImGui::MenuItem(system->GetName(), nullptr, &system->ImGuiDebugFlag);
+			ImGui::TextDisabled("Tick Systems");
+			for(auto system : tickSystems)
+				ImGui::MenuItem(system->GetName(), nullptr, &system->ImGuiDebugFlag);
+
+			ImGui::EndMenu();
+		}
+		ImGui::PopItemFlag();
+
+		for(auto system : systems) {
+			if (system->ImGuiDebugFlag)
+				system->ImGuiDebug();
+		}
+		for(auto system : tickSystems) {
+			if (system->ImGuiDebugFlag)
+				system->ImGuiDebug();
+		}
 	}
 
 	void SystemManager::StartTick() {

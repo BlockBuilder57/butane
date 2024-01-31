@@ -23,6 +23,67 @@ namespace engine::core {
 		SetMouseLock(false);
 	}
 
+	void InputSystem::ImGuiDebug() {
+		if (!ImGuiDebugFlag)
+			return;
+
+		ImGui::Begin(Name());
+
+		//ImGui::SeparatorText("Binds");
+
+		ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_NoSavedSettings | ImGuiTableFlags_SizingFixedFit;
+
+		if (ImGui::BeginTable("table", 5, flags)) {
+			ImGui::TableSetupColumn("Name");
+			ImGui::TableSetupColumn("Keys");
+			ImGui::TableSetupColumn("Down");
+			ImGui::TableSetupColumn("Held");
+			ImGui::TableSetupColumn("Up");
+			ImGui::TableHeadersRow();
+
+			for(Bind* bind : registeredBinds) {
+				ImGui::TableNextRow();
+
+				ImGui::TableSetColumnIndex(0);
+				ImGui::TextUnformatted(bind->name.c_str());
+
+				ImGui::TableSetColumnIndex(1);
+				std::string keystr = "";
+
+				if ((bind->keyModifiers & SDL_Keymod::KMOD_CTRL) != 0)
+					keystr += "CTRL+";
+				if ((bind->keyModifiers & SDL_Keymod::KMOD_SHIFT) != 0)
+					keystr += "SHIFT+";
+				if ((bind->keyModifiers & SDL_Keymod::KMOD_ALT) != 0)
+					keystr += "ALT+";
+				if ((bind->keyModifiers & SDL_Keymod::KMOD_GUI) != 0)
+					keystr += "GUI+";
+
+				for(int i = 0; i < bind->keyArray.size(); i++) {
+					keystr += SDL_GetKeyName(SDL_GetKeyFromScancode(bind->keyArray[i]));
+					keystr += "+";
+				}
+
+				// lazy stripping
+				if (keystr.ends_with('+'))
+					keystr = keystr.substr(0, keystr.size() - 1);
+
+				ImGui::TextUnformatted(keystr.c_str());
+
+				ImGui::TableSetColumnIndex(2);
+				ImGui::Text(bind->Down() ? "x" : "-");
+				ImGui::TableSetColumnIndex(3);
+				ImGui::Text(bind->Held() ? "x" : "-");
+				ImGui::TableSetColumnIndex(4);
+				ImGui::Text(bind->Up() ? "x" : "-");
+			}
+
+			ImGui::EndTable();
+		}
+
+		ImGui::End();
+	}
+
 	void InputSystem::StartTick() {
 		// fetch mouse state here
 		statusCurrent.mouseButtons = SDL_GetMouseState(&statusCurrent.mouseRelative.x, &statusCurrent.mouseRelative.y);
@@ -90,60 +151,6 @@ namespace engine::core {
 
 	Bind* InputSystem::RegisterBind(std::string name, std::vector<SDL_Scancode> keys, SDL_Keymod modifiers) {
 		return registeredBinds.emplace_back(new Bind(name, keys, modifiers));
-	}
-
-	void InputSystem::ImGuiBindStatus() {
-		ImGui::SeparatorText("Binds");
-
-		ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders;
-
-		if (ImGui::BeginTable("table", 5, flags)) {
-			ImGui::TableSetupColumn("Name");
-			ImGui::TableSetupColumn("Keys");
-			ImGui::TableSetupColumn("Down");
-			ImGui::TableSetupColumn("Held");
-			ImGui::TableSetupColumn("Up");
-			ImGui::TableHeadersRow();
-
-			for(Bind* bind : registeredBinds) {
-				ImGui::TableNextRow();
-
-				ImGui::TableSetColumnIndex(0);
-				ImGui::TextUnformatted(bind->name.c_str());
-
-				ImGui::TableSetColumnIndex(1);
-				std::string keystr = "";
-
-				if ((bind->keyModifiers & SDL_Keymod::KMOD_CTRL) != 0)
-					keystr += "CTRL+";
-				if ((bind->keyModifiers & SDL_Keymod::KMOD_SHIFT) != 0)
-					keystr += "SHIFT+";
-				if ((bind->keyModifiers & SDL_Keymod::KMOD_ALT) != 0)
-					keystr += "ALT+";
-				if ((bind->keyModifiers & SDL_Keymod::KMOD_GUI) != 0)
-					keystr += "GUI+";
-
-				for(int i = 0; i < bind->keyArray.size(); i++) {
-					keystr += SDL_GetKeyName(SDL_GetKeyFromScancode(bind->keyArray[i]));
-					keystr += "+";
-				}
-
-				// lazy stripping
-				if (keystr.ends_with('+'))
-					keystr = keystr.substr(0, keystr.size() - 1);
-
-				ImGui::TextUnformatted(keystr.c_str());
-
-				ImGui::TableSetColumnIndex(2);
-				ImGui::Text("%d", bind->Down());
-				ImGui::TableSetColumnIndex(3);
-				ImGui::Text("%d", bind->Held());
-				ImGui::TableSetColumnIndex(4);
-				ImGui::Text("%d", bind->Up());
-			}
-
-			ImGui::EndTable();
-		}
 	}
 
 } // namespace engine::core

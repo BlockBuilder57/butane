@@ -29,6 +29,10 @@ namespace engine::core::gl {
 		LoadTexture(path);
 	}
 
+	Texture::~Texture() {
+		FreeTexture();
+	}
+
 	bool Texture::LoadTexture(const std::filesystem::path& path) {
 		LogDebug("Loading texture from \"{}\"", path.c_str());
 		SDL_Surface* surface = IMG_Load(path.c_str());
@@ -85,6 +89,10 @@ namespace engine::core::gl {
 	}
 
 	void Texture::InitializeOGLTexture(int width, int height, GLenum format, void* data) {
+		texWidth = width;
+		texHeight = height;
+		texFormat = format;
+
 		glGenTextures(1, &texID);
 		glBindTexture(GL_TEXTURE_2D, texID);
 

@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <core/sdl/File.hpp>
+#include <vector>
 
 namespace engine::core::filesystem {
 
@@ -11,11 +12,14 @@ namespace engine::core::filesystem {
 	   public:
 		static Filesystem& The();
 
-		stdfs::path GetDataDir();
-		stdfs::path GetAbsolutePathFor(const stdfs::path& path);
+		static stdfs::path GetDataDir();
+		static stdfs::path GetAbsolutePathFor(const stdfs::path& path);
+		static stdfs::path GetRelativePathFor(const stdfs::path& path);
 
-		Unique<sdl::File> OpenAbsoluteFile(const stdfs::path& path);
-		Unique<sdl::File> OpenRelativeFile(const stdfs::path& path);
+		static Unique<sdl::File> OpenAbsoluteFile(const stdfs::path& path);
+		static Unique<sdl::File> OpenRelativeFile(const stdfs::path& path);
+
+		static std::vector<stdfs::path> WalkDirectory(const stdfs::path& path);
 	};
 
 }

@@ -9,7 +9,7 @@
 #include <core/filesystem/WatchSystem.hpp>
 #include <core/gl/GLHeaders.hpp>
 #include <core/gl/Shader.hpp>
-#include <core/gl/Texture.hpp>
+#include "core/gl/TextureSystem.hpp"
 #include <core/InputSystem.hpp>
 #include <core/Logger.hpp>
 #include <core/scene/Scene.hpp>
@@ -54,11 +54,12 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
-	core::SystemManager::The().Init();
-
 	// Create file watch system
 	core::filesystem::watchSystem = new core::filesystem::WatchSystem;
 	core::SystemManager::The().Add(static_cast<core::PerTickSystem*>(core::filesystem::watchSystem));
+
+	// Create texture system
+	core::SystemManager::The().Add(static_cast<core::System*>(&core::gl::TextureSystem::The()));
 
 	// Create input system
 	core::SystemManager::The().Add(static_cast<core::PerTickSystem*>(&core::InputSystem::The()));
@@ -69,6 +70,9 @@ int main(int argc, char** argv) {
 	// By this point the Window class has setup OpenGL and made the context it created current,
 	// so now we can load OpenGL APIs.
 	gladLoadGLLoader(SDL_GL_GetProcAddress);
+
+	// Init all registered systems
+	core::SystemManager::The().Init();
 
 	DumpOglInfo();
 
@@ -264,14 +268,10 @@ int main(int argc, char** argv) {
 	lightProgram.Link();
 
 	// textures
-	gl::Texture blank = gl::Texture();
-	const unsigned char colorWhite[4] = { 255, 255, 255, 255 };
-	blank.LoadTexture(1, 1, (void*)&colorWhite[0]);
-
-	gl::Texture test = gl::Texture(GL_REPEAT, GL_REPEAT, core::filesystem::Filesystem::The().GetAbsolutePathFor("textures/test.png"));
-	gl::Texture crate_diffuse = gl::Texture(GL_REPEAT, GL_REPEAT, core::filesystem::Filesystem::The().GetAbsolutePathFor("textures/container2.png"));
-	gl::Texture crate_specular = gl::Texture(GL_REPEAT, GL_REPEAT, core::filesystem::Filesystem::The().GetAbsolutePathFor("textures/container2_specular.png"));
-	gl::Texture crate_emission = gl::Texture(GL_REPEAT, GL_REPEAT, core::filesystem::Filesystem::The().GetAbsolutePathFor("textures/matrix.jpg"));
+	gl::Texture* test = core::gl::TextureSystem::The().GetTexture("textures/test.png");
+	gl::Texture* crate_diffuse = core::gl::TextureSystem::The().GetTexture("textures/container2.png");
+	gl::Texture* crate_specular = core::gl::TextureSystem::The().GetTexture("textures/container2_specular.png");
+	gl::Texture* crate_emission = core::gl::TextureSystem::The().GetTexture("textures/matrix.jpg");
 
 	// loop variables
 
@@ -435,6 +435,8 @@ int main(int argc, char** argv) {
 			}
 
 			ImGui::MenuItem("ImGui Demo", "", &show_demo);
+			if (show_demo)
+				ImGui::ShowDemoWindow();
 
 			ImGui::TextDisabled("%.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
 
@@ -448,16 +450,16 @@ int main(int argc, char** argv) {
 		// do actual drawing now
 
 		glActiveTexture(GL_TEXTURE0);
-		crate_diffuse.Bind();
+		crate_diffuse->Bind();
 		glActiveTexture(GL_TEXTURE1);
-		crate_specular.Bind();
+		crate_specular->Bind();
 		glActiveTexture(GL_TEXTURE2);
-		crate_emission.Bind();
+		crate_emission->Bind();
 
 		cubeProgram.Bind();
 		cubeProgram.SetUniform("viewPos", theCam->transform.metaPos);
 		cubeProgram.SetUniform("light.position", lightPos);
-		cubeProgram.SetUniform("light.ambient", {0.2f, 0.2f, 0.2f});
+		cubeProgram.SetUniform("light.ambient", {0.3f, 0.3f, 0.3f});
 		cubeProgram.SetUniform("light.diffuse", {0.5f, 0.5f, 0.5f}); // darken diffuse light a bit
 		cubeProgram.SetUniform("light.specular", {1.0f, 1.0f, 1.0f});
 		cubeProgram.SetUniform("material.diffuse", 0);

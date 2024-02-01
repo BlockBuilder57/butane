@@ -15,6 +15,7 @@ add_library(engine_core
 
 		# OpenGL abstractions
 		gl/Shader.cpp
+		gl/TextureSystem.cpp
 		gl/Texture.cpp
 
 		# Scene

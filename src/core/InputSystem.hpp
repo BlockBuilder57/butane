@@ -16,7 +16,7 @@
 
 namespace engine::core {
 
-	constexpr static auto MAX_KEY_COUNT = 64;
+	constexpr static auto MAX_KEY_COUNT = 16;
 
 	struct Bind;
 
@@ -54,7 +54,7 @@ namespace engine::core {
 		bool ButtonHeld(SDL_Scancode key, SDL_Keymod modifiers);
 		bool ButtonUp(SDL_Scancode key, SDL_Keymod modifiers);
 
-		Bind* RegisterBind(std::string name, std::vector<SDL_Scancode> keys, SDL_Keymod modifiers);
+		Bind* RegisterBind(std::string name, std::vector<SDL_Scancode> keys, SDL_Keymod modifiers = SDL_Keymod::KMOD_NONE);
 
 	   private:
 		struct InputStatus {
@@ -80,6 +80,11 @@ namespace engine::core {
 			}
 
 			bool ModifiersValid(SDL_Keymod modifier) {
+				// no modifiers, always valid
+				if (modifier == SDL_Keymod::KMOD_NONE)
+					return true;
+
+				// if we're not holding anything down and the bind has modifiers, skip early
 				if(modifiers == SDL_Keymod::KMOD_NONE && modifier != SDL_Keymod::KMOD_NONE)
 					return false;
 

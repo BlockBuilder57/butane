@@ -31,8 +31,8 @@ add_library(imgui
 target_link_libraries(imgui SDL2::SDL2)
 target_include_directories(imgui PRIVATE ${IMGUI_DIR})
 
-set(CMAKE_CXX_FLAGS_DEBUG "-D_DEBUG")
-set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG")
 
 # default linker
 if(NOT CUSTENGINE_LINKER AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")

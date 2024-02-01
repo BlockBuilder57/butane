@@ -27,7 +27,7 @@ namespace engine::core {
 		if (!ImGuiDebugFlag)
 			return;
 
-		ImGui::Begin(Name());
+		ImGui::Begin(GetName());
 
 		//ImGui::SeparatorText("Binds");
 
@@ -149,7 +149,7 @@ namespace engine::core {
 		return !statusCurrent.KeyPressed(key, modifiers) && statusLast.KeyPressed(key, modifiers);
 	}
 
-	Bind* InputSystem::RegisterBind(std::string name, std::vector<SDL_Scancode> keys, SDL_Keymod modifiers) {
+	Bind* InputSystem::RegisterBind(std::string name, std::vector<SDL_Scancode> keys, SDL_Keymod modifiers /*= SDL_Keymod::KMOD_NONE*/) {
 		return registeredBinds.emplace_back(new Bind(name, keys, modifiers));
 	}
 

@@ -47,7 +47,7 @@ namespace engine::core::filesystem {
 	}
 
 	void WatchSystem::RemoveWatch(engine::core::filesystem::Watch* watch) {
-		ENGINE_TODO();
+		std::erase(watches, watch);
 	}
 
 }

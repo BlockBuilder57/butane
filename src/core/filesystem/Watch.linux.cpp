@@ -38,13 +38,14 @@ namespace engine::core::filesystem {
 
 				while(i < len) {
 					auto event = reinterpret_cast<inotify_event*>(&buff[i]);
+					//LogDebug("Event {}, mask {:08x}", event->name, event->mask);
 					HandleActionImpl(event);
 					i += sizeof(*event) + event->len;
 				}
 			}
 		}
 
-		void HandleActionImpl(inotify_event* event) const {
+		void HandleActionImpl(inotify_event* event) {
 			ENGINE_CHECK(eventCallback, "Please assign a event callback before adding this watch");
 
 			// files do not have an event name
@@ -52,15 +53,21 @@ namespace engine::core::filesystem {
 			if (event->name[0] != '\0')
 				path /= event->name;
 
-			if(event->mask & IN_CLOSE_WRITE) {
+			// IN_IGNORED kills the watch instance, we need to reboot it
+			if(event->mask & IN_IGNORED || event->mask & IN_DELETE_SELF || event->mask & IN_MOVE_SELF) {
+				inotify_rm_watch(iNotifyFd, watchId);
+				watchId = inotify_add_watch(iNotifyFd, path.c_str(), IN_CLOSE_WRITE | IN_MOVED_TO | IN_CREATE | IN_MOVED_FROM | IN_DELETE);
+			}
+
+			if(event->mask & IN_CLOSE_WRITE || event->mask & IN_MODIFY || event->mask & IN_IGNORED) {
 				eventCallback(path, Watch::Event::Modify);
 			}
 
-			if(event->mask & IN_MOVED_TO || event->mask & IN_CREATE) {
+			if(event->mask & IN_MOVED_TO || event->mask & IN_CREATE || event->mask & IN_MOVE_SELF) {
 				eventCallback(path, Watch::Event::Add);
 			}
 
-			if(event->mask & IN_MOVED_FROM || event->mask & IN_DELETE) {
+			if(event->mask & IN_MOVED_FROM || event->mask & IN_DELETE || event->mask & IN_DELETE_SELF) {
 				eventCallback(path, Watch::Event::Rem);
 			}
 		}

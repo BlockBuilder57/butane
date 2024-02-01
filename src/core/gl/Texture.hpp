@@ -4,6 +4,7 @@
 
 #include <core/gl/GLHeaders.hpp>
 #include <core/filesystem/Filesystem.hpp>
+#include <core/filesystem/WatchSystem.hpp>
 #include <core/Types.hpp>
 
 namespace engine::core::gl {
@@ -17,7 +18,8 @@ namespace engine::core::gl {
 
 		~Texture();
 
-		bool LoadTexture(const std::filesystem::path& path);
+		bool SetPath(const std::filesystem::path& path);
+
 		bool LoadTexture(int width, int height, void* data);
 		bool LoadTexture(int width, int height, GLenum format, void* data);
 
@@ -36,6 +38,9 @@ namespace engine::core::gl {
 		u16 TexFilterScaleMin, TexFilterScaleMax = GL_LINEAR_MIPMAP_LINEAR;
 	   private:
 		void InitializeOGLTexture(int width, int height, GLenum format, void* data);
+
+		core::filesystem::Watch* fileWatch {};
+
 		GLuint texID {};
 		u16 texWidth, texHeight {};
 		GLenum texFormat {};

@@ -64,10 +64,15 @@ namespace engine::core::gl {
 	}
 
 	void Shader::SetPath(const filesystem::stdfs::path& path) {
-		auto file = core::filesystem::Filesystem::The().OpenAbsoluteFile(path);
+		// attempt to make this an absolute path
+		std::filesystem::path absPath = path;
+		if (!path.has_root_directory())
+			absPath = core::filesystem::Filesystem::GetDataDir() / path;
+
+		auto file = core::filesystem::Filesystem::OpenAbsoluteFile(absPath);
 
 		if (!file) {
-			LogError("Failed to open {} for shader", path.string());
+			LogError("Failed to open {} for shader", absPath.string());
 			return;
 		}
 

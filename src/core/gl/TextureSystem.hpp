@@ -20,7 +20,8 @@ namespace engine::core::gl {
 
 		enum class DefaultTexture {
 			Missing,
-			White
+			White,
+			Black
 		};
 
 		Texture* GetDefaultTexture(DefaultTexture type);
@@ -28,13 +29,16 @@ namespace engine::core::gl {
 		Texture* GetTexture(const filesystem::stdfs::path& path);
 
 	   private:
-		Texture defaultMissing {};
-		Texture defaultWhite {};
+		Texture* defaultMissing {};
+		Texture* defaultWhite {};
+		Texture* defaultBlack {};
 
-		// keys are local to the data directory
+		// keys are relative to the data directory
 		std::map<filesystem::stdfs::path, Texture*> textureDict {};
 
-		filesystem::stdfs::path debugPath = "wobo";
+		filesystem::stdfs::path debugPath {};
+		std::map<filesystem::stdfs::path, std::vector<filesystem::stdfs::path>> debugTree {};
+		void RecurseDirectoryStuff(filesystem::stdfs::path path);
 	};
 
 } // namespace engine::core::gl

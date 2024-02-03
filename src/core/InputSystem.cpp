@@ -27,7 +27,7 @@ namespace engine::core {
 		if (!ImGuiDebugFlag)
 			return;
 
-		ImGui::Begin(GetName());
+		ImGui::Begin(GetName(), &ImGuiDebugFlag);
 
 		//ImGui::SeparatorText("Binds");
 

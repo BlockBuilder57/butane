@@ -243,9 +243,9 @@ int main(int argc, char** argv) {
 	gl::Shader vertexShader(gl::Shader::Kind::Vertex);
 	gl::Shader fragmentShader(gl::Shader::Kind::Fragment);
 	gl::Shader lightFragmentShader(gl::Shader::Kind::Fragment);
-	vertexShader.SetPath(core::filesystem::Filesystem::The().GetAbsolutePathFor("shaders/default.vert"));
-	fragmentShader.SetPath(core::filesystem::Filesystem::The().GetAbsolutePathFor("shaders/default.frag"));
-	lightFragmentShader.SetPath(core::filesystem::Filesystem::The().GetAbsolutePathFor("shaders/light.frag"));
+	vertexShader.SetPath(core::filesystem::Filesystem::GetAbsolutePathFor("shaders/default.vert"));
+	fragmentShader.SetPath(core::filesystem::Filesystem::GetAbsolutePathFor("shaders/default.frag"));
+	lightFragmentShader.SetPath(core::filesystem::Filesystem::GetAbsolutePathFor("shaders/light.frag"));
 
 	if(!vertexShader.Compile()) {
 		core::LogInfo("Vertex shader compilation failure: {}", vertexShader.GetInfoLog());
@@ -436,7 +436,7 @@ int main(int argc, char** argv) {
 
 			ImGui::MenuItem("ImGui Demo", "", &show_demo);
 			if (show_demo)
-				ImGui::ShowDemoWindow();
+				ImGui::ShowDemoWindow(&show_demo);
 
 			ImGui::TextDisabled("%.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
 

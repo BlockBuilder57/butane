@@ -1,0 +1,4 @@
+WrapModeU = "MIRRORED_REPEAT"
+WrapModeV = "MIRRORED_REPEAT"
+TexFilterScaleMin = "NEAREST"
+TexFilterScaleMax = "NEAREST"

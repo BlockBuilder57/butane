@@ -1,8 +1,10 @@
 // Created by block on 8/18/23.
 
 #include <SDL2/SDL_image.h>
+#include <toml++/toml.h>
 
 #include <core/gl/Texture.hpp>
+#include <core/filesystem/TomlLoader.hpp>
 #include <core/Logger.hpp>
 
 namespace engine::core::gl {
@@ -98,6 +100,40 @@ namespace engine::core::gl {
 
 		InitializeOGLTexture(surface->w, surface->h, texture_format, surface->pixels);
 		SDL_FreeSurface(surface);
+
+		return true;
+	}
+
+	bool Texture::LoadConfig(const std::filesystem::path& path) {
+		toml::table table = filesystem::TomlLoader::LoadTable(path);
+		if (table.empty())
+			return false;
+
+		// set up config hotloading
+		if(!configWatch) {
+			// set up filewatch for hotloads
+			configWatch = new core::filesystem::Watch(path);
+			configWatch->SetCallback([&](const core::filesystem::stdfs::path& path, core::filesystem::Watch::Event ev) {
+				if (ev == core::filesystem::Watch::Event::Modify) {
+					LoadConfig(path);
+				}
+			});
+			core::filesystem::watchSystem->AddWatch(configWatch);
+		}
+
+		WrapModeU = (GLenum)filesystem::TomlLoader::GetEnum<OGLTextureWrap>(table[STRINGIFY(WrapModeU)], OGLTextureWrap::REPEAT);
+		WrapModeV = (GLenum)filesystem::TomlLoader::GetEnum<OGLTextureWrap>(table[STRINGIFY(WrapModeV)], OGLTextureWrap::REPEAT);
+		TexFilterScaleMin = (GLenum)filesystem::TomlLoader::GetEnum<OGLTextureFilter>(table[STRINGIFY(TexFilterScaleMin)], OGLTextureFilter::NEAREST);
+		TexFilterScaleMax = (GLenum)filesystem::TomlLoader::GetEnum<OGLTextureFilter>(table[STRINGIFY(TexFilterScaleMax)], OGLTextureFilter::NEAREST);
+
+		if (texID != 0) {
+			glBindTexture(GL_TEXTURE_2D, texID);
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, WrapModeU);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, WrapModeV);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, TexFilterScaleMin);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, TexFilterScaleMax);
+		}
 
 		return true;
 	}

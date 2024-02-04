@@ -10,6 +10,7 @@ add_library(engine_core
 
 		filesystem/Filesystem.cpp
 		filesystem/WatchSystem.cpp
+		filesystem/TomlLoader.cpp
 
 		# SDL abstractions
 		sdl/Window.cpp
@@ -30,10 +31,14 @@ custengine_setup_target(engine_core)
 
 target_include_directories(engine_core PRIVATE ${IMGUI_DIR})
 
+target_compile_definitions(magic_enum INTERFACE "MAGIC_ENUM_NO_CHECK_REFLECTED_ENUM")
+
 target_link_libraries(engine_core PUBLIC
 		glad::glad
 		glm::glm
 		imgui
+		tomlplusplus::tomlplusplus
+		magic_enum
 		)
 
 

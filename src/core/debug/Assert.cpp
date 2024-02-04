@@ -2,11 +2,11 @@
 #include <cstdlib>
 #include <core/Logger.hpp>
 
-namespace engine::core {
+namespace engine::core::debug {
 
 	[[noreturn]] void ExitMsg(const char* message) {
 		LogFatal("{}", message);
 		std::quick_exit(0xAF);
 	}
 
-} // namespace core
+} // namespace engine::core::debug

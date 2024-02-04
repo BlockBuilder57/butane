@@ -7,7 +7,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <core/Assert.hpp>
+#include <core/debug/Assert.hpp>
 #include <core/Logger.hpp>
 
 #include <core/filesystem/WatchSystem.hpp>

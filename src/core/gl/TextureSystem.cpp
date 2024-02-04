@@ -59,10 +59,10 @@ namespace engine::core::gl {
 					debugTree[file.parent_path()] = {};
 				}
 
-				// add ourselves to the parent's children
-				auto childVec = debugTree[file.parent_path()];
+				// add ourselves to the parent's directories
+				auto childVec = debugTree[file.parent_path()].directories;
 				if (std::find(childVec.begin(), childVec.end(), file) == childVec.end())
-					debugTree[file.parent_path()].push_back(file);
+					debugTree[file.parent_path()].directories.push_back(file);
 
 				continue;
 			}
@@ -70,10 +70,23 @@ namespace engine::core::gl {
 			const std::vector<std::string> whitelistFilenames = { ".png", ".jpg", ".bmp", ".xcf" };
 
 			if (std::find(whitelistFilenames.begin(), whitelistFilenames.end(), file.extension()) != whitelistFilenames.end()) {
+				auto configPath = file;
+				configPath.replace_extension(file.extension().string() + ".toml");
 				auto relativePath = filesystem::Filesystem::GetRelativePathFor(file);
-				textureDict[relativePath] = new gl::Texture(file);
+
+				gl::Texture* tex = new gl::Texture();
+				if (filesystem::stdfs::exists(configPath))
+					tex->LoadConfig(configPath);
+				tex->SetPath(file);
+				textureDict[relativePath] = tex;
+
+				auto childVec = debugTree[file.parent_path()].files;
+				if (std::find(childVec.begin(), childVec.end(), file) == childVec.end())
+					debugTree[file.parent_path()].files.push_back(file);
 			}
 		}
+
+		LogInfo("Loaded all textures");
 	}
 
 	void TextureSystem::Shutdown() {
@@ -83,57 +96,25 @@ namespace engine::core::gl {
 		textureDict.clear();
 	}
 
-	static int imguiIdx = 0;
-
-	void TextureSystem::RecurseDirectoryStuff(filesystem::stdfs::path path) {
-		if (!debugTree.contains(path))
-			return;
-
-		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
-		auto relativePath = filesystem::Filesystem::GetRelativePathFor(path);
-		auto children = debugTree[path];
-
-		imguiIdx++;
-		if (ImGui::TreeNodeEx((void*)(intptr_t)imguiIdx, flags, "%s/", path.filename().c_str())) {
-			for (const auto& childPath : children) {
-				RecurseDirectoryStuff(childPath);
-			}
-
-			for (const auto& pair : textureDict) {
-				if (pair.first.parent_path() != relativePath)
-					continue;
-
-				imguiIdx++;
-				// all files act as leaves
-				flags |= ImGuiTreeNodeFlags_Leaf;
-				if (ImGui::TreeNodeEx((void*)(intptr_t)imguiIdx, flags, "%s", pair.first.filename().c_str())) {
-					ImGui::TreePop();
-				}
-				if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
-					debugPath = pair.first;
-				}
-			}
-
-			ImGui::TreePop();
-		}
-	}
-
 	void TextureSystem::ImGuiDebug() {
 		if (!ImGuiDebugFlag)
 			return;
 
 		ImGui::Begin(GetName(), &ImGuiDebugFlag);
 
-		imguiIdx = 0;
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, IM_COL32(0, 0, 0, 64));
-		ImGui::BeginChild("TextureList", ImVec2(ImGui::GetContentRegionAvail().x, 200), false);
-		RecurseDirectoryStuff(filesystem::Filesystem::GetDataDir());
+		ImGui::BeginChild("TextureList", ImVec2(ImGui::GetContentRegionAvail().x, 180), ImGuiChildFlags_Border | ImGuiChildFlags_ResizeY);
+
+		std::filesystem::path treeSelection = debug::ImGuiExtensions::DrawDirectoryTree(filesystem::Filesystem::GetDataDir(), debugTree);
+		if (!treeSelection.empty())
+			debugPath = filesystem::Filesystem::GetRelativePathFor(treeSelection);
+
 		ImGui::EndChild();
 		ImGui::PopStyleColor();
 
 		// draw some extra info for the selected debug path
 		if (!debugPath.empty()) {
-			Texture* tex = textureDict.contains(debugPath) ? textureDict[debugPath] : defaultMissing;
+			Texture* tex = GetTexture(debugPath);
 			if (tex != nullptr) {
 				GLuint imgId = tex->GetID();
 				u16 dimX = std::min((u16)ImGui::GetContentRegionAvail().x, tex->GetWidth());

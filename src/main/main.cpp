@@ -396,6 +396,7 @@ int main(int argc, char** argv) {
 			deltaTime = 0;
 		}
 
+		core::debug::ImGuiExtensions::IdIndex = 0;
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();

@@ -6,7 +6,7 @@
 #include "Watch.null.cpp"
 #endif
 
-#include <core/Assert.hpp>
+#include <core/debug/Assert.hpp>
 
 namespace engine::core::filesystem {
 

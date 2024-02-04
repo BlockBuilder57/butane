@@ -3,7 +3,8 @@
 #pragma once
 
 #include <core/System.hpp>
-#include "Texture.hpp"
+#include <core/debug/ImGuiExtensions.hpp>
+#include <core/gl/Texture.hpp>
 #include <map>
 
 namespace engine::core::gl {
@@ -37,8 +38,7 @@ namespace engine::core::gl {
 		std::map<filesystem::stdfs::path, Texture*> textureDict {};
 
 		filesystem::stdfs::path debugPath {};
-		std::map<filesystem::stdfs::path, std::vector<filesystem::stdfs::path>> debugTree {};
-		void RecurseDirectoryStuff(filesystem::stdfs::path path);
+		std::map<filesystem::stdfs::path, debug::ImGuiExtensions::DirectoryTree> debugTree {};
 	};
 
 } // namespace engine::core::gl

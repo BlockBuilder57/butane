@@ -1,10 +1,12 @@
 add_library(engine_core
-		Assert.cpp
+		debug/Assert.cpp
+		debug/ImGuiExtensions.cpp
+
 		Logger.cpp
 		StdoutSink.cpp
 
-		InputSystem.cpp
 		System.cpp
+		InputSystem.cpp
 
 		filesystem/Filesystem.cpp
 		filesystem/WatchSystem.cpp

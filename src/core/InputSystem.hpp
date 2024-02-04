@@ -22,7 +22,7 @@ namespace engine::core {
 
 	struct InputSystem : public core::PerTickSystem {
 		static InputSystem& The();
-		char* GetName() override { return STRINGIFY(InputSystem); }
+		const char* GetName() override { return STRINGIFY(InputSystem); }
 
 		// implementation of [core::PerTickSystem] interface
 		void Init() override;

@@ -205,7 +205,7 @@ int main(int argc, char** argv) {
 
 	// model
 
-	u32 VAO, VBO, EBO;
+	u32 VAO, VBO/*, EBO*/;
 	u32 lightVAO;
 
 	glGenVertexArrays(1, &VAO);
@@ -268,7 +268,6 @@ int main(int argc, char** argv) {
 	lightProgram.Link();
 
 	// textures
-	gl::Texture* test = core::gl::TextureSystem::The().GetTexture("textures/test.png");
 	gl::Texture* crate_diffuse = core::gl::TextureSystem::The().GetTexture("textures/container2.png");
 	gl::Texture* crate_specular = core::gl::TextureSystem::The().GetTexture("textures/container2_specular.png");
 	gl::Texture* crate_emission = core::gl::TextureSystem::The().GetTexture("textures/matrix.jpg");
@@ -420,7 +419,6 @@ int main(int argc, char** argv) {
 
 		// imgui drawing
 		static bool show_demo = false;
-		static bool camera_controls = false;
 		if(debugMenuFlag && ImGui::BeginMainMenuBar()) {
 			engine::core::SystemManager::The().ImGuiDebug();
 

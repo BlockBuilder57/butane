@@ -8,7 +8,7 @@ namespace engine::core {
 
 	struct System {
 		virtual ~System() = default;
-		virtual char* GetName() = 0;
+		virtual const char* GetName() = 0;
 
 		virtual void Init() = 0;
 		virtual void Shutdown() = 0;

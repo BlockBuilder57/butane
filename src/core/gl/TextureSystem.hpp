@@ -12,7 +12,7 @@ namespace engine::core::gl {
 	struct TextureSystem : public core::System {
 		static TextureSystem &The();
 
-		char *GetName() override { return STRINGIFY(TextureSystem); }
+		const char* GetName() override { return STRINGIFY(TextureSystem); }
 
 		// implementation of [core::System] interface
 		void Init() override;

@@ -59,7 +59,7 @@ namespace engine::core {
 				if ((bind->keyModifiers & SDL_Keymod::KMOD_GUI) != 0)
 					keystr += "GUI+";
 
-				for(int i = 0; i < bind->keyArray.size(); i++) {
+				for(size_t i = 0; i < bind->keyArray.size(); i++) {
 					keystr += SDL_GetKeyName(SDL_GetKeyFromScancode(bind->keyArray[i]));
 					keystr += "+";
 				}

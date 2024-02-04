@@ -31,7 +31,6 @@ namespace engine::core::filesystem {
 				perror("select");
 			} else if(FD_ISSET(iNotifyFd, &set)) {
 				ssize_t len, i = 0;
-				char action[81 + FILENAME_MAX] = { 0 };
 				char buff[((sizeof(inotify_event)+FILENAME_MAX)*1024)] = { 0 };
 
 				len = read(iNotifyFd, buff, sizeof(buff));

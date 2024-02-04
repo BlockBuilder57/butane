@@ -11,16 +11,18 @@ namespace engine::core::gl {
 	}
 
 	void TextureSystem::Init() {
+		const std::filesystem::path dataPath = filesystem::Filesystem::GetDataDir();
+
 		// generate single pixel textures
 		defaultWhite = new gl::Texture();
 		const unsigned char colorWhite[4] = { 255, 255, 255, 255 };
 		defaultWhite->LoadTexture(1, 1, (void*)&colorWhite[0]);
-		textureDict["./" STRINGIFY(defaultWhite)] = defaultWhite;
+		textureDict[dataPath / STRINGIFY(defaultWhite)] = defaultWhite;
 
 		defaultBlack = new gl::Texture();
 		const unsigned char colorBlack[4] = { 0, 0, 0, 255 };
 		defaultBlack->LoadTexture(1, 1, (void*)&colorBlack[0]);
-		textureDict["./" STRINGIFY(defaultBlack)] = defaultBlack;
+		textureDict[dataPath / STRINGIFY(defaultBlack)] = defaultBlack;
 
 		// generate missing texture
 		defaultMissing = new gl::Texture();
@@ -42,11 +44,11 @@ namespace engine::core::gl {
 
 		defaultMissing->TexFilterScaleMax = defaultMissing->TexFilterScaleMin = GL_NEAREST;
 		defaultMissing->LoadTexture(missingSize, missingSize, (void*)&missingData[0]);
-		textureDict["./" STRINGIFY(defaultMissing)] = defaultMissing;
+		textureDict[dataPath / STRINGIFY(defaultMissing)] = defaultMissing;
 		delete[] missingData;
 
 		// load textures from filesystem
-		auto files = filesystem::Filesystem::WalkDirectory(filesystem::Filesystem::GetDataDir());
+		auto files = filesystem::Filesystem::WalkDirectory(dataPath);
 		for (auto file : files) {
 			if (filesystem::stdfs::is_directory(file)) {
 				// add ourselves if we're not in the map
@@ -85,6 +87,10 @@ namespace engine::core::gl {
 					debugTree[file.parent_path()].files.push_back(file);
 			}
 		}
+
+		debugTree[dataPath].files.push_back(dataPath / STRINGIFY(defaultWhite));
+		debugTree[dataPath].files.push_back(dataPath / STRINGIFY(defaultBlack));
+		debugTree[dataPath].files.push_back(dataPath / STRINGIFY(defaultMissing));
 
 		LogInfo("Loaded all textures");
 	}

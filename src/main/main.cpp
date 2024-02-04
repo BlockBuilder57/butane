@@ -315,14 +315,27 @@ int main(int argc, char** argv) {
 	auto bind_lock = core::InputSystem::The().RegisterBind("lock", {SDL_Scancode::SDL_SCANCODE_L}, SDL_Keymod::KMOD_CTRL);
 	auto debug_menu = core::InputSystem::The().RegisterBind("debug_menu", {SDL_Scancode::SDL_SCANCODE_M}, SDL_Keymod::KMOD_CTRL);
 
-	bool animateCam = true;
-	bool lookAtTarget = true;
+	bool animateCam = false;
+	bool lookAtTarget = false;
 	bool debugMenuFlag = true;
-	glm::vec3 camPos = {-2.f, 1.f, -2.5f};
+	glm::vec3 camPos = {};
 	glm::quat camRot = glm::identity<glm::quat>();
 	float camSpeed = 5.f;
 	glm::vec3 lightPos = {1.2f, 1.4f, 2.0f};
 	glm::vec3 lightColor = {1.0f, 1.0f, 1.0f};
+
+	const glm::vec3 cubePositions[] = {
+			glm::vec3( 0.0f,  0.0f,  0.0f),
+			glm::vec3( 2.0f,  5.0f, -15.0f),
+			glm::vec3(-1.5f, -2.2f, -2.5f),
+			glm::vec3(-3.8f, -2.0f, -12.3f),
+			glm::vec3( 2.4f, -0.4f, -3.5f),
+			glm::vec3(-1.7f,  3.0f, -7.5f),
+			glm::vec3( 1.3f, -2.0f, -2.5f),
+			glm::vec3( 1.5f,  2.0f, -2.5f),
+			glm::vec3( 1.5f,  0.2f, -1.5f),
+			glm::vec3(-1.3f,  1.0f, -1.5f)
+	};
 
 	while(run) {
 		// Fixed timestep updates.
@@ -335,7 +348,7 @@ int main(int argc, char** argv) {
 
 			if(bind_lock->Down()) {
 				core::InputSystem::The().SetMouseLock(!core::InputSystem::The().IsMouseLocked());
-				animateCam = lookAtTarget = !core::InputSystem::The().IsMouseLocked();
+				//animateCam = lookAtTarget = !core::InputSystem::The().IsMouseLocked();
 			}
 
 			if (debug_menu->Down()) {
@@ -457,10 +470,17 @@ int main(int argc, char** argv) {
 
 		cubeProgram.Bind();
 		cubeProgram.SetUniform("viewPos", theCam->transform.metaPos);
-		cubeProgram.SetUniform("light.position", lightPos);
-		cubeProgram.SetUniform("light.ambient", {0.3f, 0.3f, 0.3f});
+		//cubeProgram.SetUniform("light.position", lightPos);
+		cubeProgram.SetUniform("light.position", theCam->transform.metaPos);
+		cubeProgram.SetUniform("light.direction", theCam->transform.metaForward);
+		cubeProgram.SetUniform("light.cutOff", glm::cos(glm::radians(12.5f)));
+		cubeProgram.SetUniform("light.outerCutOff", glm::cos(glm::radians(17.5f)));
+		cubeProgram.SetUniform("light.ambient", {0.1f, 0.1f, 0.1f});
 		cubeProgram.SetUniform("light.diffuse", {0.5f, 0.5f, 0.5f}); // darken diffuse light a bit
 		cubeProgram.SetUniform("light.specular", {1.0f, 1.0f, 1.0f});
+		cubeProgram.SetUniform("light.constant", 1.0f);
+		cubeProgram.SetUniform("light.linear", 0.09f);
+		cubeProgram.SetUniform("light.quadratic", 0.032f);
 		cubeProgram.SetUniform("material.diffuse", 0);
 		cubeProgram.SetUniform("material.specular", 1);
 		cubeProgram.SetUniform("material.emission", 2);
@@ -470,8 +490,17 @@ int main(int argc, char** argv) {
 		cubeProgram.SetUniform("matView", theScene.GetCameraView());
 		cubeProgram.SetUniform("matModel", glm::identity<glm::mat4>());
 
-		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		for(int i = 0; i < 10; i++)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, cubePositions[i]);
+			float angle = 20.0f * i;
+			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+			cubeProgram.SetUniform("matModel", model);
+
+			glBindVertexArray(VAO);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 
 		lightProgram.Bind();
 		lightProgram.SetUniform("lightColor",  lightColor);
@@ -481,7 +510,8 @@ int main(int argc, char** argv) {
 
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, lightPos);
-		model = glm::scale(model, glm::vec3(0.2f));
+		model = glm::rotate(model, glm::radians(7.f), glm::vec3(1.0f, 0.3f, 0.5f));
+		model = glm::scale(model, glm::vec3(0.1f));
 		lightProgram.SetUniform("matModel", model);
 
 		glBindVertexArray(lightVAO);

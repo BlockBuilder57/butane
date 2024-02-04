@@ -32,6 +32,7 @@ namespace engine::core::scene {
 
 		glm::vec3 metaForward {};
 		glm::vec3 metaUp {};
+		glm::vec3 metaRight {};
 
 	   private:
 		void UpdateMeta();

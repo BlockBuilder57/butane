@@ -55,10 +55,13 @@ namespace engine::core::scene {
 		metaRot = rot;
 		metaEuler = glm::degrees(glm::eulerAngles(rot));
 
-		glm::vec3 forward = { 0, 0, 1 };
-		glm::vec3 up = { 0, 1, 0 };
-		metaForward = rot * forward;
-		metaUp = rot * up;
+		const glm::vec3 forward = { 0, 0, 1 };
+		const glm::vec3 up = { 0, 1, 0 };
+		// ...why do I have to invert this? I don't have to in xenomods...
+		metaForward = -(rot * forward);
+		// this is a neat way of doing this:
+		metaRight = glm::normalize(glm::cross(metaForward, up));
+		metaUp = glm::normalize(glm::cross(metaRight, metaForward));
 	}
 
 } // namespace engine::core::scene

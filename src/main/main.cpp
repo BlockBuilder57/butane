@@ -337,6 +337,20 @@ int main(int argc, char** argv) {
 			glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
 
+	const glm::vec3 pointLightPositions[] = {
+			glm::vec3( 0.7f,  0.2f,  2.0f),
+			glm::vec3( 2.3f, -3.3f, -4.0f),
+			glm::vec3(-4.0f,  2.0f, -12.0f),
+			glm::vec3( 0.0f,  0.0f, -3.0f)
+	};
+
+	const glm::vec3 pointLightColors[] = {
+			glm::vec3(0.2f, 0.2f, 0.6f),
+			glm::vec3(0.3f, 0.3f, 0.7f),
+			glm::vec3(0.0f, 0.0f, 0.3f),
+			glm::vec3(0.4f, 0.4f, 0.4f)
+	};
+
 	while(run) {
 		// Fixed timestep updates.
 		//
@@ -470,17 +484,35 @@ int main(int argc, char** argv) {
 
 		cubeProgram.Bind();
 		cubeProgram.SetUniform("viewPos", theCam->transform.metaPos);
-		//cubeProgram.SetUniform("light.position", lightPos);
-		cubeProgram.SetUniform("light.position", theCam->transform.metaPos);
-		cubeProgram.SetUniform("light.direction", theCam->transform.metaForward);
-		cubeProgram.SetUniform("light.cutOff", glm::cos(glm::radians(12.5f)));
-		cubeProgram.SetUniform("light.outerCutOff", glm::cos(glm::radians(17.5f)));
-		cubeProgram.SetUniform("light.ambient", {0.1f, 0.1f, 0.1f});
-		cubeProgram.SetUniform("light.diffuse", {0.5f, 0.5f, 0.5f}); // darken diffuse light a bit
-		cubeProgram.SetUniform("light.specular", {1.0f, 1.0f, 1.0f});
-		cubeProgram.SetUniform("light.constant", 1.0f);
-		cubeProgram.SetUniform("light.linear", 0.09f);
-		cubeProgram.SetUniform("light.quadratic", 0.032f);
+
+		// lights
+
+		cubeProgram.SetUniform("dirLight.direction", {-0.2f, -1.0f, -0.3f});
+		cubeProgram.SetUniform("dirLight.ambient", {0.05f, 0.05f, 0.05f});
+		cubeProgram.SetUniform("dirLight.diffuse", {0.2f, 0.2f, 0.7f});
+		cubeProgram.SetUniform("dirLight.specular", {0.7f, 0.7f, 0.7f});
+
+		for (int i = 0; i < 4; i++) {
+			cubeProgram.SetUniform(std::format("pointLights[{}].position", i), pointLightPositions[i]);
+			cubeProgram.SetUniform(std::format("pointLights[{}].ambient", i), pointLightColors[i] * 0.1f);
+			cubeProgram.SetUniform(std::format("pointLights[{}].diffuse", i), pointLightColors[i]);
+			cubeProgram.SetUniform(std::format("pointLights[{}].specular", i), pointLightColors[i]);
+			cubeProgram.SetUniform(std::format("pointLights[{}].constant", i), 1.0f);
+			cubeProgram.SetUniform(std::format("pointLights[{}].linear", i), 0.09f);
+			cubeProgram.SetUniform(std::format("pointLights[{}].quadratic", i), 0.032f);
+		}
+
+		cubeProgram.SetUniform("spotLight.position", theCam->transform.metaPos);
+		cubeProgram.SetUniform("spotLight.direction", theCam->transform.metaForward);
+		cubeProgram.SetUniform("spotLight.ambient", {0.0f, 0.0f, 0.0f});
+		cubeProgram.SetUniform("spotLight.diffuse", {1.0f, 1.0f, 1.0f});
+		cubeProgram.SetUniform("spotLight.specular", {1.0f, 1.0f, 1.0f});
+		cubeProgram.SetUniform("spotLight.constant", 1.0f);
+		cubeProgram.SetUniform("spotLight.linear", 0.09f);
+		cubeProgram.SetUniform("spotLight.quadratic", 0.032f);
+		cubeProgram.SetUniform("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+		cubeProgram.SetUniform("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
+
 		cubeProgram.SetUniform("material.diffuse", 0);
 		cubeProgram.SetUniform("material.specular", 1);
 		cubeProgram.SetUniform("material.emission", 2);
@@ -502,20 +534,26 @@ int main(int argc, char** argv) {
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
+		// lights
+
 		lightProgram.Bind();
-		lightProgram.SetUniform("lightColor",  lightColor);
+
 		lightProgram.SetUniform("time", glm::vec2(nowTime, std::chrono::system_clock::now().time_since_epoch().count()));
 		lightProgram.SetUniform("matProjection", theScene.GetCameraProjection());
 		lightProgram.SetUniform("matView", theScene.GetCameraView());
 
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, lightPos);
-		model = glm::rotate(model, glm::radians(7.f), glm::vec3(1.0f, 0.3f, 0.5f));
-		model = glm::scale(model, glm::vec3(0.1f));
-		lightProgram.SetUniform("matModel", model);
+		for(int i = 0; i < 4; i++)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, pointLightPositions[i]);
 
-		glBindVertexArray(lightVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+			model = glm::scale(model, glm::vec3(0.1f));
+			lightProgram.SetUniform("matModel", model);
+			lightProgram.SetUniform("lightColor",  pointLightColors[i]);
+
+			glBindVertexArray(lightVAO);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 
 
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

@@ -25,14 +25,14 @@ namespace engine::core::gl {
 			Black
 		};
 
-		Texture* GetDefaultTexture(DefaultTexture type);
+		static Texture* GetDefaultTexture(DefaultTexture type);
 
 		Texture* GetTexture(const filesystem::stdfs::path& path);
 
 	   private:
-		Texture* defaultMissing {};
-		Texture* defaultWhite {};
-		Texture* defaultBlack {};
+		static Texture* defaultMissing;
+		static Texture* defaultWhite;
+		static Texture* defaultBlack;
 
 		// keys are relative to the data directory
 		std::map<filesystem::stdfs::path, Texture*> textureDict {};

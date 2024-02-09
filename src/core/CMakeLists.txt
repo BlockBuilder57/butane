@@ -20,6 +20,7 @@ add_library(engine_core
 		gl/Shader.cpp
 		gl/TextureSystem.cpp
 		gl/Texture.cpp
+		gl/Material.cpp
 
 		# Scene
 		scene/Scene.cpp

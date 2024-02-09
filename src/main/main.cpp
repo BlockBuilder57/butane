@@ -9,7 +9,6 @@
 #include <core/filesystem/WatchSystem.hpp>
 #include <core/gl/GLHeaders.hpp>
 #include <core/gl/Shader.hpp>
-#include "core/gl/TextureSystem.hpp"
 #include <core/InputSystem.hpp>
 #include <core/Logger.hpp>
 #include <core/scene/Scene.hpp>
@@ -19,6 +18,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#include "core/gl/Material.hpp"
+#include "core/gl/TextureSystem.hpp"
 
 namespace core = engine::core;
 namespace sdl = core::sdl;
@@ -267,10 +269,14 @@ int main(int argc, char** argv) {
 	lightProgram.AttachShader(lightFragmentShader);
 	lightProgram.Link();
 
-	// textures
-	gl::Texture* crate_diffuse = core::gl::TextureSystem::The().GetTexture("textures/container2.png");
-	gl::Texture* crate_specular = core::gl::TextureSystem::The().GetTexture("textures/container2_specular.png");
-	gl::Texture* crate_emission = core::gl::TextureSystem::The().GetTexture("textures/matrix.jpg");
+	// materials
+	gl::Material tempMaterial = gl::Material {
+		.shader = &cubeProgram,
+		.diffuse = core::gl::TextureSystem::The().GetTexture("textures/container2.png"),
+		.specular = core::gl::TextureSystem::The().GetTexture("textures/container2_specular.png"),
+		.emission = core::gl::TextureSystem::The().GetTexture("textures/matrix.jpg"),
+		.shininess = 32.0f
+	};
 
 	// loop variables
 
@@ -475,52 +481,45 @@ int main(int argc, char** argv) {
 
 		// do actual drawing now
 
-		glActiveTexture(GL_TEXTURE0);
-		crate_diffuse->Bind();
-		glActiveTexture(GL_TEXTURE1);
-		crate_specular->Bind();
-		glActiveTexture(GL_TEXTURE2);
-		crate_emission->Bind();
+		// material test
+		tempMaterial.BindAndSetUniforms();
 
-		cubeProgram.Bind();
-		cubeProgram.SetUniform("viewPos", theCam->transform.metaPos);
+		tempMaterial.shader->SetUniform("viewPos", theCam->transform.metaPos);
 
 		// lights
 
-		cubeProgram.SetUniform("dirLight.direction", {-0.2f, -1.0f, -0.3f});
-		cubeProgram.SetUniform("dirLight.ambient", {0.05f, 0.05f, 0.05f});
-		cubeProgram.SetUniform("dirLight.diffuse", {0.2f, 0.2f, 0.7f});
-		cubeProgram.SetUniform("dirLight.specular", {0.7f, 0.7f, 0.7f});
+		tempMaterial.shader->SetUniform("dirLight.direction", {-0.2f, -1.0f, -0.3f});
+		tempMaterial.shader->SetUniform("dirLight.ambient", {0.05f, 0.05f, 0.05f});
+		tempMaterial.shader->SetUniform("dirLight.diffuse", {0.2f, 0.2f, 0.7f});
+		tempMaterial.shader->SetUniform("dirLight.specular", {0.7f, 0.7f, 0.7f});
 
 		for (int i = 0; i < 4; i++) {
-			cubeProgram.SetUniform(std::format("pointLights[{}].position", i), pointLightPositions[i]);
-			cubeProgram.SetUniform(std::format("pointLights[{}].ambient", i), pointLightColors[i] * 0.1f);
-			cubeProgram.SetUniform(std::format("pointLights[{}].diffuse", i), pointLightColors[i]);
-			cubeProgram.SetUniform(std::format("pointLights[{}].specular", i), pointLightColors[i]);
-			cubeProgram.SetUniform(std::format("pointLights[{}].constant", i), 1.0f);
-			cubeProgram.SetUniform(std::format("pointLights[{}].linear", i), 0.09f);
-			cubeProgram.SetUniform(std::format("pointLights[{}].quadratic", i), 0.032f);
+			tempMaterial.shader->SetUniform(std::format("pointLights[{}].position", i), pointLightPositions[i]);
+			tempMaterial.shader->SetUniform(std::format("pointLights[{}].ambient", i), pointLightColors[i] * 0.1f);
+			tempMaterial.shader->SetUniform(std::format("pointLights[{}].diffuse", i), pointLightColors[i]);
+			tempMaterial.shader->SetUniform(std::format("pointLights[{}].specular", i), pointLightColors[i]);
+			tempMaterial.shader->SetUniform(std::format("pointLights[{}].constant", i), 1.0f);
+			tempMaterial.shader->SetUniform(std::format("pointLights[{}].linear", i), 0.09f);
+			tempMaterial.shader->SetUniform(std::format("pointLights[{}].quadratic", i), 0.032f);
 		}
 
-		cubeProgram.SetUniform("spotLight.position", theCam->transform.metaPos);
-		cubeProgram.SetUniform("spotLight.direction", theCam->transform.metaForward);
-		cubeProgram.SetUniform("spotLight.ambient", {0.0f, 0.0f, 0.0f});
-		cubeProgram.SetUniform("spotLight.diffuse", {1.0f, 1.0f, 1.0f});
-		cubeProgram.SetUniform("spotLight.specular", {1.0f, 1.0f, 1.0f});
-		cubeProgram.SetUniform("spotLight.constant", 1.0f);
-		cubeProgram.SetUniform("spotLight.linear", 0.09f);
-		cubeProgram.SetUniform("spotLight.quadratic", 0.032f);
-		cubeProgram.SetUniform("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-		cubeProgram.SetUniform("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
+		tempMaterial.shader->SetUniform("spotLight.position", theCam->transform.metaPos);
+		tempMaterial.shader->SetUniform("spotLight.direction", theCam->transform.metaForward);
+		tempMaterial.shader->SetUniform("spotLight.ambient", {0.0f, 0.0f, 0.0f});
+		tempMaterial.shader->SetUniform("spotLight.diffuse", {1.0f, 1.0f, 1.0f});
+		tempMaterial.shader->SetUniform("spotLight.specular", {1.0f, 1.0f, 1.0f});
+		tempMaterial.shader->SetUniform("spotLight.constant", 1.0f);
+		tempMaterial.shader->SetUniform("spotLight.linear", 0.09f);
+		tempMaterial.shader->SetUniform("spotLight.quadratic", 0.032f);
+		tempMaterial.shader->SetUniform("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+		tempMaterial.shader->SetUniform("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
 
-		cubeProgram.SetUniform("material.diffuse", 0);
-		cubeProgram.SetUniform("material.specular", 1);
-		cubeProgram.SetUniform("material.emission", 2);
-		cubeProgram.SetUniform("material.shininess", 32.0f);
-		cubeProgram.SetUniform("time", glm::vec2(nowTime, std::chrono::system_clock::now().time_since_epoch().count()));
-		cubeProgram.SetUniform("matProjection", theScene.GetCameraProjection());
-		cubeProgram.SetUniform("matView", theScene.GetCameraView());
-		cubeProgram.SetUniform("matModel", glm::identity<glm::mat4>());
+		// projection
+
+		tempMaterial.shader->SetUniform("time", glm::vec2(nowTime, std::chrono::system_clock::now().time_since_epoch().count()));
+		tempMaterial.shader->SetUniform("matProjection", theScene.GetCameraProjection());
+		tempMaterial.shader->SetUniform("matView", theScene.GetCameraView());
+		tempMaterial.shader->SetUniform("matModel", glm::identity<glm::mat4>());
 
 		for(int i = 0; i < 10; i++)
 		{
@@ -528,7 +527,7 @@ int main(int argc, char** argv) {
 			model = glm::translate(model, cubePositions[i]);
 			float angle = 20.0f * i;
 			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-			cubeProgram.SetUniform("matModel", model);
+			tempMaterial.shader->SetUniform("matModel", model);
 
 			glBindVertexArray(VAO);
 			glDrawArrays(GL_TRIANGLES, 0, 36);

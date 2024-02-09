@@ -5,6 +5,10 @@
 
 namespace engine::core::gl {
 
+	Texture* TextureSystem::defaultMissing = {};
+	Texture* TextureSystem::defaultWhite = {};
+	Texture* TextureSystem::defaultBlack = {};
+
 	TextureSystem& TextureSystem::The() {
 		static TextureSystem the;
 		return the;
@@ -135,6 +139,7 @@ namespace engine::core::gl {
 
 		ImGui::End();
 	}
+
 	Texture* TextureSystem::GetDefaultTexture(DefaultTexture type) {
 		switch (type) {
 			case DefaultTexture::Missing:

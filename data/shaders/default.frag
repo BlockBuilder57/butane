@@ -118,7 +118,7 @@ void main() {
     // properties
     vec3 norm = normalize(NORMAL);
     vec3 viewDir = normalize(viewPos - FRAGPOS);
-    vec3 result;
+    vec3 result = vec3(0.0);
 
     // phase 1: Directional lighting
     result += clamp(CalcDirLight(dirLight, norm, viewDir), 0, 999);
@@ -132,7 +132,7 @@ void main() {
     vec4 emission_full = texture(material.emission, TEXCOORD);
     vec3 emiss_mask = -clamp(vec3(texture(material.specular, TEXCOORD)) * 300, 0, 1) + 1;
     vec3 emission = emission_full.rgb * (emission_full.a * emiss_mask);
-    //result += emission;
+    result += emission;
 
     gl_FragColor = vec4(result, 1.0);
 }

@@ -59,27 +59,27 @@ namespace engine::core {
 
 		template <class... Args>
 		inline void Debug(std::string_view fmt, Args... args) {
-			VOut(MessageSeverity::Debug, fmt, std::make_format_args(std::forward<Args>(args)...));
+			VOut(MessageSeverity::Debug, fmt, std::make_format_args(args...));
 		}
 
 		template <class... Args>
 		inline void Info(std::string_view fmt, Args... args) {
-			VOut(MessageSeverity::Info, fmt, std::make_format_args(std::forward<Args>(args)...));
+			VOut(MessageSeverity::Info, fmt, std::make_format_args(args...));
 		}
 
 		template <class... Args>
 		inline void Warning(std::string_view fmt, Args... args) {
-			VOut(MessageSeverity::Warning, fmt, std::make_format_args(std::forward<Args>(args)...));
+			VOut(MessageSeverity::Warning, fmt, std::make_format_args(args...));
 		}
 
 		template <class... Args>
 		inline void Error(std::string_view fmt, Args... args) {
-			VOut(MessageSeverity::Error, fmt, std::make_format_args(std::forward<Args>(args)...));
+			VOut(MessageSeverity::Error, fmt, std::make_format_args(args...));
 		}
 
 		template <class... Args>
 		inline void Fatal(std::string_view fmt, Args... args) {
-			VOut(MessageSeverity::Fatal, fmt, std::make_format_args(std::forward<Args>(args)...));
+			VOut(MessageSeverity::Fatal, fmt, std::make_format_args(args...));
 		}
 
 	   private:

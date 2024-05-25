@@ -3,4 +3,6 @@
 /build
 /cmake-build-*
 
+# data exclusions
 /data/imgui.ini
+/data/sstv/*.*

@@ -5,6 +5,7 @@
 #include <imgui.h>
 #include <SDL2/SDL.h>
 
+#include <core/experiments/SSTV.hpp>
 #include <core/filesystem/Filesystem.hpp>
 #include <core/filesystem/WatchSystem.hpp>
 #include <core/gl/GLHeaders.hpp>
@@ -321,6 +322,8 @@ int main(int argc, char** argv) {
 	auto bind_lock = core::InputSystem::The().RegisterBind("lock", {SDL_Scancode::SDL_SCANCODE_L}, SDL_Keymod::KMOD_CTRL);
 	auto debug_menu = core::InputSystem::The().RegisterBind("debug_menu", {SDL_Scancode::SDL_SCANCODE_M}, SDL_Keymod::KMOD_CTRL);
 
+	auto bind_sstv = core::InputSystem::The().RegisterBind("sstv", {SDL_Scancode::SDL_SCANCODE_S}, SDL_Keymod::KMOD_CTRL);
+
 	bool animateCam = false;
 	bool lookAtTarget = false;
 	bool debugMenuFlag = true;
@@ -373,6 +376,11 @@ int main(int argc, char** argv) {
 
 			if (debug_menu->Down()) {
 				debugMenuFlag = !debugMenuFlag;
+			}
+
+			if (bind_sstv->Down()) {
+				auto sstv = core::experiments::SSTV::The();
+				sstv.DoTheThing(windowRect);
 			}
 
 			if(core::InputSystem::The().IsMouseLocked()) {

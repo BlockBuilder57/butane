@@ -20,6 +20,9 @@ namespace engine::core::debug {
 
 		static int IdIndex;
 
+		// Looks through a directory tree and
+		static void PrecacheDirectories(const std::vector<std::filesystem::path>& files, std::map<std::filesystem::path, DirectoryTree>& directoryTree);
+
 		// Takes in a start path, and a directory tree of files and directories under that start path.
 		static std::filesystem::path DrawDirectoryTree(const std::filesystem::path& startPath, std::map<std::filesystem::path, DirectoryTree>& directoryTree);
 	};

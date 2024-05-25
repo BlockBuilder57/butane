@@ -21,6 +21,7 @@ add_library(engine_core
 		sdl/File.cpp
 
 		# OpenGL abstractions
+		gl/ShaderSystem.cpp
 		gl/Shader.cpp
 		gl/TextureSystem.cpp
 		gl/Texture.cpp

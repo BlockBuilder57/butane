@@ -28,8 +28,16 @@ namespace engine::core::filesystem {
 		return sdl::File::OpenFile(GetDataDir() / path, "rb");
 	}
 
+	bool IsSubpath(const std::filesystem::path& path, const std::filesystem::path& base) {
+		auto rel = std::filesystem::relative(path, base);
+		return !rel.empty() && rel.native()[0] != '.';
+	}
+
 	std::vector<stdfs::path> Filesystem::WalkDirectory(const stdfs::path& path) {
 		std::vector<stdfs::path> bepis;
+
+		//if (IsSubpath(path, GetDataDir()))
+		//	bepis.push_back(GetDataDir());
 
 		for (const auto &entry : stdfs::recursive_directory_iterator(path)) {
 			bepis.push_back(entry.path());

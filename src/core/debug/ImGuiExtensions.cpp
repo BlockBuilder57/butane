@@ -8,6 +8,28 @@ namespace engine::core::debug {
 
 	int ImGuiExtensions::IdIndex = 0;
 
+	void ImGuiExtensions::PrecacheDirectories(const std::vector<std::filesystem::path>& files, std::map<std::filesystem::path, DirectoryTree>& directoryTree) {
+		for (auto file : files) {
+			if(!filesystem::stdfs::is_directory(file))
+				continue;
+
+			// add ourselves if we're not in the map
+			if(!directoryTree.contains(file)) {
+				directoryTree[file] = {};
+			}
+
+			// add our parent if it's not in the map
+			if(!directoryTree.contains(file.parent_path())) {
+				directoryTree[file.parent_path()] = {};
+			}
+
+			// add ourselves to the parent's directories
+			auto childVec = directoryTree[file.parent_path()].directories;
+			if(std::find(childVec.begin(), childVec.end(), file) == childVec.end())
+				directoryTree[file.parent_path()].directories.push_back(file);
+		}
+	}
+
 	std::filesystem::path ImGuiExtensions::DrawDirectoryTree(const std::filesystem::path& startPath, std::map<std::filesystem::path, DirectoryTree>& directoryTree) {
 		if (startPath.empty() || directoryTree.empty())
 			return {};

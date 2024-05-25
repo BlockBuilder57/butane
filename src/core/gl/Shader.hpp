@@ -4,11 +4,10 @@
 #include <core/filesystem/WatchSystem.hpp>
 #include <core/gl/GLHeaders.hpp>
 #include <core/Types.hpp>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
+#include <toml++/toml.hpp>
 #include <vector>
 
 namespace engine::core::gl {
@@ -30,6 +29,20 @@ namespace engine::core::gl {
 
 		GLuint GetID() { return glProgramObject; }
 
+		struct Uniform {
+			enum class Type {
+				Unknown,
+				Int,
+				Float,
+				Vec2,
+				Vec3,
+				Texture,
+			};
+
+			std::string name;
+			Type type;
+		};
+
 		// TODO:
 		// (proper) float2/float3 overloads
 		// vec3/vec4 overloads
@@ -41,7 +54,7 @@ namespace engine::core::gl {
 		void SetUniform(const std::string& uniform, const glm::vec3& vec);
 		void SetUniform(const std::string& uniform, const glm::vec4& vec);
 		void SetUniform(const std::string& uniform, const glm::mat4& mat);
-		//void SetUniform(const std::string& uniform, double value);
+		// void SetUniform(const std::string& uniform, double value);
 
 	   private:
 		u32 glProgramObject {};

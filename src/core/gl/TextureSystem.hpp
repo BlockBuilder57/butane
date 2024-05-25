@@ -2,15 +2,15 @@
 
 #pragma once
 
-#include <core/System.hpp>
 #include <core/debug/ImGuiExtensions.hpp>
 #include <core/gl/Texture.hpp>
+#include <core/System.hpp>
 #include <map>
 
 namespace engine::core::gl {
 
 	struct TextureSystem : public core::System {
-		static TextureSystem &The();
+		static TextureSystem& The();
 
 		const char* GetName() override { return STRINGIFY(TextureSystem); }
 

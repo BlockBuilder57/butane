@@ -53,25 +53,11 @@ namespace engine::core::gl {
 
 		// load textures from filesystem
 		auto files = filesystem::Filesystem::WalkDirectory(dataPath);
+		debug::ImGuiExtensions::PrecacheDirectories(files, debugTree);
+
 		for (auto file : files) {
-			if (filesystem::stdfs::is_directory(file)) {
-				// add ourselves if we're not in the map
-				if (!debugTree.contains(file)) {
-					debugTree[file] = {};
-				}
-
-				// add our parent if it's not in the map
-				if (!debugTree.contains(file.parent_path())) {
-					debugTree[file.parent_path()] = {};
-				}
-
-				// add ourselves to the parent's directories
-				auto childVec = debugTree[file.parent_path()].directories;
-				if (std::find(childVec.begin(), childVec.end(), file) == childVec.end())
-					debugTree[file.parent_path()].directories.push_back(file);
-
+			if (filesystem::stdfs::is_directory(file))
 				continue;
-			}
 
 			const std::vector<std::string> whitelistFilenames = { ".png", ".jpg", ".bmp", ".xcf" };
 

@@ -134,5 +134,5 @@ void main() {
     vec3 emission = emission_full.rgb * (emission_full.a * emiss_mask);
     result += emission;
 
-    gl_FragColor = vec4(result, 1.0);
+    gl_FragColor = vec4(emission, 1.0);
 }

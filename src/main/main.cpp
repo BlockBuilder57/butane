@@ -9,7 +9,9 @@
 #include <core/filesystem/Filesystem.hpp>
 #include <core/filesystem/WatchSystem.hpp>
 #include <core/gl/GLHeaders.hpp>
-#include <core/gl/Shader.hpp>
+#include <core/gl/Material.hpp>
+#include <core/gl/TextureSystem.hpp>
+#include <core/gl/ShaderSystem.hpp>
 #include <core/InputSystem.hpp>
 #include <core/Logger.hpp>
 #include <core/scene/Scene.hpp>
@@ -19,9 +21,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
-#include "core/gl/Material.hpp"
-#include "core/gl/TextureSystem.hpp"
 
 namespace core = engine::core;
 namespace sdl = core::sdl;
@@ -61,7 +60,8 @@ int main(int argc, char** argv) {
 	core::filesystem::watchSystem = new core::filesystem::WatchSystem;
 	core::SystemManager::The().Add(static_cast<core::PerTickSystem*>(core::filesystem::watchSystem));
 
-	// Create texture system
+	// Create shader and texture systems
+	core::SystemManager::The().Add(static_cast<core::System*>(&core::gl::ShaderSystem::The()));
 	core::SystemManager::The().Add(static_cast<core::System*>(&core::gl::TextureSystem::The()));
 
 	// Create input system
@@ -242,37 +242,13 @@ int main(int argc, char** argv) {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
-	// vertex/fragment shaders
-	gl::Shader vertexShader(gl::Shader::Kind::Vertex);
-	gl::Shader fragmentShader(gl::Shader::Kind::Fragment);
-	gl::Shader lightFragmentShader(gl::Shader::Kind::Fragment);
-	vertexShader.SetPath(core::filesystem::Filesystem::GetAbsolutePathFor("shaders/default.vert"));
-	fragmentShader.SetPath(core::filesystem::Filesystem::GetAbsolutePathFor("shaders/default.frag"));
-	lightFragmentShader.SetPath(core::filesystem::Filesystem::GetAbsolutePathFor("shaders/light.frag"));
-
-	if(!vertexShader.Compile()) {
-		core::LogInfo("Vertex shader compilation failure: {}", vertexShader.GetInfoLog());
-	}
-	if(!fragmentShader.Compile()) {
-		core::LogInfo("Fragment shader compilation failure: {}", fragmentShader.GetInfoLog());
-	}
-	if(!lightFragmentShader.Compile()) {
-		core::LogInfo("Light fragment shader compilation failure: {}", lightFragmentShader.GetInfoLog());
-	}
-
-	gl::ShaderProgram cubeProgram;
-	cubeProgram.AttachShader(vertexShader);
-	cubeProgram.AttachShader(fragmentShader);
-	cubeProgram.Link();
-
-	gl::ShaderProgram lightProgram;
-	lightProgram.AttachShader(vertexShader);
-	lightProgram.AttachShader(lightFragmentShader);
-	lightProgram.Link();
+	// shaders
+	gl::ShaderProgram* cubeProgram = gl::ShaderSystem::The().GetProgram("shaders/default.program");
+	gl::ShaderProgram* lightProgram = gl::ShaderSystem::The().GetProgram("shaders/light.program");
 
 	// materials
 	gl::Material tempMaterial = gl::Material {
-		.shader = &cubeProgram,
+		.shader = cubeProgram,
 		.diffuse = core::gl::TextureSystem::The().GetTexture("textures/container2.png"),
 		.specular = core::gl::TextureSystem::The().GetTexture("textures/container2_specular.png"),
 		.emission = core::gl::TextureSystem::The().GetTexture("textures/matrix.jpg"),
@@ -543,11 +519,11 @@ int main(int argc, char** argv) {
 
 		// lights
 
-		lightProgram.Bind();
+		lightProgram->Bind();
 
-		lightProgram.SetUniform("time", glm::vec2(nowTime, std::chrono::system_clock::now().time_since_epoch().count()));
-		lightProgram.SetUniform("matProjection", theScene.GetCameraProjection());
-		lightProgram.SetUniform("matView", theScene.GetCameraView());
+		lightProgram->SetUniform("time", glm::vec2(nowTime, std::chrono::system_clock::now().time_since_epoch().count()));
+		lightProgram->SetUniform("matProjection", theScene.GetCameraProjection());
+		lightProgram->SetUniform("matView", theScene.GetCameraView());
 
 		for(int i = 0; i < 4; i++)
 		{
@@ -555,8 +531,8 @@ int main(int argc, char** argv) {
 			model = glm::translate(model, pointLightPositions[i]);
 
 			model = glm::scale(model, glm::vec3(0.1f));
-			lightProgram.SetUniform("matModel", model);
-			lightProgram.SetUniform("lightColor",  pointLightColors[i]);
+			lightProgram->SetUniform("matModel", model);
+			lightProgram->SetUniform("lightColor",  pointLightColors[i]);
 
 			glBindVertexArray(lightVAO);
 			glDrawArrays(GL_TRIANGLES, 0, 36);

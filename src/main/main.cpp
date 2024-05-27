@@ -450,6 +450,19 @@ int main(int argc, char** argv) {
 				ImGui::EndMenu();
 			}
 
+			if (ImGui::BeginMenu("SSTV")) {
+				auto sstv = core::experiments::SSTV::The();
+				for (int i = 0; i < sstv.MODES.size(); i++) {
+					auto* mode = &sstv.MODES[i];
+					if (ImGui::Button(mode->name.c_str())) {
+						sstv.SetMode(mode);
+						sstv.DoTheThing(windowRect);
+					}
+				}
+
+				ImGui::EndMenu();
+			}
+
 			ImGui::MenuItem("ImGui Demo", "", &show_demo);
 			if (show_demo)
 				ImGui::ShowDemoWindow(&show_demo);

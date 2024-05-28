@@ -298,7 +298,7 @@ int main(int argc, char** argv) {
 	auto bind_lock = core::InputSystem::The().RegisterBind("lock", {SDL_Scancode::SDL_SCANCODE_L}, SDL_Keymod::KMOD_CTRL);
 	auto debug_menu = core::InputSystem::The().RegisterBind("debug_menu", {SDL_Scancode::SDL_SCANCODE_M}, SDL_Keymod::KMOD_CTRL);
 
-	auto bind_sstv = core::InputSystem::The().RegisterBind("sstv", {SDL_Scancode::SDL_SCANCODE_S}, SDL_Keymod::KMOD_CTRL);
+	auto bind_sstv = core::InputSystem::The().RegisterBind("sstv", {SDL_Scancode::SDL_SCANCODE_S}, SDL_Keymod::KMOD_ALT);
 
 	bool animateCam = false;
 	bool lookAtTarget = false;

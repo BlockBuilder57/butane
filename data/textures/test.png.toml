@@ -1,0 +1,4 @@
+WrapModeU = "REPEAT"
+WrapModeV = "REPEAT"
+TexFilterScaleMin = "NEAREST"
+TexFilterScaleMax = "NEAREST"

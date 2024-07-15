@@ -1,0 +1,5 @@
+name = "Light"
+program = "shaders/light.program"
+
+[uniforms]
+lightColor = [1.0, 1.0, 1.0, 1.0]

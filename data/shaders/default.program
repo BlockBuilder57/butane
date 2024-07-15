@@ -1,4 +1,9 @@
 name = "Default Shader Program"
 frag = "shaders/src/default.frag"
 vert = "shaders/src/default.vert"
-uniforms = [["diffuse", "Texture"], ["specular", "Texture"], ["emission", "Texture"], ["shininess", "Float"]]
+
+[uniforms]
+diffuse = "Texture"
+specular = "Texture"
+emission = "Texture"
+shininess = "Float"

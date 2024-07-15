@@ -1,5 +1,9 @@
-#include <core/gl/Shader.hpp>
+#include <core/filesystem/TomlLoader.hpp>
+#include <core/gl/ShaderSystem.hpp>
+#include <core/gl/MaterialSystem.hpp>
 #include <core/Logger.hpp>
+
+#include <magic_enum.hpp>
 
 namespace engine::core::gl {
 
@@ -17,11 +21,83 @@ namespace engine::core::gl {
 		shaderObjects.resize(0);*/
 	}
 
+	void ShaderProgram::SetPath(const std::filesystem::path& path) {
+		// attempt to make this an absolute path
+		std::filesystem::path absPath = path;
+		if (!path.has_root_directory())
+			absPath = core::filesystem::Filesystem::GetDataDir() / path;
+
+		if(!fileWatch) {
+			// set up filewatch for hotloads
+			fileWatch = new core::filesystem::Watch(absPath);
+			fileWatch->SetCallback([&](const core::filesystem::stdfs::path& path, core::filesystem::Watch::Event ev) {
+				if (ev == core::filesystem::Watch::Event::Modify) {
+					SetPath(path);
+				}
+			});
+			core::filesystem::watchSystem->AddWatch(fileWatch);
+		}
+
+		toml::table table = filesystem::TomlLoader::LoadTable(path);
+
+		gl::Shader* frag = nullptr;
+		gl::Shader* vert = nullptr;
+
+		// build uniforms
+
+		bool hotloading = false;
+		std::vector<Material*> materials {};
+		if (!uniforms.empty()) {
+			hotloading = true;
+			MaterialSystem::The().GetMaterialsUsingProgram(this, materials);
+			uniforms.clear();
+		}
+
+		if (table["uniforms"].type() == toml::node_type::table) {
+			toml::table unis = *table["uniforms"].as_table();
+			for (auto key : unis) {
+				auto thing = magic_enum::enum_cast<ShaderProgram::Uniform::Type>(key.second.value_or("Unknown"), magic_enum::case_insensitive);
+				if (thing.has_value()) {
+					//LogInfo("Adding key {}, {}", key.first.str(), magic_enum::enum_name(thing.value()));
+					uniforms.emplace_back(std::string(key.first.str()), thing.value());
+				}
+			}
+		}
+
+		// hotloading will break everything!
+		// we need to reconnect our materials
+		if (hotloading) {
+			for (Material* mat : materials) {
+				mat->SetUpUniforms(uniforms);
+			}
+		}
+
+		if (table.contains("frag"))
+			frag = ShaderSystem::The().AddShader(table["frag"].value_or("shaders/src/default.frag"), Shader::Kind::Fragment);
+		if (table.contains("vert"))
+			vert = ShaderSystem::The().AddShader(table["vert"].value_or("shaders/src/default.vert"), Shader::Kind::Vertex);
+
+		if (frag != nullptr)
+			AttachShader(reinterpret_cast<Shader&>(*frag));
+		if (vert != nullptr)
+			AttachShader(reinterpret_cast<Shader&>(*vert));
+		Link();
+	}
+
 	void ShaderProgram::Bind() {
 		glUseProgram(glProgramObject);
 	}
 	void ShaderProgram::Unbind() {
 		glUseProgram(0);
+	}
+
+	void ShaderProgram::Uniform::ImGuiDebug() {
+		// we're in a table!
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("%s", name.c_str());
+
+		ImGui::TableSetColumnIndex(1);
+		ImGui::Text("%s", magic_enum::enum_name(type).data());
 	}
 
 	void ShaderProgram::SetUniform(const std::string& uniform, int value) {
@@ -78,7 +154,7 @@ namespace engine::core::gl {
 
 		if(!fileWatch) {
 			// set up filewatch for hotloads
-			fileWatch = new core::filesystem::Watch(path);
+			fileWatch = new core::filesystem::Watch(absPath);
 			fileWatch->SetCallback([&](const core::filesystem::stdfs::path& path, core::filesystem::Watch::Event ev) {
 				if (ev == core::filesystem::Watch::Event::Modify) {
 					SetPath(path);

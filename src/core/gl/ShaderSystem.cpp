@@ -21,26 +21,8 @@ namespace engine::core::gl {
 				continue;
 
 			if (file.extension() == ".program") {
-				toml::parse_result res = toml::parse_file(file.c_str());
-
-				// how do I error handle this now...?
-
-				toml::table table = *res.as_table();
-
 				gl::ShaderProgram* prog = new gl::ShaderProgram();
-				gl::Shader* frag = nullptr;
-				gl::Shader* vert = nullptr;
-
-				if (table.contains("frag"))
-					frag = AddShader(table["frag"].value_or("shaders/src/default.frag"), Shader::Kind::Fragment);
-				if (table.contains("vert"))
-					vert = AddShader(table["vert"].value_or("shaders/src/default.vert"), Shader::Kind::Vertex);
-
-				if (frag != nullptr)
-					prog->AttachShader(reinterpret_cast<Shader&>(*frag));
-				if (vert != nullptr)
-					prog->AttachShader(reinterpret_cast<Shader&>(*vert));
-				prog->Link();
+				prog->SetPath(file);
 
 				programDict[file] = prog;
 
@@ -52,6 +34,14 @@ namespace engine::core::gl {
 	}
 
 	void ShaderSystem::Shutdown() {
+		for (auto i : shaderDict) {
+			delete i.second;
+		}
+		for (auto i : programDict) {
+			delete i.second;
+		}
+		shaderDict.clear();
+		programDict.clear();
 	}
 
 	void ShaderSystem::ImGuiDebug() {
@@ -72,7 +62,27 @@ namespace engine::core::gl {
 
 		// draw some extra info for the selected debug path
 		if (!debugPath.empty()) {
-			ImGui::Text("Path: %s", debugPath.c_str());
+			ShaderProgram* prog = GetProgram(debugPath);
+			if (prog != nullptr) {
+				ImGui::Text("Path: %s", debugPath.c_str());
+
+				if (ImGui::TreeNode("Uniforms")) {
+					if (ImGui::BeginTable("shader_uniforms_table", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable))
+					{
+						ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed, 100.0f);
+						ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthStretch);
+						ImGui::TableHeadersRow();
+
+						for (auto& uni : prog->uniforms) {
+							ImGui::TableNextRow();
+							uni.ImGuiDebug();
+						}
+						ImGui::EndTable();
+					}
+
+					ImGui::TreePop();
+				}
+			}
 		}
 
 		ImGui::End();
@@ -85,7 +95,7 @@ namespace engine::core::gl {
 		Shader* shader = GetShader(absPath);
 		if (shader != nullptr){
 			// we already have this shader! no need to recreate it
-			core::LogDebug("We have {} already, returning it", absPath.c_str());
+			//core::LogDebug("We have {} already, returning it", absPath.c_str());
 			return shader;
 		}
 

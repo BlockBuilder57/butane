@@ -13,14 +13,8 @@ namespace engine::core::gl {
 
 	}
 
-	Texture::Texture(const std::filesystem::path& path) {
-		SetPath(path);
-	}
-
-	Texture::Texture(u16 wrapU, u16 wrapV, const std::filesystem::path& path) {
-		this->WrapModeU = wrapU;
-		this->WrapModeV = wrapV;
-		SetPath(path);
+	Texture::Texture(const std::string& name) {
+		this->name = name;
 	}
 
 	Texture::Texture(u16 wrapU, u16 wrapV, u16 filterMin, u16 filterMax, const std::filesystem::path& path) {
@@ -54,6 +48,9 @@ namespace engine::core::gl {
 			LogError("Failed to load texture! {}", absPath.c_str());
 			return false;
 		}
+
+		// set the path
+		name = absPath.filename();
 
 		// set up hotloading
 		if(!fileWatch) {
@@ -121,10 +118,14 @@ namespace engine::core::gl {
 			core::filesystem::watchSystem->AddWatch(configWatch);
 		}
 
-		WrapModeU = (GLenum)filesystem::TomlLoader::GetEnum<OGLTextureWrap>(table[STRINGIFY(WrapModeU)], OGLTextureWrap::REPEAT);
-		WrapModeV = (GLenum)filesystem::TomlLoader::GetEnum<OGLTextureWrap>(table[STRINGIFY(WrapModeV)], OGLTextureWrap::REPEAT);
-		TexFilterScaleMin = (GLenum)filesystem::TomlLoader::GetEnum<OGLTextureFilter>(table[STRINGIFY(TexFilterScaleMin)], OGLTextureFilter::NEAREST);
-		TexFilterScaleMax = (GLenum)filesystem::TomlLoader::GetEnum<OGLTextureFilter>(table[STRINGIFY(TexFilterScaleMax)], OGLTextureFilter::NEAREST);
+		if (table.contains(STRINGIFY(WrapModeU)))
+			WrapModeU = (GLenum)filesystem::TomlLoader::GetEnum<OGLTextureWrap>(table[STRINGIFY(WrapModeU)], OGLTextureWrap::REPEAT);
+		if (table.contains(STRINGIFY(WrapModeV)))
+			WrapModeV = (GLenum)filesystem::TomlLoader::GetEnum<OGLTextureWrap>(table[STRINGIFY(WrapModeV)], OGLTextureWrap::REPEAT);
+		if (table.contains(STRINGIFY(TexFilterScaleMin)))
+			TexFilterScaleMin = (GLenum)filesystem::TomlLoader::GetEnum<OGLTextureFilter>(table[STRINGIFY(TexFilterScaleMin)], OGLTextureFilter::NEAREST);
+		if (table.contains(STRINGIFY(TexFilterScaleMax)))
+			TexFilterScaleMax = (GLenum)filesystem::TomlLoader::GetEnum<OGLTextureFilter>(table[STRINGIFY(TexFilterScaleMax)], OGLTextureFilter::NEAREST);
 
 		if (texID != 0) {
 			glBindTexture(GL_TEXTURE_2D, texID);
@@ -168,6 +169,7 @@ namespace engine::core::gl {
 		if (texID == 0)
 			return;
 
+		name = "";
 		glDeleteTextures(1, &texID);
 	}
 

@@ -8,6 +8,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <toml++/toml.hpp>
+#include <utility>
 #include <vector>
 
 namespace engine::core::gl {
@@ -24,6 +25,8 @@ namespace engine::core::gl {
 		/// Link the program.
 		void Link();
 
+		void SetPath(const std::filesystem::path& path);
+
 		void Bind();
 		void Unbind();
 
@@ -31,17 +34,23 @@ namespace engine::core::gl {
 
 		struct Uniform {
 			enum class Type {
-				Unknown,
+				Unknown = 0,
 				Int,
 				Float,
 				Vec2,
 				Vec3,
+				Vec4,
+				Color,
 				Texture,
 			};
 
-			std::string name;
-			Type type;
+			void ImGuiDebug();
+
+			std::string name {};
+			Type type {};
 		};
+
+		std::vector<Uniform> uniforms;
 
 		// TODO:
 		// (proper) float2/float3 overloads
@@ -59,6 +68,7 @@ namespace engine::core::gl {
 	   private:
 		u32 glProgramObject {};
 		std::vector<Shader*> shaderObjects;
+		core::filesystem::Watch* fileWatch {};
 	};
 
 	struct Shader {

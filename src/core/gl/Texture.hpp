@@ -14,8 +14,7 @@ namespace engine::core::gl {
 	class Texture {
 	   public:
 		Texture();
-		Texture(const std::filesystem::path& path);
-		Texture(u16 wrapU, u16 wrapV, const std::filesystem::path& path);
+		Texture(const std::string& name);
 		Texture(u16 wrapU, u16 wrapV, u16 filterMin, u16 filterMax, const std::filesystem::path& path);
 
 		~Texture();
@@ -31,6 +30,7 @@ namespace engine::core::gl {
 		void Bind();
 		void Unbind();
 
+		std::string GetName() { return name; }
 		GLuint GetID() { return texID; }
 
 		u16 GetWidth() { return texWidth; }
@@ -59,6 +59,7 @@ namespace engine::core::gl {
 
 		void InitializeOGLTexture(int width, int height, GLenum format, void* data);
 
+		std::string name {};
 		core::filesystem::Watch* fileWatch {};
 		core::filesystem::Watch* configWatch {};
 

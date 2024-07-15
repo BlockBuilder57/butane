@@ -9,7 +9,7 @@
 #include <core/filesystem/Filesystem.hpp>
 #include <core/filesystem/WatchSystem.hpp>
 #include <core/gl/GLHeaders.hpp>
-#include <core/gl/Material.hpp>
+#include <core/gl/MaterialSystem.hpp>
 #include <core/gl/TextureSystem.hpp>
 #include <core/gl/ShaderSystem.hpp>
 #include <core/InputSystem.hpp>
@@ -60,14 +60,15 @@ int main(int argc, char** argv) {
 	core::filesystem::watchSystem = new core::filesystem::WatchSystem;
 	core::SystemManager::The().Add(static_cast<core::PerTickSystem*>(core::filesystem::watchSystem));
 
-	// Create shader and texture systems
+	// Create shader, texture, and material systems
 	core::SystemManager::The().Add(static_cast<core::System*>(&core::gl::ShaderSystem::The()));
 	core::SystemManager::The().Add(static_cast<core::System*>(&core::gl::TextureSystem::The()));
+	core::SystemManager::The().Add(static_cast<core::System*>(&core::gl::MaterialSystem::The()));
 
 	// Create input system
 	core::SystemManager::The().Add(static_cast<core::PerTickSystem*>(&core::InputSystem::The()));
 
-	auto window = sdl::Window { "engine", 1280, 720 };
+	auto window = sdl::Window { "engine", 800, 600 };
 	sdl::Window::CurrentWindow = &window;
 
 	// By this point the Window class has setup OpenGL and made the context it created current,
@@ -242,18 +243,9 @@ int main(int argc, char** argv) {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
-	// shaders
-	gl::ShaderProgram* cubeProgram = gl::ShaderSystem::The().GetProgram("shaders/default.program");
-	gl::ShaderProgram* lightProgram = gl::ShaderSystem::The().GetProgram("shaders/light.program");
-
 	// materials
-	gl::Material tempMaterial = gl::Material {
-		.shader = cubeProgram,
-		.diffuse = core::gl::TextureSystem::The().GetTexture("textures/container2.png"),
-		.specular = core::gl::TextureSystem::The().GetTexture("textures/container2_specular.png"),
-		.emission = core::gl::TextureSystem::The().GetTexture("textures/matrix.jpg"),
-		.shininess = 32.0f
-	};
+	gl::Material* cubeMaterial = gl::MaterialSystem::The().GetMaterial("materials/container.material");
+	gl::Material* lightMaterial = gl::MaterialSystem::The().GetMaterial("materials/light.material");
 
 	// loop variables
 
@@ -452,7 +444,7 @@ int main(int argc, char** argv) {
 
 			if (ImGui::BeginMenu("SSTV")) {
 				auto sstv = core::experiments::SSTV::The();
-				for (int i = 0; i < sstv.MODES.size(); i++) {
+				for (auto i = 0; i < sstv.MODES.size(); i++) {
 					auto* mode = &sstv.MODES[i];
 					if (ImGui::Button(mode->name.c_str())) {
 						sstv.SetMode(mode);
@@ -479,44 +471,44 @@ int main(int argc, char** argv) {
 		// do actual drawing now
 
 		// material test
-		tempMaterial.BindAndSetUniforms();
+		cubeMaterial->BindAndSetUniforms();
 
-		tempMaterial.shader->SetUniform("viewPos", theCam->transform.metaPos);
+		cubeMaterial->shaderProgram->SetUniform("viewPos", theCam->transform.metaPos);
 
-		// lights
+		// cubes
 
-		tempMaterial.shader->SetUniform("dirLight.direction", {-0.2f, -1.0f, -0.3f});
-		tempMaterial.shader->SetUniform("dirLight.ambient", {0.05f, 0.05f, 0.05f});
-		tempMaterial.shader->SetUniform("dirLight.diffuse", {0.2f, 0.2f, 0.7f});
-		tempMaterial.shader->SetUniform("dirLight.specular", {0.7f, 0.7f, 0.7f});
+		cubeMaterial->shaderProgram->SetUniform("dirLight.direction", {-0.2f, -1.0f, -0.3f});
+		cubeMaterial->shaderProgram->SetUniform("dirLight.ambient", {0.05f, 0.05f, 0.05f});
+		cubeMaterial->shaderProgram->SetUniform("dirLight.diffuse", {0.2f, 0.2f, 0.7f});
+		cubeMaterial->shaderProgram->SetUniform("dirLight.specular", {0.7f, 0.7f, 0.7f});
 
 		for (int i = 0; i < 4; i++) {
-			tempMaterial.shader->SetUniform(std::format("pointLights[{}].position", i), pointLightPositions[i]);
-			tempMaterial.shader->SetUniform(std::format("pointLights[{}].ambient", i), pointLightColors[i] * 0.1f);
-			tempMaterial.shader->SetUniform(std::format("pointLights[{}].diffuse", i), pointLightColors[i]);
-			tempMaterial.shader->SetUniform(std::format("pointLights[{}].specular", i), pointLightColors[i]);
-			tempMaterial.shader->SetUniform(std::format("pointLights[{}].constant", i), 1.0f);
-			tempMaterial.shader->SetUniform(std::format("pointLights[{}].linear", i), 0.09f);
-			tempMaterial.shader->SetUniform(std::format("pointLights[{}].quadratic", i), 0.032f);
+			cubeMaterial->shaderProgram->SetUniform(std::format("pointLights[{}].position", i), pointLightPositions[i]);
+			cubeMaterial->shaderProgram->SetUniform(std::format("pointLights[{}].ambient", i), pointLightColors[i] * 0.1f);
+			cubeMaterial->shaderProgram->SetUniform(std::format("pointLights[{}].diffuse", i), pointLightColors[i]);
+			cubeMaterial->shaderProgram->SetUniform(std::format("pointLights[{}].specular", i), pointLightColors[i]);
+			cubeMaterial->shaderProgram->SetUniform(std::format("pointLights[{}].constant", i), 1.0f);
+			cubeMaterial->shaderProgram->SetUniform(std::format("pointLights[{}].linear", i), 0.09f);
+			cubeMaterial->shaderProgram->SetUniform(std::format("pointLights[{}].quadratic", i), 0.032f);
 		}
 
-		tempMaterial.shader->SetUniform("spotLight.position", theCam->transform.metaPos);
-		tempMaterial.shader->SetUniform("spotLight.direction", theCam->transform.metaForward);
-		tempMaterial.shader->SetUniform("spotLight.ambient", {0.0f, 0.0f, 0.0f});
-		tempMaterial.shader->SetUniform("spotLight.diffuse", {1.0f, 1.0f, 1.0f});
-		tempMaterial.shader->SetUniform("spotLight.specular", {1.0f, 1.0f, 1.0f});
-		tempMaterial.shader->SetUniform("spotLight.constant", 1.0f);
-		tempMaterial.shader->SetUniform("spotLight.linear", 0.09f);
-		tempMaterial.shader->SetUniform("spotLight.quadratic", 0.032f);
-		tempMaterial.shader->SetUniform("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-		tempMaterial.shader->SetUniform("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
+		cubeMaterial->shaderProgram->SetUniform("spotLight.position", theCam->transform.metaPos);
+		cubeMaterial->shaderProgram->SetUniform("spotLight.direction", theCam->transform.metaForward);
+		cubeMaterial->shaderProgram->SetUniform("spotLight.ambient", {0.0f, 0.0f, 0.0f});
+		cubeMaterial->shaderProgram->SetUniform("spotLight.diffuse", {1.0f, 1.0f, 1.0f});
+		cubeMaterial->shaderProgram->SetUniform("spotLight.specular", {1.0f, 1.0f, 1.0f});
+		cubeMaterial->shaderProgram->SetUniform("spotLight.constant", 1.0f);
+		cubeMaterial->shaderProgram->SetUniform("spotLight.linear", 0.09f);
+		cubeMaterial->shaderProgram->SetUniform("spotLight.quadratic", 0.032f);
+		cubeMaterial->shaderProgram->SetUniform("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+		cubeMaterial->shaderProgram->SetUniform("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
 
 		// projection
 
-		tempMaterial.shader->SetUniform("time", glm::vec2(nowTime, std::chrono::system_clock::now().time_since_epoch().count()));
-		tempMaterial.shader->SetUniform("matProjection", theScene.GetCameraProjection());
-		tempMaterial.shader->SetUniform("matView", theScene.GetCameraView());
-		tempMaterial.shader->SetUniform("matModel", glm::identity<glm::mat4>());
+		cubeMaterial->shaderProgram->SetUniform("time", glm::vec2(nowTime, std::chrono::system_clock::now().time_since_epoch().count()));
+		cubeMaterial->shaderProgram->SetUniform("matProjection", theScene.GetCameraProjection());
+		cubeMaterial->shaderProgram->SetUniform("matView", theScene.GetCameraView());
+		cubeMaterial->shaderProgram->SetUniform("matModel", glm::identity<glm::mat4>());
 
 		for(int i = 0; i < 10; i++)
 		{
@@ -524,7 +516,7 @@ int main(int argc, char** argv) {
 			model = glm::translate(model, cubePositions[i]);
 			float angle = 20.0f * i;
 			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-			tempMaterial.shader->SetUniform("matModel", model);
+			cubeMaterial->shaderProgram->SetUniform("matModel", model);
 
 			glBindVertexArray(VAO);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -532,11 +524,11 @@ int main(int argc, char** argv) {
 
 		// lights
 
-		lightProgram->Bind();
+		lightMaterial->BindAndSetUniforms();
 
-		lightProgram->SetUniform("time", glm::vec2(nowTime, std::chrono::system_clock::now().time_since_epoch().count()));
-		lightProgram->SetUniform("matProjection", theScene.GetCameraProjection());
-		lightProgram->SetUniform("matView", theScene.GetCameraView());
+		lightMaterial->shaderProgram->SetUniform("time", glm::vec2(nowTime, std::chrono::system_clock::now().time_since_epoch().count()));
+		lightMaterial->shaderProgram->SetUniform("matProjection", theScene.GetCameraProjection());
+		lightMaterial->shaderProgram->SetUniform("matView", theScene.GetCameraView());
 
 		for(int i = 0; i < 4; i++)
 		{
@@ -544,10 +536,10 @@ int main(int argc, char** argv) {
 			model = glm::translate(model, pointLightPositions[i]);
 
 			model = glm::scale(model, glm::vec3(0.1f));
-			lightProgram->SetUniform("matModel", model);
-			lightProgram->SetUniform("lightColor",  pointLightColors[i]);
+			lightMaterial->shaderProgram->SetUniform("matModel", model);
+			lightMaterial->shaderProgram->SetUniform("lightColor", pointLightColors[i]);
 
-			glBindVertexArray(lightVAO);
+			glBindVertexArray(VAO);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 

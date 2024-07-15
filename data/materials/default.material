@@ -1,0 +1,8 @@
+name = "Default Material"
+program = "shaders/default.program"
+
+[uniforms]
+diffuse = "defaultWhite"
+specular = "defaultBlack"
+emission = "defaultBlack"
+shininess = 1.0

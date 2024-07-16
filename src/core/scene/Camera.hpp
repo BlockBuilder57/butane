@@ -3,7 +3,7 @@
 #pragma once
 
 #include <core/rendering/GLHeaders.hpp>
-#include <core/scene/Transform.hpp>
+#include <core/scene/SGNode.hpp>
 #include <core/Types.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -12,7 +12,7 @@
 
 namespace engine::core::scene {
 
-	class Camera {
+	class Camera : public SGNodeMixin<Camera> {
 	   public:
 		Camera();
 
@@ -23,8 +23,6 @@ namespace engine::core::scene {
 		void SetFovNearFar(float fieldofview, float near, float far);
 
 		std::string Name;
-		Transform transform {};
-
 	   private:
 		glm::mat4 matProjection {};
 		float fov { 70.f };

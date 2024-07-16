@@ -28,6 +28,8 @@ add_library(engine_core
 		rendering/Texture.cpp
 		rendering/Material.cpp
 		rendering/MaterialSystem.cpp
+		rendering/Mesh.cpp
+		rendering/Model.cpp
 
 		# Scene
 		scene/Scene.cpp
@@ -47,6 +49,7 @@ target_link_libraries(engine_core PUBLIC
 		imgui
 		tomlplusplus::tomlplusplus
 		magic_enum
+		assimp::assimp
 		)
 
 

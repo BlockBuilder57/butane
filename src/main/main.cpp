@@ -12,6 +12,7 @@
 #include <core/rendering/MaterialSystem.hpp>
 #include <core/rendering/TextureSystem.hpp>
 #include <core/rendering/ShaderSystem.hpp>
+#include <core/rendering/Model.hpp>
 #include <core/InputSystem.hpp>
 #include <core/TimeSystem.hpp>
 #include <core/Logger.hpp>
@@ -253,9 +254,11 @@ int main(int argc, char** argv) {
 	gfx::Material* cubeMaterial = gfx::MaterialSystem::The().GetMaterial("materials/container.material");
 	gfx::Material* lightMaterial = gfx::MaterialSystem::The().GetMaterial("materials/light.material");
 
+	// models
+	gfx::Model* backpack = new gfx::Model(core::filesystem::Filesystem::GetDataDir() / "models/backpack/backpack.obj");
+
 	// loop variables
 	bool run = true;
-
 
 	// Assign window event handlers
 	window.On(SDL_QUIT, [&](SDL_Event& ev) {
@@ -300,7 +303,7 @@ int main(int argc, char** argv) {
 	glm::vec3 lightColor = {1.0f, 1.0f, 1.0f};
 
 	const glm::vec3 cubePositions[] = {
-			glm::vec3( 0.0f,  0.0f,  0.0f),
+			glm::vec3( 0.0f,  0.0f,  8.0f),
 			glm::vec3( 2.0f,  5.0f, -15.0f),
 			glm::vec3(-1.5f, -2.2f, -2.5f),
 			glm::vec3(-3.8f, -2.0f, -12.3f),
@@ -466,6 +469,8 @@ int main(int argc, char** argv) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// do actual drawing now
+
+		backpack->Draw(glm::identity<glm::mat4>());
 
 		// material test
 		cubeMaterial->BindAndSetUniforms();

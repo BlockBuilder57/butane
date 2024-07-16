@@ -31,6 +31,7 @@ add_library(imgui
 target_link_libraries(imgui SDL2::SDL2)
 target_include_directories(imgui PRIVATE ${IMGUI_DIR})
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG")
 
@@ -47,6 +48,7 @@ add_subdirectory(third_party/glad)
 add_subdirectory(third_party/glm)
 add_subdirectory(third_party/tomlpp)
 add_subdirectory(third_party/magic_enum)
+add_subdirectory(third_party/assimp)
 
 add_subdirectory(src/core)
 add_subdirectory(src/main)

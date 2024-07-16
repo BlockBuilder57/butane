@@ -10,7 +10,7 @@ namespace engine::core::gfx {
 	}
 
 	void MaterialSystem::Init() {
-		const std::filesystem::path dataPath = filesystem::Filesystem::GetDataDir() / "materials";
+		const std::filesystem::path dataPath = filesystem::Filesystem::GetDataDir();
 
 		// load textures from filesystem
 		auto files = filesystem::Filesystem::WalkDirectory(dataPath);

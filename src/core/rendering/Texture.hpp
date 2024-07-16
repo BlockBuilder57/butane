@@ -4,12 +4,12 @@
 
 #include <magic_enum.hpp>
 
-#include <core/gl/GLHeaders.hpp>
+#include <core/rendering/GLHeaders.hpp>
 #include <core/filesystem/Filesystem.hpp>
 #include <core/filesystem/WatchSystem.hpp>
 #include <core/Types.hpp>
 
-namespace engine::core::gl {
+namespace engine::core::gfx {
 
 	class Texture {
 	   public:
@@ -72,13 +72,13 @@ namespace engine::core::gl {
 
 // I WAS HERE FOR THREE HOURS
 template <>
-struct magic_enum::customize::enum_range<engine::core::gl::Texture::OGLTextureWrap> {
+struct magic_enum::customize::enum_range<engine::core::gfx::Texture::OGLTextureWrap> {
 	static constexpr int min = 0x2900;
 	static constexpr int max = 0x8750;
 	// (max - min) must be less than UINT16_MAX.
 };
 template <>
-struct magic_enum::customize::enum_range<engine::core::gl::Texture::OGLTextureFilter> {
+struct magic_enum::customize::enum_range<engine::core::gfx::Texture::OGLTextureFilter> {
 	static constexpr int min = 0x2600;
 	static constexpr int max = 0x2704;
 	// (max - min) must be less than UINT16_MAX.

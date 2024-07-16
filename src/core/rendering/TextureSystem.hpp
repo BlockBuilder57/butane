@@ -3,11 +3,11 @@
 #pragma once
 
 #include <core/debug/ImGuiExtensions.hpp>
-#include <core/gl/Texture.hpp>
+#include <core/rendering/Texture.hpp>
 #include <core/System.hpp>
 #include <map>
 
-namespace engine::core::gl {
+namespace engine::core::gfx {
 
 	struct TextureSystem : public core::System {
 		static TextureSystem& The();
@@ -41,4 +41,4 @@ namespace engine::core::gl {
 		std::map<filesystem::stdfs::path, debug::ImGuiExtensions::DirectoryTree> debugTree {};
 	};
 
-} // namespace engine::core::gl
+} // namespace engine::core::rendering

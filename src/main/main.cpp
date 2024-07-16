@@ -8,10 +8,10 @@
 #include <core/experiments/SSTV.hpp>
 #include <core/filesystem/Filesystem.hpp>
 #include <core/filesystem/WatchSystem.hpp>
-#include <core/gl/GLHeaders.hpp>
-#include <core/gl/MaterialSystem.hpp>
-#include <core/gl/TextureSystem.hpp>
-#include <core/gl/ShaderSystem.hpp>
+#include <core/rendering/GLHeaders.hpp>
+#include <core/rendering/MaterialSystem.hpp>
+#include <core/rendering/TextureSystem.hpp>
+#include <core/rendering/ShaderSystem.hpp>
 #include <core/InputSystem.hpp>
 #include <core/Logger.hpp>
 #include <core/scene/Scene.hpp>
@@ -24,7 +24,7 @@
 
 namespace core = engine::core;
 namespace sdl = core::sdl;
-namespace gl = core::gl;
+namespace gfx = core::gfx;
 
 void DumpOglInfo() {
 	int maj;
@@ -61,9 +61,9 @@ int main(int argc, char** argv) {
 	core::SystemManager::The().Add(static_cast<core::PerTickSystem*>(core::filesystem::watchSystem));
 
 	// Create shader, texture, and material systems
-	core::SystemManager::The().Add(static_cast<core::System*>(&core::gl::ShaderSystem::The()));
-	core::SystemManager::The().Add(static_cast<core::System*>(&core::gl::TextureSystem::The()));
-	core::SystemManager::The().Add(static_cast<core::System*>(&core::gl::MaterialSystem::The()));
+	core::SystemManager::The().Add(static_cast<core::System*>(&core::gfx::ShaderSystem::The()));
+	core::SystemManager::The().Add(static_cast<core::System*>(&core::gfx::TextureSystem::The()));
+	core::SystemManager::The().Add(static_cast<core::System*>(&core::gfx::MaterialSystem::The()));
 
 	// Create input system
 	core::SystemManager::The().Add(static_cast<core::PerTickSystem*>(&core::InputSystem::The()));
@@ -244,8 +244,8 @@ int main(int argc, char** argv) {
 	glEnableVertexAttribArray(0);
 
 	// materials
-	gl::Material* cubeMaterial = gl::MaterialSystem::The().GetMaterial("materials/container.material");
-	gl::Material* lightMaterial = gl::MaterialSystem::The().GetMaterial("materials/light.material");
+	gfx::Material* cubeMaterial = gfx::MaterialSystem::The().GetMaterial("materials/container.material");
+	gfx::Material* lightMaterial = gfx::MaterialSystem::The().GetMaterial("materials/light.material");
 
 	// loop variables
 

@@ -3,7 +3,7 @@
 #include "TextureSystem.hpp"
 #include "core/Logger.hpp"
 
-namespace engine::core::gl {
+namespace engine::core::gfx {
 
 	Texture* TextureSystem::defaultMissing = {};
 	Texture* TextureSystem::defaultWhite = {};
@@ -18,18 +18,18 @@ namespace engine::core::gl {
 		const std::filesystem::path dataPath = filesystem::Filesystem::GetDataDir();
 
 		// generate single pixel textures
-		defaultWhite = new gl::Texture(STRINGIFY(defaultWhite));
+		defaultWhite = new gfx::Texture(STRINGIFY(defaultWhite));
 		const unsigned char colorWhite[4] = { 255, 255, 255, 255 };
 		defaultWhite->LoadTexture(1, 1, (void*)&colorWhite[0]);
 		textureDict[dataPath / STRINGIFY(defaultWhite)] = defaultWhite;
 
-		defaultBlack = new gl::Texture(STRINGIFY(defaultBlack));
+		defaultBlack = new gfx::Texture(STRINGIFY(defaultBlack));
 		const unsigned char colorBlack[4] = { 0, 0, 0, 255 };
 		defaultBlack->LoadTexture(1, 1, (void*)&colorBlack[0]);
 		textureDict[dataPath / STRINGIFY(defaultBlack)] = defaultBlack;
 
 		// generate missing texture
-		defaultMissing = new gl::Texture(STRINGIFY(defaultMissing));
+		defaultMissing = new gfx::Texture(STRINGIFY(defaultMissing));
 		constexpr int missingSize = 256;
 		constexpr int missingStripeSize = 16;
 		auto* missingData = new unsigned int[missingSize * missingSize];
@@ -66,7 +66,7 @@ namespace engine::core::gl {
 				configPath.replace_extension(file.extension().string() + ".toml");
 				auto relativePath = filesystem::Filesystem::GetRelativePathFor(file);
 
-				gl::Texture* tex = new gl::Texture();
+				gfx::Texture* tex = new gfx::Texture();
 				if (filesystem::stdfs::exists(configPath))
 					tex->LoadConfig(configPath);
 				tex->SetPath(file);
@@ -152,4 +152,4 @@ namespace engine::core::gl {
 		return defaultMissing;
 	}
 
-} // namespace engine::core::gl
+} // namespace engine::core::rendering

@@ -5,12 +5,12 @@
 
 #include <utility>
 
-namespace engine::core::gl {
+namespace engine::core::gfx {
 
 	Material::Material() {
 	}
 
-	Material::Material(std::string material_name, engine::core::gl::ShaderProgram* shader) {
+	Material::Material(std::string material_name, engine::core::gfx::ShaderProgram* shader) {
 		name = material_name;
 		shaderProgram = shader;
 	}

@@ -3,12 +3,12 @@
 #pragma once
 
 #include <core/debug/ImGuiExtensions.hpp>
-#include <core/gl/Material.hpp>
+#include <core/rendering/Material.hpp>
 #include <core/Logger.hpp>
 #include <core/System.hpp>
 #include <map>
 
-namespace engine::core::gl {
+namespace engine::core::gfx {
 
 	struct MaterialSystem : public core::System {
 		static MaterialSystem& The();
@@ -33,4 +33,4 @@ namespace engine::core::gl {
 		std::map<filesystem::stdfs::path, debug::ImGuiExtensions::DirectoryTree> debugTree {};
 	};
 
-} // namespace engine::core::gl
+} // namespace engine::core::rendering

@@ -2,7 +2,7 @@
 
 #include "MaterialSystem.hpp"
 
-namespace engine::core::gl {
+namespace engine::core::gfx {
 
 	MaterialSystem& MaterialSystem::The() {
 		static MaterialSystem the;
@@ -21,7 +21,7 @@ namespace engine::core::gl {
 				continue;
 
 			if (file.extension() == ".material") {
-				gl::Material* mat = new gl::Material();
+				gfx::Material* mat = new gfx::Material();
 				mat->SetPath(file);
 
 				materialDict[file] = mat;
@@ -106,4 +106,4 @@ namespace engine::core::gl {
 		}
 	}
 
-} // namespace engine::core::gl
+} // namespace engine::core::rendering

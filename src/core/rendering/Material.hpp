@@ -4,13 +4,13 @@
 
 #include <core/filesystem/Filesystem.hpp>
 #include <core/filesystem/WatchSystem.hpp>
-#include <core/gl/GLHeaders.hpp>
+#include <core/rendering/GLHeaders.hpp>
 #include <core/Types.hpp>
 
 #include "TextureSystem.hpp"
 #include "ShaderSystem.hpp"
 
-namespace engine::core::gl {
+namespace engine::core::gfx {
 
 #define MATERIAL_DEFAULT_INT 0
 #define MATERIAL_DEFAULT_FLOAT 0.f

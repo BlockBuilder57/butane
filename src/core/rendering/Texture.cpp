@@ -3,11 +3,11 @@
 #include <SDL2/SDL_image.h>
 #include <toml++/toml.h>
 
-#include <core/gl/Texture.hpp>
+#include <core/rendering/Texture.hpp>
 #include <core/filesystem/TomlLoader.hpp>
 #include <core/Logger.hpp>
 
-namespace engine::core::gl {
+namespace engine::core::gfx {
 
 	Texture::Texture() {
 
@@ -181,4 +181,4 @@ namespace engine::core::gl {
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-} // namespace engine::core::gl
+} // namespace engine::core::rendering

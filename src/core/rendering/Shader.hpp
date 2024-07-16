@@ -2,7 +2,7 @@
 
 #include <core/filesystem/Filesystem.hpp>
 #include <core/filesystem/WatchSystem.hpp>
-#include <core/gl/GLHeaders.hpp>
+#include <core/rendering/GLHeaders.hpp>
 #include <core/Types.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -11,7 +11,7 @@
 #include <utility>
 #include <vector>
 
-namespace engine::core::gl {
+namespace engine::core::gfx {
 
 	struct Shader;
 
@@ -110,4 +110,4 @@ namespace engine::core::gl {
 		i32 compileSuccess {};
 	};
 
-} // namespace engine::core::gl
+} // namespace engine::core::rendering

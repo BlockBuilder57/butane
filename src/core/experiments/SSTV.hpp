@@ -3,7 +3,7 @@
 #pragma once
 
 #include <array>
-#include <core/gl/Texture.hpp>
+#include <core/rendering/Texture.hpp>
 #include <core/Logger.hpp>
 #include <core/StaticVector.hpp>
 #include <vector>

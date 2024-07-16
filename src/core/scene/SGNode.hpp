@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/Types.hpp>
+#include <core/scene/Transform.hpp>
 #include <vector>
 
 namespace engine::core::scene {
@@ -78,8 +79,9 @@ namespace engine::core::scene {
 			}
 		}
 
-	   private:
+	   public:
 		std::string name {};
+		Transform transform {};
 
 		T* parent { nullptr }; // who created me
 		ListType children;	   // adjacent to me.

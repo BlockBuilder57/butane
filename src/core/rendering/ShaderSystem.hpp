@@ -3,12 +3,12 @@
 #pragma once
 
 #include <core/debug/ImGuiExtensions.hpp>
-#include <core/gl/Shader.hpp>
+#include <core/rendering/Shader.hpp>
 #include <core/Logger.hpp>
 #include <core/System.hpp>
 #include <map>
 
-namespace engine::core::gl {
+namespace engine::core::gfx {
 
 	struct ShaderSystem : public core::System {
 		static ShaderSystem& The();
@@ -34,4 +34,4 @@ namespace engine::core::gl {
 		std::map<filesystem::stdfs::path, debug::ImGuiExtensions::DirectoryTree> debugTree {};
 	};
 
-} // namespace engine::core::gl
+} // namespace engine::core::rendering

@@ -2,7 +2,7 @@
 
 #include "ShaderSystem.hpp"
 
-namespace engine::core::gl {
+namespace engine::core::gfx {
 
 	ShaderSystem& ShaderSystem::The() {
 		static ShaderSystem the;
@@ -21,7 +21,7 @@ namespace engine::core::gl {
 				continue;
 
 			if (file.extension() == ".program") {
-				gl::ShaderProgram* prog = new gl::ShaderProgram();
+				gfx::ShaderProgram* prog = new gfx::ShaderProgram();
 				prog->SetPath(file);
 
 				programDict[file] = prog;
@@ -100,7 +100,7 @@ namespace engine::core::gl {
 		}
 
 		// we do need to get this shader now
-		shader = new gl::Shader(kind);
+		shader = new gfx::Shader(kind);
 		shader->SetPath(absPath);
 
 		if(!shader->Compile()) {
@@ -140,4 +140,4 @@ namespace engine::core::gl {
 		return nullptr;
 	}
 
-} // namespace engine::core::gl
+} // namespace engine::core::rendering

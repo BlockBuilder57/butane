@@ -20,13 +20,13 @@ add_library(engine_core
 		sdl/Window.cpp
 		sdl/File.cpp
 
-		# OpenGL abstractions
-		gl/ShaderSystem.cpp
-		gl/Shader.cpp
-		gl/TextureSystem.cpp
-		gl/Texture.cpp
-		gl/Material.cpp
-		gl/MaterialSystem.cpp
+		# Rendering abstractions
+		rendering/ShaderSystem.cpp
+		rendering/Shader.cpp
+		rendering/TextureSystem.cpp
+		rendering/Texture.cpp
+		rendering/Material.cpp
+		rendering/MaterialSystem.cpp
 
 		# Scene
 		scene/Scene.cpp

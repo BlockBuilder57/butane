@@ -72,7 +72,7 @@ namespace engine::core::experiments {
 		}
 
 		for (int i = 0; i < lines; i++) {
-			for (int j = mode->instruction_loop_start; j < mode->instructions_looping.size(); j++) {
+			for (auto j = mode->instruction_loop_start; j < mode->instructions_looping.size(); j++) {
 				// found an extra line, but we don't use them - skip
 				Instruction ins = mode->instructions_looping[j];
 				if (!mode->uses_extra_lines && ins.flags & InstructionFlags::ExtraLine)

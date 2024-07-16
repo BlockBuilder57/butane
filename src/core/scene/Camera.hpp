@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <core/gl/GLHeaders.hpp>
+#include <core/rendering/GLHeaders.hpp>
 #include <core/scene/Transform.hpp>
 #include <core/Types.hpp>
 #include <glm/glm.hpp>

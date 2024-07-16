@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <core/gl/GLHeaders.hpp>
+#include <core/rendering/GLHeaders.hpp>
 #include <core/scene/Camera.hpp>
 #include <core/scene/SGNode.hpp>
 #include <core/Types.hpp>

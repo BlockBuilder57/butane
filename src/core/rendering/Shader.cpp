@@ -1,13 +1,13 @@
 #include <core/filesystem/TomlLoader.hpp>
-#include <core/gl/ShaderSystem.hpp>
-#include <core/gl/MaterialSystem.hpp>
+#include <core/rendering/ShaderSystem.hpp>
+#include <core/rendering/MaterialSystem.hpp>
 #include <core/Logger.hpp>
 
 #include <magic_enum.hpp>
 
-namespace engine::core::gl {
+namespace engine::core::gfx {
 
-	void ShaderProgram::AttachShader(engine::core::gl::Shader& shader) {
+	void ShaderProgram::AttachShader(engine::core::gfx::Shader& shader) {
 		shader.AddProgram(this);
 		shaderObjects.push_back(&shader);
 		glAttachShader(glProgramObject, shader.Get());
@@ -40,8 +40,8 @@ namespace engine::core::gl {
 
 		toml::table table = filesystem::TomlLoader::LoadTable(path);
 
-		gl::Shader* frag = nullptr;
-		gl::Shader* vert = nullptr;
+		gfx::Shader* frag = nullptr;
+		gfx::Shader* vert = nullptr;
 
 		// build uniforms
 
@@ -180,4 +180,4 @@ namespace engine::core::gl {
 		glShaderSource(glShaderObject, 1, &ptr, nullptr);
 	}
 
-} // namespace engine::core::gl
+} // namespace engine::core::rendering

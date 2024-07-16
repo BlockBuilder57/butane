@@ -11,6 +11,7 @@ add_library(engine_core
 
 		System.cpp
 		InputSystem.cpp
+		TimeSystem.cpp
 
 		filesystem/Filesystem.cpp
 		filesystem/WatchSystem.cpp

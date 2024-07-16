@@ -13,6 +13,7 @@
 #include <core/rendering/TextureSystem.hpp>
 #include <core/rendering/ShaderSystem.hpp>
 #include <core/InputSystem.hpp>
+#include <core/TimeSystem.hpp>
 #include <core/Logger.hpp>
 #include <core/scene/Scene.hpp>
 #include <core/sdl/Window.hpp>
@@ -56,6 +57,12 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
+	// Create time system
+	core::SystemManager::The().Add(static_cast<core::System*>(&core::TimeSystem::The()));
+
+	// Create input system
+	core::SystemManager::The().Add(static_cast<core::PerTickSystem*>(&core::InputSystem::The()));
+
 	// Create file watch system
 	core::filesystem::watchSystem = new core::filesystem::WatchSystem;
 	core::SystemManager::The().Add(static_cast<core::PerTickSystem*>(core::filesystem::watchSystem));
@@ -64,9 +71,6 @@ int main(int argc, char** argv) {
 	core::SystemManager::The().Add(static_cast<core::System*>(&core::gfx::ShaderSystem::The()));
 	core::SystemManager::The().Add(static_cast<core::System*>(&core::gfx::TextureSystem::The()));
 	core::SystemManager::The().Add(static_cast<core::System*>(&core::gfx::MaterialSystem::The()));
-
-	// Create input system
-	core::SystemManager::The().Add(static_cast<core::PerTickSystem*>(&core::InputSystem::The()));
 
 	auto window = sdl::Window { "engine", 800, 600 };
 	sdl::Window::CurrentWindow = &window;
@@ -152,6 +156,8 @@ int main(int argc, char** argv) {
 	ImGui_ImplOpenGL3_Init("#version 330 core");
 
 	// init stuff
+
+	core::TimeSystem& timeSystem = core::TimeSystem::The();
 
 	auto& theScene = core::scene::Scene::The();
 	auto theCam = new core::scene::Camera();
@@ -248,16 +254,8 @@ int main(int argc, char** argv) {
 	gfx::Material* lightMaterial = gfx::MaterialSystem::The().GetMaterial("materials/light.material");
 
 	// loop variables
-
 	bool run = true;
 
-	// This is essentially how many update ticks we run (when we can)
-	// This should be made a configurable value later on
-	constexpr static float UpdateRate = 1. / 100.;
-
-	float deltaTime = 0.f;
-	float lastTime = SDL_GetTicks64() / 1000.f;
-	float nowTime;
 
 	// Assign window event handlers
 	window.On(SDL_QUIT, [&](SDL_Event& ev) {
@@ -328,13 +326,16 @@ int main(int argc, char** argv) {
 			glm::vec3(0.4f, 0.4f, 0.4f)
 	};
 
+
 	while(run) {
+		timeSystem.SystemsUpdate();
+
 		// Fixed timestep updates.
 		//
 		// Note that this loop is not "greedy"; it only executes
 		// updates for the times it can, and does not otherwise.
-		while(deltaTime >= UpdateRate) {
-			//core::LogInfo("Update {}", deltaTime);
+		while(timeSystem.TickDeltaTime() >= timeSystem.UpdateRate()) {
+			timeSystem.StartTick();
 			core::SystemManager::The().StartTick();
 
 			if(bind_lock->Down()) {
@@ -355,7 +356,7 @@ int main(int argc, char** argv) {
 				glm::vec2 look = core::InputSystem::The().GetMouseDelta();
 				if (look.length() > 0) {
 					look = {-look.y, -look.x}; // fix axies
-					look *= deltaTime * 8.f; // sensitivity
+					look *= timeSystem.TickDeltaTime() * 8.f; // sensitivity
 
 					// yaw is in world space
 					float yawDeg = glm::radians(look.y);
@@ -395,13 +396,13 @@ int main(int argc, char** argv) {
 
 
 				move = camRot * move;
-				move *= camSpeed * deltaTime;
+				move *= camSpeed * timeSystem.TickDeltaTime();
 
 				camPos += move;
 			}
 
 			core::SystemManager::The().EndTick();
-			deltaTime = 0;
+			timeSystem.EndTick();
 		}
 
 		core::debug::ImGuiExtensions::IdIndex = 0;
@@ -409,14 +410,10 @@ int main(int argc, char** argv) {
 		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();
 
-		nowTime = SDL_GetTicks64() / 1000.f;
-		deltaTime += (nowTime - lastTime);
-		lastTime = nowTime;
-
-		//core::LogInfo("delta time: {}", 1.f/(nowTime - lastTime));
+		//core::LogDebug("Render delta time: {}", timeSystem.DeltaTime());
 
 		if (animateCam) {
-			theCam->transform.SetPos({cos(nowTime * 1.2f) * 3.f, theCam->transform.metaPos.y, sin(nowTime) * 3.f});
+			theCam->transform.SetPos({cos(timeSystem.NowTime() * 1.2f) * 3.f, theCam->transform.metaPos.y, sin(timeSystem.NowTime()) * 3.f});
 			if (lookAtTarget)
 				theCam->transform.LookAtTarget({});
 			camPos = theCam->transform.metaPos;
@@ -505,7 +502,7 @@ int main(int argc, char** argv) {
 
 		// projection
 
-		cubeMaterial->shaderProgram->SetUniform("time", glm::vec2(nowTime, std::chrono::system_clock::now().time_since_epoch().count()));
+		cubeMaterial->shaderProgram->SetUniform("time", glm::vec2(timeSystem.NowTime(), std::chrono::system_clock::now().time_since_epoch().count()));
 		cubeMaterial->shaderProgram->SetUniform("matProjection", theScene.GetCameraProjection());
 		cubeMaterial->shaderProgram->SetUniform("matView", theScene.GetCameraView());
 		cubeMaterial->shaderProgram->SetUniform("matModel", glm::identity<glm::mat4>());
@@ -526,7 +523,7 @@ int main(int argc, char** argv) {
 
 		lightMaterial->BindAndSetUniforms();
 
-		lightMaterial->shaderProgram->SetUniform("time", glm::vec2(nowTime, std::chrono::system_clock::now().time_since_epoch().count()));
+		lightMaterial->shaderProgram->SetUniform("time", glm::vec2(timeSystem.NowTime(), std::chrono::system_clock::now().time_since_epoch().count()));
 		lightMaterial->shaderProgram->SetUniform("matProjection", theScene.GetCameraProjection());
 		lightMaterial->shaderProgram->SetUniform("matView", theScene.GetCameraView());
 

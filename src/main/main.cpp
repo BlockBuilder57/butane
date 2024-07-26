@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
 	core::SystemManager::The().Add(static_cast<core::System*>(&core::gfx::TextureSystem::The()));
 	core::SystemManager::The().Add(static_cast<core::System*>(&core::gfx::MaterialSystem::The()));
 
-	auto window = sdl::Window { "engine", 800, 600 };
+	auto window = sdl::Window { "engine", 1280, 720 };
 	sdl::Window::CurrentWindow = &window;
 
 	// By this point the Window class has setup OpenGL and made the context it created current,
@@ -337,7 +337,8 @@ int main(int argc, char** argv) {
 		//
 		// Note that this loop is not "greedy"; it only executes
 		// updates for the times it can, and does not otherwise.
-		while(timeSystem.TickDeltaTime() >= timeSystem.UpdateRate()) {
+		while(timeSystem.TickNextReady()) {
+			//core::LogInfo("New tick!! {} >= {}", timeSystem.TickConsumingTime(), timeSystem.UpdateRate());
 			timeSystem.StartTick();
 			core::SystemManager::The().StartTick();
 

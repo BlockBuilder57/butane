@@ -25,27 +25,26 @@ namespace engine::core {
 
 		ImGui::Begin(GetName(), &ImGuiDebugFlag);
 
-		ImGui::Text("Update Rate: %.3f", updateRate);
-		ImGui::Text("Delta time: %.3f", deltaTime);
+		ImGui::Text("Render delta time: %.5fms", deltaTime * 1000.f);
+		ImGui::Text("Update Rate: %.5fs (%.1f/s)", updateRate, 1./updateRate);
 		ImGui::Text("Ticks: %lu", ticks);
-		ImGui::Text("Tick delta: %.3f", tickDeltaTime);
+		ImGui::Text("Tick delta: %.5fs", TickDeltaTime());
 
 		ImGui::End();
 	}
 
 	void TimeSystem::StartTick() {
+		tickConsumingTime -= updateRate;
 		inTick = true;
 		ticks++;
 
+		tickLastStartTime = tickStartTime;
 		UpdateNowTime();
-		tickDeltaTime = (nowTime - tickLastTime);
-
-		//LogDebug("Tick delta: {}", tickDeltaTime);
+		tickStartTime = nowTime;
 	}
 
 	void TimeSystem::EndTick() {
 		inTick = false;
-		tickLastTime = nowTime;
 	}
 
 	void TimeSystem::UpdateNowTime() {
@@ -53,10 +52,19 @@ namespace engine::core {
 		nowTime = SDL_GetTicks64() / 1000.f;
 	}
 
+	bool TimeSystem::TickNextReady() {
+		// check if we have another tick to consume later
+		if ((tickConsumingTime - updateRate) >= updateRate) {
+			LogWarning("Can't keep up! Tick {} took too long!", ticks);
+		}
+
+		return tickConsumingTime >= updateRate;
+	}
+
 	void TimeSystem::SystemsUpdate() {
 		UpdateNowTime();
 		deltaTime = (nowTime - lastTime);
-		tickDeltaTime = (nowTime - tickLastTime);
+		tickConsumingTime += deltaTime;
 
 		//LogDebug("Render delta: {}", DeltaTime());
 	}

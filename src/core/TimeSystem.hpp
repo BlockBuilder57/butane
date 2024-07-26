@@ -22,19 +22,21 @@ namespace engine::core {
 
 		void SystemsUpdate();
 		void UpdateNowTime();
-		void UpdateTickNowTime();
 
 		float UpdateRate() { return updateRate; }
 		float NowTime() { return nowTime; }
 		float DeltaTime() { return deltaTime; }
 
-		int TicksElapsed() { return ticks; }
-		float TickDeltaTime() { return tickDeltaTime; }
+		bool IsInTick() { return inTick; }
+		bool TickNextReady();
+		float TickConsumingTime() { return tickConsumingTime; }
+		float TickElapsedTime() { return (nowTime - tickStartTime); }
+		float TickDeltaTime() { return (tickStartTime - tickLastStartTime); }
 
 	   private:
 		// This is essentially how many update ticks we run (under ideal conditions)
 		// This should be made a configurable value later on
-		double updateRate = 1. / 100.;
+		double updateRate = 1. / 50.;
 
 		float deltaTime = 0.f;
 		float lastTime = 0.f;
@@ -42,8 +44,9 @@ namespace engine::core {
 
 		std::uint64_t ticks;
 		bool inTick = false;
-		float tickDeltaTime = updateRate + 1.f;
-		float tickLastTime = 0.f;
+		float tickStartTime = 0.f;
+		float tickLastStartTime = 0.f;
+		float tickConsumingTime = 0.f;
 
 	};
 

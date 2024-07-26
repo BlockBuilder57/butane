@@ -34,7 +34,7 @@ namespace engine::core {
 	}
 
 	void SystemManager::ImGuiDebug() {
-		ImGui::PushItemFlag(ImGuiItemFlags_SelectableDontClosePopup, true);
+		ImGui::PushItemFlag(ImGuiItemFlags_AutoClosePopups, false);
 		if (ImGui::BeginMenu("Systems")) {
 			ImGui::TextDisabled("Systems");
 			for(auto system : systems)

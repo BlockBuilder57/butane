@@ -21,6 +21,8 @@ namespace engine::core::gfx {
 	   public:
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
+		// temp, eventually this will be a scene object thing
+		glm::mat4 transform;
 
 		Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices);
 

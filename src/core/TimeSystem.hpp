@@ -36,7 +36,7 @@ namespace engine::core {
 	   private:
 		// This is essentially how many update ticks we run (under ideal conditions)
 		// This should be made a configurable value later on
-		double updateRate = 1. / 50.;
+		double updateRate = 1. / 100.;
 
 		float deltaTime = 0.f;
 		float lastTime = 0.f;

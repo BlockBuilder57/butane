@@ -21,8 +21,6 @@ namespace engine::core::scene {
 
 		void SetAspect(float ratio);
 		void SetFovNearFar(float fieldofview, float near, float far);
-
-		std::string Name;
 	   private:
 		glm::mat4 matProjection {};
 		float fov { 70.f };

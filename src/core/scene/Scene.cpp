@@ -21,5 +21,11 @@ namespace engine::core::scene {
 
 		return glm::identity<glm::mat4>();
 	}
+	Transform* Scene::GetCameraTransform() {
+		if(cam != nullptr)
+			return &cam->transform;
+
+		return nullptr;
+	}
 
 } // namespace engine::core::scene

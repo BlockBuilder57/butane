@@ -21,6 +21,7 @@ namespace engine::core::scene {
 
 		glm::mat4 GetCameraView();
 		glm::mat4 GetCameraProjection();
+		Transform* GetCameraTransform();
 
 		void SetCamera(Camera* newCam) { cam = newCam; }
 

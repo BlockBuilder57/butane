@@ -17,6 +17,7 @@
 #include <core/TimeSystem.hpp>
 #include <core/Logger.hpp>
 #include <core/scene/Scene.hpp>
+#include <core/scene/Light.hpp>
 #include <core/sdl/Window.hpp>
 #include <core/StdoutSink.hpp>
 #include <core/Types.hpp>
@@ -72,6 +73,9 @@ int main(int argc, char** argv) {
 	core::SystemManager::The().Add(static_cast<core::System*>(&core::gfx::ShaderSystem::The()));
 	core::SystemManager::The().Add(static_cast<core::System*>(&core::gfx::TextureSystem::The()));
 	core::SystemManager::The().Add(static_cast<core::System*>(&core::gfx::MaterialSystem::The()));
+
+	// Create systems for the scene
+	core::SystemManager::The().Add(static_cast<core::PerTickSystem*>(&core::scene::LightManager::The()));
 
 	auto window = sdl::Window { "engine", 1280, 720 };
 	sdl::Window::CurrentWindow = &window;
@@ -295,12 +299,11 @@ int main(int argc, char** argv) {
 
 	bool animateCam = false;
 	bool lookAtTarget = false;
+	bool updateSpotlight = true;
 	bool debugMenuFlag = true;
 	glm::vec3 camPos = {};
 	glm::quat camRot = glm::identity<glm::quat>();
 	float camSpeed = 5.f;
-	glm::vec3 lightPos = {1.2f, 1.4f, 2.0f};
-	glm::vec3 lightColor = {1.0f, 1.0f, 1.0f};
 
 	const glm::vec3 cubePositions[] = {
 			glm::vec3( 0.0f,  0.0f,  8.0f),
@@ -314,21 +317,6 @@ int main(int argc, char** argv) {
 			glm::vec3( 1.5f,  0.2f, -1.5f),
 			glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
-
-	const glm::vec3 pointLightPositions[] = {
-			glm::vec3( 0.7f,  0.2f,  2.0f),
-			glm::vec3( 2.3f, -3.3f, -4.0f),
-			glm::vec3(-4.0f,  2.0f, -12.0f),
-			glm::vec3( 0.0f,  0.0f, -3.0f)
-	};
-
-	const glm::vec3 pointLightColors[] = {
-			glm::vec3(0.2f, 0.2f, 0.6f),
-			glm::vec3(0.3f, 0.3f, 0.7f),
-			glm::vec3(0.0f, 0.0f, 0.3f),
-			glm::vec3(0.4f, 0.4f, 0.4f)
-	};
-
 
 	while(run) {
 		timeSystem.SystemsUpdate();
@@ -435,10 +423,9 @@ int main(int argc, char** argv) {
 			if (ImGui::BeginMenu("Camera")) {
 				ImGui::Checkbox("animate cam", &animateCam);
 				ImGui::Checkbox("look at target", &lookAtTarget);
+				ImGui::Checkbox("update spotlight", &updateSpotlight);
 				ImGui::DragFloat3("cam pos", &camPos.x, 0.1f);
 				ImGui::DragFloat("cam speed", &camSpeed, 0.1f);
-				ImGui::DragFloat3("light pos", &lightPos.x, 0.1f);
-				ImGui::DragFloat3("light color", &lightColor.x, 0.1f);
 
 				ImGui::EndMenu();
 			}
@@ -470,43 +457,21 @@ int main(int argc, char** argv) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// do actual drawing now
+		if (updateSpotlight)
+			core::scene::LightManager::The().spot.transform = theCam->transform;
 
-		backpack->Draw(glm::identity<glm::mat4>());
+		glm::mat4 matModel = glm::identity<glm::mat4>();
+		matModel = glm::translate(matModel, {0.f, sin(timeSystem.NowTime()), -3.f});
+		matModel = glm::scale(matModel, {0.4f, 0.4f, 0.4f});
+		matModel = glm::rotate(matModel, timeSystem.NowTime() * (3.1415926f/2.f), core::scene::Transform::Up);
+		//matModel = matModel * glm::mat4_cast(camRot);
 
-		// material test
+		backpack->Draw(matModel);
+
+		// cubes
 		cubeMaterial->BindAndSetUniforms();
 
 		cubeMaterial->shaderProgram->SetUniform("viewPos", theCam->transform.metaPos);
-
-		// cubes
-
-		cubeMaterial->shaderProgram->SetUniform("dirLight.direction", {-0.2f, -1.0f, -0.3f});
-		cubeMaterial->shaderProgram->SetUniform("dirLight.ambient", {0.05f, 0.05f, 0.05f});
-		cubeMaterial->shaderProgram->SetUniform("dirLight.diffuse", {0.2f, 0.2f, 0.7f});
-		cubeMaterial->shaderProgram->SetUniform("dirLight.specular", {0.7f, 0.7f, 0.7f});
-
-		for (int i = 0; i < 4; i++) {
-			cubeMaterial->shaderProgram->SetUniform(std::format("pointLights[{}].position", i), pointLightPositions[i]);
-			cubeMaterial->shaderProgram->SetUniform(std::format("pointLights[{}].ambient", i), pointLightColors[i] * 0.1f);
-			cubeMaterial->shaderProgram->SetUniform(std::format("pointLights[{}].diffuse", i), pointLightColors[i]);
-			cubeMaterial->shaderProgram->SetUniform(std::format("pointLights[{}].specular", i), pointLightColors[i]);
-			cubeMaterial->shaderProgram->SetUniform(std::format("pointLights[{}].constant", i), 1.0f);
-			cubeMaterial->shaderProgram->SetUniform(std::format("pointLights[{}].linear", i), 0.09f);
-			cubeMaterial->shaderProgram->SetUniform(std::format("pointLights[{}].quadratic", i), 0.032f);
-		}
-
-		cubeMaterial->shaderProgram->SetUniform("spotLight.position", theCam->transform.metaPos);
-		cubeMaterial->shaderProgram->SetUniform("spotLight.direction", theCam->transform.metaForward);
-		cubeMaterial->shaderProgram->SetUniform("spotLight.ambient", {0.0f, 0.0f, 0.0f});
-		cubeMaterial->shaderProgram->SetUniform("spotLight.diffuse", {1.0f, 1.0f, 1.0f});
-		cubeMaterial->shaderProgram->SetUniform("spotLight.specular", {1.0f, 1.0f, 1.0f});
-		cubeMaterial->shaderProgram->SetUniform("spotLight.constant", 1.0f);
-		cubeMaterial->shaderProgram->SetUniform("spotLight.linear", 0.09f);
-		cubeMaterial->shaderProgram->SetUniform("spotLight.quadratic", 0.032f);
-		cubeMaterial->shaderProgram->SetUniform("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-		cubeMaterial->shaderProgram->SetUniform("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
-
-		// projection
 
 		cubeMaterial->shaderProgram->SetUniform("time", glm::vec2(timeSystem.NowTime(), std::chrono::system_clock::now().time_since_epoch().count()));
 		cubeMaterial->shaderProgram->SetUniform("matProjection", theScene.GetCameraProjection());
@@ -535,12 +500,13 @@ int main(int argc, char** argv) {
 
 		for(int i = 0; i < 4; i++)
 		{
+			auto* light = &core::scene::LightManager::The().points[i];
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, pointLightPositions[i]);
+			model = glm::translate(model, light->transform.metaPos);
 
 			model = glm::scale(model, glm::vec3(0.1f));
 			lightMaterial->shaderProgram->SetUniform("matModel", model);
-			lightMaterial->shaderProgram->SetUniform("lightColor", pointLightColors[i]);
+			lightMaterial->shaderProgram->SetUniform("lightColor", light->GetColor());
 
 			glBindVertexArray(VAO);
 			glDrawArrays(GL_TRIANGLES, 0, 36);

@@ -35,6 +35,7 @@ add_library(engine_core
 		scene/Scene.cpp
 		scene/Transform.cpp
 		scene/Camera.cpp
+		scene/Light.cpp
 		)
 
 custengine_setup_target(engine_core)

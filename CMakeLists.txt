@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.14)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG")
+
 project(butane
 	LANGUAGES C CXX
 	)
@@ -31,10 +35,6 @@ add_library(imgui
 target_link_libraries(imgui SDL2::SDL2)
 target_include_directories(imgui PRIVATE ${IMGUI_DIR})
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG")
-
 # default linker
 if(NOT BUTANE_LINKER AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(BUTANE_LINKER "lld")
@@ -43,6 +43,10 @@ elseif(NOT BUTANE_LINKER)
 endif()
 
 butane_set_alternate_linker()
+
+set(ASSIMP_NO_EXPORT ON)
+set(ASSIMP_BUILD_TESTS OFF)
+set(ASSIMP_INSTALL OFF)
 
 add_subdirectory(third_party/glad)
 add_subdirectory(third_party/glm)

@@ -172,94 +172,13 @@ int main(int argc, char** argv) {
 	theCam->transform.SetPosRot({0.f, 0.7f, 0.f}, glm::identity<glm::quat>());
 	theCam->SetFovNearFar(70.f, 0.1f, 1000.f);
 
-	float vertices[] = {
-		// position           // normal             // uvs
-		-0.5f, -0.5f, -0.5f,   0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,   0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,   0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,   0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,   0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,   0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-
-		-0.5f, -0.5f,  0.5f,   0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,   0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,   0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,   0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,   0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,   0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-
-		-0.5f,  0.5f,  0.5f,  -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-		 0.5f,  0.5f,  0.5f,   1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,   1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,   1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,   1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,   1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,   1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-		-0.5f, -0.5f, -0.5f,   0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,   0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-	 	 0.5f, -0.5f,  0.5f,   0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-	 	 0.5f, -0.5f,  0.5f,   0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,   0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,   0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-
-		-0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-	 	 0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-	 	 0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,  0.0f, 1.0f
-	};
-
-
-	// model
-
-	u32 VAO, VBO/*, EBO*/;
-	u32 lightVAO;
-
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	//glGenBuffers(1, &EBO);
-
-	glBindVertexArray(VAO);
-
-	// bind buffers
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	// normal attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-	// texture coord attribute
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2);
-
-	// light
-	glGenVertexArrays(1, &lightVAO);
-	glBindVertexArray(lightVAO);
-	// we only need to bind to the VBO, the container's VBO's data already contains the data.
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	// set the vertex attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
 	// materials
-	gfx::Material* cubeMaterial = gfx::MaterialSystem::The().GetMaterial("materials/container.material");
-	gfx::Material* lightMaterial = gfx::MaterialSystem::The().GetMaterial("materials/light.material");
+	gfx::Material* materialCube = gfx::MaterialSystem::The().GetMaterial("materials/container.material");
+	gfx::Material* materialLight = gfx::MaterialSystem::The().GetMaterial("materials/light.material");
 
 	// models
-	gfx::Model* backpack = new gfx::Model(core::filesystem::Filesystem::GetDataDir() / "models/backpack/backpack.obj");
+	gfx::Model* modelCube = new gfx::Model(core::filesystem::Filesystem::GetDataDir() / "models/defaults/cube.obj");
+	gfx::Model* modelBackpack = new gfx::Model(core::filesystem::Filesystem::GetDataDir() / "models/backpack/backpack.obj");
 
 	// loop variables
 	bool run = true;
@@ -457,59 +376,45 @@ int main(int argc, char** argv) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// do actual drawing now
+
 		if (updateSpotlight)
 			core::scene::LightManager::The().spot.transform = theCam->transform;
 
+		// manual models
 		glm::mat4 matModel = glm::identity<glm::mat4>();
 		matModel = glm::translate(matModel, {0.f, sin(timeSystem.NowTime()), -3.f});
 		matModel = glm::scale(matModel, {0.4f, 0.4f, 0.4f});
 		matModel = glm::rotate(matModel, timeSystem.NowTime() * (3.1415926f/2.f), core::scene::Transform::Up);
 		//matModel = matModel * glm::mat4_cast(camRot);
 
-		backpack->Draw(matModel);
+		modelBackpack->Draw(gfx::MaterialSystem::The().GetMaterial("models/backpack/backpack.material"), matModel);
 
 		// cubes
-		cubeMaterial->BindAndSetUniforms();
+		materialCube->shaderProgram->Bind();
+		materialCube->shaderProgram->SetUniform("viewPos", theCam->transform.metaPos);
 
-		cubeMaterial->shaderProgram->SetUniform("viewPos", theCam->transform.metaPos);
-
-		cubeMaterial->shaderProgram->SetUniform("time", glm::vec2(timeSystem.NowTime(), std::chrono::system_clock::now().time_since_epoch().count()));
-		cubeMaterial->shaderProgram->SetUniform("matProjection", theScene.GetCameraProjection());
-		cubeMaterial->shaderProgram->SetUniform("matView", theScene.GetCameraView());
-		cubeMaterial->shaderProgram->SetUniform("matModel", glm::identity<glm::mat4>());
-
-		for(int i = 0; i < 10; i++)
-		{
+		for(int i = 0; i < 10; i++) {
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, cubePositions[i]);
 			float angle = 20.0f * i;
 			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-			cubeMaterial->shaderProgram->SetUniform("matModel", model);
 
-			glBindVertexArray(VAO);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
+			modelCube->Draw(materialCube, model);
 		}
 
 		// lights
+		materialLight->shaderProgram->Bind();
 
-		lightMaterial->BindAndSetUniforms();
-
-		lightMaterial->shaderProgram->SetUniform("time", glm::vec2(timeSystem.NowTime(), std::chrono::system_clock::now().time_since_epoch().count()));
-		lightMaterial->shaderProgram->SetUniform("matProjection", theScene.GetCameraProjection());
-		lightMaterial->shaderProgram->SetUniform("matView", theScene.GetCameraView());
-
-		for(int i = 0; i < 4; i++)
-		{
+		for(int i = 0; i < 4; i++) {
 			auto* light = &core::scene::LightManager::The().points[i];
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, light->transform.metaPos);
 
 			model = glm::scale(model, glm::vec3(0.1f));
-			lightMaterial->shaderProgram->SetUniform("matModel", model);
-			lightMaterial->shaderProgram->SetUniform("lightColor", light->GetColor());
+			materialLight->shaderProgram->SetUniform("matModel", model);
+			materialLight->shaderProgram->SetUniform("lightColor", light->GetColor());
 
-			glBindVertexArray(VAO);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
+			modelCube->Draw(materialLight, model);
 		}
 
 

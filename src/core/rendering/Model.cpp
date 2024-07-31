@@ -13,9 +13,11 @@ namespace butane::core::gfx {
 	}
 
 	void Model::Draw(glm::mat4 matModel) {
+		Draw(MaterialSystem::The().GetMaterial("materials/default.material"), matModel);
+	}
+	void Model::Draw(Material* material, glm::mat4 matModel) {
 		for(Mesh mesh : meshes)
-			// todo real materials
-			mesh.Draw(MaterialSystem::The().GetMaterial("models/backpack/backpack.material"), matModel);
+			mesh.Draw(material, matModel);
 	}
 
 	void Model::LoadModel(const std::filesystem::path& path) {

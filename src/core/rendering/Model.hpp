@@ -19,6 +19,7 @@ namespace butane::core::gfx {
 		Model(const std::filesystem::path& path);
 
 		void Draw(glm::mat4 matModel);
+		void Draw(Material* material, glm::mat4 matModel);
 
 	   private:
 		std::vector<Mesh> meshes;

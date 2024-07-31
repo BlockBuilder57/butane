@@ -8,7 +8,7 @@
 
 #include <core/debug/Assert.hpp>
 
-namespace engine::core::filesystem {
+namespace butane::core::filesystem {
 
 	Watch::Watch(const stdfs::path& watchPath) {
 		CtorImpl<WatchImpl>(watchPath);
@@ -42,11 +42,11 @@ namespace engine::core::filesystem {
 		}
 	}
 
-	void WatchSystem::AddWatch(engine::core::filesystem::Watch* watch) {
+	void WatchSystem::AddWatch(butane::core::filesystem::Watch* watch) {
 		watches.push_back(watch);
 	}
 
-	void WatchSystem::RemoveWatch(engine::core::filesystem::Watch* watch) {
+	void WatchSystem::RemoveWatch(butane::core::filesystem::Watch* watch) {
 		std::erase(watches, watch);
 	}
 

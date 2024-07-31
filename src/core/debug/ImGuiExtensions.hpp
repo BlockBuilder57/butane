@@ -10,7 +10,7 @@
 #include <vector>
 #include <filesystem>
 
-namespace engine::core::debug {
+namespace butane::core::debug {
 
 	struct ImGuiExtensions {
 		struct DirectoryTree {

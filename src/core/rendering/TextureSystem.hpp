@@ -7,7 +7,7 @@
 #include <core/System.hpp>
 #include <map>
 
-namespace engine::core::gfx {
+namespace butane::core::gfx {
 
 	struct TextureSystem : public core::System {
 		static TextureSystem& The();
@@ -41,4 +41,4 @@ namespace engine::core::gfx {
 		std::map<filesystem::stdfs::path, debug::ImGuiExtensions::DirectoryTree> debugTree {};
 	};
 
-} // namespace engine::core::rendering
+} // namespace butane::core::rendering

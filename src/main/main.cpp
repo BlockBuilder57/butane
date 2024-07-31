@@ -25,7 +25,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-namespace core = engine::core;
+namespace core = butane::core;
 namespace sdl = core::sdl;
 namespace gfx = core::gfx;
 
@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
 	// Create systems for the scene
 	core::SystemManager::The().Add(static_cast<core::PerTickSystem*>(&core::scene::LightManager::The()));
 
-	auto window = sdl::Window { "engine", 1280, 720 };
+	auto window = sdl::Window { "butane", 1280, 720 };
 	sdl::Window::CurrentWindow = &window;
 
 	// By this point the Window class has setup OpenGL and made the context it created current,
@@ -418,7 +418,7 @@ int main(int argc, char** argv) {
 		// imgui drawing
 		static bool show_demo = false;
 		if(debugMenuFlag && ImGui::BeginMainMenuBar()) {
-			engine::core::SystemManager::The().ImGuiDebug();
+			butane::core::SystemManager::The().ImGuiDebug();
 
 			if (ImGui::BeginMenu("Camera")) {
 				ImGui::Checkbox("animate cam", &animateCam);

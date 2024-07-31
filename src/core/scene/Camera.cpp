@@ -4,7 +4,7 @@
 
 #include "core/sdl/Window.hpp"
 
-namespace engine::core::scene {
+namespace butane::core::scene {
 
 	Camera::Camera() {
 		// init with defaults
@@ -27,4 +27,4 @@ namespace engine::core::scene {
 		matProjection = glm::perspective(glm::radians(fov), aspect, zNear, zFar);
 	}
 
-} // namespace engine::core::scene
+} // namespace butane::core::scene

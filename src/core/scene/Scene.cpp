@@ -2,7 +2,7 @@
 
 #include "Scene.hpp"
 
-namespace engine::core::scene {
+namespace butane::core::scene {
 
 	Scene& Scene::The() {
 		static Scene the;
@@ -28,4 +28,4 @@ namespace engine::core::scene {
 		return nullptr;
 	}
 
-} // namespace engine::core::scene
+} // namespace butane::core::scene

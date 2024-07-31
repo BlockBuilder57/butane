@@ -4,7 +4,7 @@
 
 #include <imgui.h>
 
-namespace engine::core {
+namespace butane::core {
 
 	InputSystem::InputStatus InputSystem::statusCurrent = {};
 	InputSystem::InputStatus InputSystem::statusLast = {};
@@ -153,4 +153,4 @@ namespace engine::core {
 		return registeredBinds.emplace_back(new Bind(name, keys, modifiers));
 	}
 
-} // namespace engine::core
+} // namespace butane::core

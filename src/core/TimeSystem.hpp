@@ -5,7 +5,7 @@
 #include "Logger.hpp"
 #include "System.hpp"
 
-namespace engine::core {
+namespace butane::core {
 
 	struct TimeSystem : public core::System {
 		static TimeSystem& The();
@@ -36,7 +36,7 @@ namespace engine::core {
 	   private:
 		// This is essentially how many update ticks we run (under ideal conditions)
 		// This should be made a configurable value later on
-		double updateRate = 1. / 100.;
+		double updateRate = 1. / 75.;
 
 		float deltaTime = 0.f;
 		float lastTime = 0.f;

@@ -8,7 +8,7 @@
 
 #include <cmath>
 
-namespace engine::core::experiments {
+namespace butane::core::experiments {
 
 	float Oscillator::Value(float phase) const {
 		if(mType == kOsc_Tri)
@@ -71,4 +71,4 @@ namespace engine::core::experiments {
 		return freq * (FTWO_PI / samplerate);
 	}
 
-} // namespace engine::core::experiments
+} // namespace butane::core::experiments

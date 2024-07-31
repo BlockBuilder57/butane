@@ -6,7 +6,7 @@
 #include <core/scene/Scene.hpp>
 #include <core/TimeSystem.hpp>
 
-namespace engine::core::gfx {
+namespace butane::core::gfx {
 
 	Model::Model(const std::filesystem::path& path) {
 		LoadModel(path);
@@ -117,4 +117,4 @@ namespace engine::core::gfx {
 		return Mesh(vertices, indices);
 	}
 
-} // namespace engine::core::gfx
+} // namespace butane::core::gfx

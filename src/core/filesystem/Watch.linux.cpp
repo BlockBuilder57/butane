@@ -12,7 +12,7 @@
 
 #include <core/filesystem/WatchSystem.hpp>
 
-namespace engine::core::filesystem {
+namespace butane::core::filesystem {
 
 	/// Implementation of [Watch] guts for Linux
 	struct WatchImpl {
@@ -83,4 +83,4 @@ namespace engine::core::filesystem {
 
 		Watch::EventCallback eventCallback;
 	};
-} // namespace engine::core::filesystem
+} // namespace butane::core::filesystem

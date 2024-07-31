@@ -10,7 +10,7 @@
 #include "TextureSystem.hpp"
 #include "ShaderSystem.hpp"
 
-namespace engine::core::gfx {
+namespace butane::core::gfx {
 
 #define MATERIAL_DEFAULT_INT 0
 #define MATERIAL_DEFAULT_FLOAT 0.f

@@ -3,7 +3,7 @@
 #include "TextureSystem.hpp"
 #include "core/Logger.hpp"
 
-namespace engine::core::gfx {
+namespace butane::core::gfx {
 
 	Texture* TextureSystem::defaultMissing = {};
 	Texture* TextureSystem::defaultWhite = {};
@@ -152,4 +152,4 @@ namespace engine::core::gfx {
 		return defaultMissing;
 	}
 
-} // namespace engine::core::rendering
+} // namespace butane::core::rendering

@@ -3,7 +3,7 @@
 #include <array>
 #include <cstdint>
 
-namespace engine::core {
+namespace butane::core {
 
 	template<class Elem, std::size_t Cap>
 	struct StaticVector {

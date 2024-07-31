@@ -9,7 +9,7 @@
 #include <core/filesystem/WatchSystem.hpp>
 #include <core/Types.hpp>
 
-namespace engine::core::gfx {
+namespace butane::core::gfx {
 
 	class Texture {
 	   public:
@@ -72,13 +72,13 @@ namespace engine::core::gfx {
 
 // I WAS HERE FOR THREE HOURS
 template <>
-struct magic_enum::customize::enum_range<engine::core::gfx::Texture::OGLTextureWrap> {
+struct magic_enum::customize::enum_range<butane::core::gfx::Texture::OGLTextureWrap> {
 	static constexpr int min = 0x2900;
 	static constexpr int max = 0x8750;
 	// (max - min) must be less than UINT16_MAX.
 };
 template <>
-struct magic_enum::customize::enum_range<engine::core::gfx::Texture::OGLTextureFilter> {
+struct magic_enum::customize::enum_range<butane::core::gfx::Texture::OGLTextureFilter> {
 	static constexpr int min = 0x2600;
 	static constexpr int max = 0x2704;
 	// (max - min) must be less than UINT16_MAX.

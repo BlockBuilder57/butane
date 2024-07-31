@@ -4,7 +4,7 @@
 
 #include <core/Logger.hpp>
 
-namespace engine::core::debug {
+namespace butane::core::debug {
 
 	int ImGuiExtensions::IdIndex = 0;
 

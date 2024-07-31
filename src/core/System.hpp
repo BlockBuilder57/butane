@@ -4,7 +4,7 @@
 #include <vector>
 #include <imgui.h>
 
-namespace engine::core {
+namespace butane::core {
 
 	struct System {
 		virtual ~System() = default;

@@ -1,6 +1,6 @@
 #include <core/StdoutSink.hpp>
 
-namespace engine::core {
+namespace butane::core {
 	StdoutSink& StdoutSink::The() {
 		static StdoutSink sink;
 		return sink;
@@ -31,10 +31,10 @@ namespace engine::core {
 		};
 
 		auto it = FputcIterator(data.severity < Logger::MessageSeverity::Error ? stdout : stderr);
-		std::format_to(it, "[Engine/{}] [{}] {}\n", Logger::SeverityToString(data.severity), data.time, std::vformat(data.format, data.args));
+		std::format_to(it, "[Butane/{}] [{}] {}\n", Logger::SeverityToString(data.severity), data.time, std::vformat(data.format, data.args));
 	}
 
 	void LoggerAttachStdout() {
 		Logger::The().AttachSink(StdoutSink::The());
 	}
-} // namespace engine::core
+} // namespace butane::core

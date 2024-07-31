@@ -15,7 +15,7 @@
 #define FPI 3.14159265358979323846f
 #define FTWO_PI 6.28318530717958647693f
 
-namespace engine::core::experiments {
+namespace butane::core::experiments {
 
 	enum OscillatorType { kOsc_Sin, kOsc_Square, kOsc_Tri, kOsc_Saw, kOsc_NegSaw, kOsc_Random, kOsc_Drunk, kOsc_Perlin };
 
@@ -49,4 +49,4 @@ namespace engine::core::experiments {
 		float mSoften { 0 };
 	};
 
-} // namespace engine::core::experiments
+} // namespace butane::core::experiments

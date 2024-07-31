@@ -8,7 +8,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
-namespace engine::core::scene {
+namespace butane::core::scene {
 
 	struct Transform {
 	   public:
@@ -39,4 +39,4 @@ namespace engine::core::scene {
 		void UpdateMeta();
 	};
 
-} // namespace engine::core::scene
+} // namespace butane::core::scene

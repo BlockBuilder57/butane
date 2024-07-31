@@ -1,7 +1,7 @@
 #include <core/filesystem/Filesystem.hpp>
 #include <core/Logger.hpp>
 
-namespace engine::core::filesystem {
+namespace butane::core::filesystem {
 
 	Filesystem& Filesystem::The() {
 		static Filesystem the;
@@ -46,4 +46,4 @@ namespace engine::core::filesystem {
 		return bepis;
 	}
 
-} // namespace engine::core::filesystem
+} // namespace butane::core::filesystem

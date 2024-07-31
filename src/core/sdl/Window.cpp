@@ -2,7 +2,7 @@
 
 #include <core/sdl/Window.hpp>
 
-namespace engine::core::sdl {
+namespace butane::core::sdl {
 
 	Window* Window::CurrentWindow = nullptr;
 
@@ -54,4 +54,4 @@ namespace engine::core::sdl {
 		return (float)w / (float)h;
 	}
 
-} // namespace engine::core::sdl
+} // namespace butane::core::sdl

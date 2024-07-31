@@ -7,7 +7,7 @@
 #include <format>
 #include <vector>
 
-namespace engine::core {
+namespace butane::core {
 
 	/// The logger.
 	struct Logger {
@@ -122,4 +122,4 @@ namespace engine::core {
 		Logger::The().Fatal(format, std::forward<Args>(args)...);
 	}
 
-} // namespace engine::core
+} // namespace butane::core

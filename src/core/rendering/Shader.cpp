@@ -5,9 +5,9 @@
 
 #include <magic_enum.hpp>
 
-namespace engine::core::gfx {
+namespace butane::core::gfx {
 
-	void ShaderProgram::AttachShader(engine::core::gfx::Shader& shader) {
+	void ShaderProgram::AttachShader(butane::core::gfx::Shader& shader) {
 		shader.AddProgram(this);
 		shaderObjects.push_back(&shader);
 		glAttachShader(glProgramObject, shader.Get());
@@ -180,4 +180,4 @@ namespace engine::core::gfx {
 		glShaderSource(glShaderObject, 1, &ptr, nullptr);
 	}
 
-} // namespace engine::core::rendering
+} // namespace butane::core::rendering

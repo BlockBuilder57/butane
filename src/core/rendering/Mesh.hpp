@@ -9,7 +9,7 @@
 #include <core/rendering/MaterialSystem.hpp>
 #include <core/Types.hpp>
 
-namespace engine::core::gfx {
+namespace butane::core::gfx {
 
 	struct Vertex {
 		glm::vec3 position;

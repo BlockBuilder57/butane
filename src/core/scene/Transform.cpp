@@ -2,7 +2,7 @@
 
 #include "Transform.hpp"
 
-namespace engine::core::scene {
+namespace butane::core::scene {
 
 	const glm::vec3 Transform::Up =      {  0,  1, 0 };
 	const glm::vec3 Transform::Down =    {  0, -1, 0 };
@@ -64,4 +64,4 @@ namespace engine::core::scene {
 		metaUp = glm::normalize(glm::cross(metaRight, metaForward));
 	}
 
-} // namespace engine::core::scene
+} // namespace butane::core::scene

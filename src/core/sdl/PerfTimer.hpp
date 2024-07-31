@@ -1,4 +1,4 @@
-namespace engine::core::sdl {
+namespace butane::core::sdl {
 
     double HiResDoubleTime();
 

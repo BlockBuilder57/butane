@@ -1,6 +1,6 @@
 #include <core/sdl/File.hpp>
 
-namespace engine::core::sdl {
+namespace butane::core::sdl {
 	Unique<File> File::OpenFile(const std::filesystem::path& path, std::string_view mode) {
 		if(std::filesystem::exists(path)) {
 			return Unique<File>(new File(SDL_RWFromFile(path.c_str(), mode.data())));

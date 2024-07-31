@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(customengine
+project(butane
 	LANGUAGES C CXX
 	)
 
@@ -36,13 +36,13 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG")
 
 # default linker
-if(NOT CUSTENGINE_LINKER AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    set(CUSTENGINE_LINKER "lld")
-elseif(NOT CUSTENGINE_LINKER)
-    set(CUSTENGINE_LINKER "bfd")
+if(NOT BUTANE_LINKER AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set(BUTANE_LINKER "lld")
+elseif(NOT BUTANE_LINKER)
+    set(BUTANE_LINKER "bfd")
 endif()
 
-custengine_set_alternate_linker()
+butane_set_alternate_linker()
 
 add_subdirectory(third_party/glad)
 add_subdirectory(third_party/glm)

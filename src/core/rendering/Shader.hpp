@@ -11,7 +11,7 @@
 #include <utility>
 #include <vector>
 
-namespace engine::core::gfx {
+namespace butane::core::gfx {
 
 	struct Shader;
 
@@ -110,4 +110,4 @@ namespace engine::core::gfx {
 		i32 compileSuccess {};
 	};
 
-} // namespace engine::core::rendering
+} // namespace butane::core::rendering

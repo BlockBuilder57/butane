@@ -10,7 +10,7 @@
 
 #include "Oscillator.hpp"
 
-namespace engine::core::experiments {
+namespace butane::core::experiments {
 
 	class SSTV {
 	   public:
@@ -316,4 +316,4 @@ namespace engine::core::experiments {
 		Oscillator osc { kOsc_Sin };
 	};
 
-} // namespace engine::core::experiments
+} // namespace butane::core::experiments

@@ -12,7 +12,7 @@
 #include <core/rendering/Mesh.hpp>
 #include <core/Types.hpp>
 
-namespace engine::core::gfx {
+namespace butane::core::gfx {
 
 	class Model {
 	   public:

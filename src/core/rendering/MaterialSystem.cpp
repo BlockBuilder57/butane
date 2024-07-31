@@ -2,7 +2,7 @@
 
 #include "MaterialSystem.hpp"
 
-namespace engine::core::gfx {
+namespace butane::core::gfx {
 
 	MaterialSystem& MaterialSystem::The() {
 		static MaterialSystem the;
@@ -106,4 +106,4 @@ namespace engine::core::gfx {
 		}
 	}
 
-} // namespace engine::core::rendering
+} // namespace butane::core::rendering

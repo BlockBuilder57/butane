@@ -2,7 +2,7 @@
 
 #include <core/Logger.hpp>
 
-namespace engine::core {
+namespace butane::core {
 
 	/// A logger sink implementation that prints to standard output.
 	struct StdoutSink : public Logger::Sink {

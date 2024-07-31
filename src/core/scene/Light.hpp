@@ -5,7 +5,7 @@
 #include <core/rendering/Shader.hpp>
 #include "SGNode.hpp"
 
-namespace engine::core::scene {
+namespace butane::core::scene {
 
 	class LightManager;
 
@@ -57,4 +57,4 @@ namespace engine::core::scene {
 		Light spot;
 	};
 
-} // namespace engine::core::scene
+} // namespace butane::core::scene

@@ -10,7 +10,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-namespace engine::core::scene {
+namespace butane::core::scene {
 
 	/// root class for all scene graph nodes
 	struct Node : public SGNodeMixin<Node> {};
@@ -30,4 +30,4 @@ namespace engine::core::scene {
 		Camera* cam;
 	};
 
-} // namespace engine::core::scene
+} // namespace butane::core::scene

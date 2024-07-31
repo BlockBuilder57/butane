@@ -2,7 +2,7 @@
 
 #include "ShaderSystem.hpp"
 
-namespace engine::core::gfx {
+namespace butane::core::gfx {
 
 	ShaderSystem& ShaderSystem::The() {
 		static ShaderSystem the;
@@ -140,4 +140,4 @@ namespace engine::core::gfx {
 		return nullptr;
 	}
 
-} // namespace engine::core::rendering
+} // namespace butane::core::rendering

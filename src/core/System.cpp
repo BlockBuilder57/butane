@@ -4,7 +4,7 @@
 
 #include "imgui_internal.h"
 
-namespace engine::core {
+namespace butane::core {
 
 	SystemManager& SystemManager::The() {
 		static SystemManager the;
@@ -69,4 +69,4 @@ namespace engine::core {
 		}
 	}
 
-} // namespace engine::core
+} // namespace butane::core

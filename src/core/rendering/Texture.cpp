@@ -7,7 +7,7 @@
 #include <core/filesystem/TomlLoader.hpp>
 #include <core/Logger.hpp>
 
-namespace engine::core::gfx {
+namespace butane::core::gfx {
 
 	Texture::Texture() {
 
@@ -181,4 +181,4 @@ namespace engine::core::gfx {
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-} // namespace engine::core::rendering
+} // namespace butane::core::rendering

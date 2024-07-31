@@ -2,7 +2,7 @@
 
 #include "TomlLoader.hpp"
 
-namespace engine::core::filesystem {
+namespace butane::core::filesystem {
 
 	toml::table TomlLoader::LoadTable(const std::filesystem::path &path) {
 		toml::table table;
@@ -21,4 +21,4 @@ namespace engine::core::filesystem {
 		return table;
 	}
 
-} // namespace engine::core::filesystem
+} // namespace butane::core::filesystem

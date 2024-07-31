@@ -6,7 +6,7 @@
 #include <core/scene/Light.hpp>
 #include <core/TimeSystem.hpp>
 
-namespace engine::core::gfx {
+namespace butane::core::gfx {
 
 	Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices) {
 		this->vertices = vertices;
@@ -61,4 +61,4 @@ namespace engine::core::gfx {
 		glBindVertexArray(0);
 	}
 
-} // namespace engine::core::gfx
+} // namespace butane::core::gfx

@@ -10,7 +10,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
-namespace engine::core::scene {
+namespace butane::core::scene {
 
 	class Camera : public SGNodeMixin<Camera> {
 	   public:
@@ -29,4 +29,4 @@ namespace engine::core::scene {
 		float aspect { 1.f };
 	};
 
-} // namespace engine::core::scene
+} // namespace butane::core::scene

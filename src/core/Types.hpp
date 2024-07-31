@@ -14,11 +14,11 @@ using i64 = std::int64_t;
 using usize = std::size_t;
 using isize = std::intptr_t;
 
-namespace engine::core {
+namespace butane::core {
 	template<class T, class Deleter = std::default_delete<T>>
 	using Unique = std::unique_ptr<T, Deleter>;
 
 	template<class T>
 	using Ref = std::shared_ptr<T>;
 
-} // namespace engine::core
+} // namespace butane::core

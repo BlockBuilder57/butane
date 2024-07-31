@@ -3,7 +3,7 @@
 #include <SDL2/SDL.h>
 #include <filesystem>
 
-namespace engine::core::sdl {
+namespace butane::core::sdl {
 
 	struct File {
 		enum class SeekDir {

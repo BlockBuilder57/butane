@@ -1,6 +1,6 @@
 #include <core/filesystem/WatchSystem.hpp>
 
-namespace engine::core::filesystem {
+namespace butane::core::filesystem {
 
 	/// Implementation of [Watch] guts for no platform.
 	struct WatchImpl {
@@ -18,4 +18,4 @@ namespace engine::core::filesystem {
 		stdfs::path root;
 		Watch::EventCallback eventCallback;
 	};
-} // namespace engine::core::filesystem
+} // namespace butane::core::filesystem

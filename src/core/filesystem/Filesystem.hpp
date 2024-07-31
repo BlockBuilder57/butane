@@ -4,7 +4,7 @@
 #include <core/sdl/File.hpp>
 #include <vector>
 
-namespace engine::core::filesystem {
+namespace butane::core::filesystem {
 
 	namespace stdfs = std::filesystem;
 

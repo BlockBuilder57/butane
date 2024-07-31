@@ -5,7 +5,7 @@
 #include "Logger.hpp"
 #include "TimeSystem.hpp"
 
-namespace engine::core {
+namespace butane::core {
 
 	TimeSystem& TimeSystem::The() {
 		static TimeSystem the;
@@ -54,9 +54,9 @@ namespace engine::core {
 
 	bool TimeSystem::TickNextReady() {
 		// check if we have another tick to consume later
-		if ((tickConsumingTime - updateRate) >= updateRate) {
+		/*if ((tickConsumingTime - updateRate) >= updateRate) {
 			LogWarning("Can't keep up! Tick {} took too long!", ticks);
-		}
+		}*/
 
 		return tickConsumingTime >= updateRate;
 	}
@@ -69,4 +69,4 @@ namespace engine::core {
 		//LogDebug("Render delta: {}", DeltaTime());
 	}
 
-} // namespace engine::core
+} // namespace butane::core

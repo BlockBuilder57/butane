@@ -8,7 +8,7 @@
 #include <functional>
 #include <unordered_map>
 
-namespace engine::core::sdl {
+namespace butane::core::sdl {
 
 	/// A basic abstraction over SDL2 windowing facilities.
 	struct Window {
@@ -42,4 +42,4 @@ namespace engine::core::sdl {
 
 
 
-} // namespace engine::core::sdl
+} // namespace butane::core::sdl

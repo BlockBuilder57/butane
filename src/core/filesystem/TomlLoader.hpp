@@ -7,7 +7,7 @@
 #include <filesystem>
 #include <core/Logger.hpp>
 
-namespace engine::core::filesystem {
+namespace butane::core::filesystem {
 
 	struct TomlLoader {
 		static toml::table LoadTable(const std::filesystem::path& path);
@@ -20,4 +20,4 @@ namespace engine::core::filesystem {
 		}
 	};
 
-} // namespace engine::core::filesystem
+} // namespace butane::core::filesystem

@@ -14,7 +14,7 @@
 #include "Logger.hpp"
 #include "System.hpp"
 
-namespace engine::core {
+namespace butane::core {
 
 	constexpr static auto MAX_KEY_COUNT = 16;
 
@@ -144,4 +144,4 @@ namespace engine::core {
 		}
 	};
 
-} // namespace engine::core
+} // namespace butane::core

@@ -5,12 +5,12 @@
 
 #include <utility>
 
-namespace engine::core::gfx {
+namespace butane::core::gfx {
 
 	Material::Material() {
 	}
 
-	Material::Material(std::string material_name, engine::core::gfx::ShaderProgram* shader) {
+	Material::Material(std::string material_name, butane::core::gfx::ShaderProgram* shader) {
 		name = material_name;
 		shaderProgram = shader;
 	}

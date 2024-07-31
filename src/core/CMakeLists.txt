@@ -1,4 +1,4 @@
-add_library(engine_core
+add_library(butane_core
 		debug/Assert.cpp
 		debug/ImGuiExtensions.cpp
 
@@ -38,13 +38,13 @@ add_library(engine_core
 		scene/Light.cpp
 		)
 
-custengine_setup_target(engine_core)
+butane_setup_target(butane_core)
 
-target_include_directories(engine_core PRIVATE ${IMGUI_DIR})
+target_include_directories(butane_core PRIVATE ${IMGUI_DIR})
 
 target_compile_definitions(magic_enum INTERFACE "MAGIC_ENUM_NO_CHECK_REFLECTED_ENUM")
 
-target_link_libraries(engine_core PUBLIC
+target_link_libraries(butane_core PUBLIC
 		glad::glad
 		glm::glm
 		imgui
@@ -54,4 +54,4 @@ target_link_libraries(engine_core PUBLIC
 		)
 
 
-add_library(engine::core ALIAS engine_core)
+add_library(butane::core ALIAS butane_core)

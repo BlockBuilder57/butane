@@ -8,7 +8,7 @@
 #include <core/System.hpp>
 #include <map>
 
-namespace engine::core::gfx {
+namespace butane::core::gfx {
 
 	struct ShaderSystem : public core::System {
 		static ShaderSystem& The();
@@ -34,4 +34,4 @@ namespace engine::core::gfx {
 		std::map<filesystem::stdfs::path, debug::ImGuiExtensions::DirectoryTree> debugTree {};
 	};
 
-} // namespace engine::core::rendering
+} // namespace butane::core::rendering

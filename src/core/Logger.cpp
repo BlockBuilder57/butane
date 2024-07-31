@@ -2,7 +2,7 @@
 #include <cstddef>
 #include <iostream>
 
-namespace engine::core {
+namespace butane::core {
 
 	Logger& Logger::The() {
 		static Logger logger;
@@ -27,4 +27,4 @@ namespace engine::core {
 			sink->OutputMessage(data);
 	}
 
-} // namespace engine::core
+} // namespace butane::core

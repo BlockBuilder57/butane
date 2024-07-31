@@ -5,7 +5,7 @@
 #include "Scene.hpp"
 #include <format>
 
-namespace engine::core::scene {
+namespace butane::core::scene {
 
 	LightManager& LightManager::The() {
 		static LightManager the;

@@ -4,7 +4,7 @@
 #include <core/scene/Transform.hpp>
 #include <vector>
 
-namespace engine::core::scene {
+namespace butane::core::scene {
 
 	template <class T>
 	struct SGNodeMixin {
@@ -86,4 +86,4 @@ namespace engine::core::scene {
 		T* parent { nullptr }; // who created me
 		ListType children;	   // adjacent to me.
 	};
-} // namespace engine::core::scene
+} // namespace butane::core::scene

@@ -2,7 +2,7 @@ name = "Backpack"
 program = "shaders/default.program"
 
 [uniforms]
-diffuse = "models/backpack/diffuse.jpg"
-specular = "models/backpack/specular.jpg"
-emission = "defaultBlack"
-shininess = 32.0
+"material.diffuse" = "models/backpack/diffuse.jpg"
+"material.specular" = "models/backpack/specular.jpg"
+"material.emission" = "defaultBlack"
+"material.shininess" = 32.0

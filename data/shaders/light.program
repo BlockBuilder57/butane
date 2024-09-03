@@ -1,6 +1,3 @@
 name = "Light"
 frag = "shaders/src/light.frag"
 vert = "shaders/src/default.vert"
-
-[uniforms]
-lightColor = "Color"

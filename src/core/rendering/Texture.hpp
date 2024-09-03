@@ -40,23 +40,6 @@ namespace butane::core::gfx {
 		GLenum WrapModeU, WrapModeV = GL_CLAMP_TO_EDGE;
 		GLenum TexFilterScaleMin, TexFilterScaleMax = GL_LINEAR_MIPMAP_LINEAR;
 	   private:
-		// dummy enums for loading config w/ magic_enum
-		enum class OGLTextureWrap {
-			CLAMP_TO_EDGE = GL_CLAMP_TO_EDGE,
-			CLAMP_TO_BORDER = GL_CLAMP_TO_BORDER,
-			MIRRORED_REPEAT = GL_MIRRORED_REPEAT,
-			REPEAT = GL_REPEAT,
-			MIRROR_CLAMP_TO_EDGE = GL_MIRROR_CLAMP_TO_EDGE
-		};
-		enum class OGLTextureFilter {
-			NEAREST = GL_NEAREST,
-			LINEAR = GL_LINEAR,
-			NEAREST_MIPMAP_NEAREST = GL_NEAREST_MIPMAP_NEAREST,
-			LINEAR_MIPMAP_NEAREST = GL_LINEAR_MIPMAP_NEAREST,
-			NEAREST_MIPMAP_LINEAR = GL_NEAREST_MIPMAP_LINEAR,
-			LINEAR_MIPMAP_LINEAR = GL_LINEAR_MIPMAP_LINEAR
-		};
-
 		void InitializeOGLTexture(int width, int height, GLenum format, void* data);
 
 		std::string name {};
@@ -69,17 +52,3 @@ namespace butane::core::gfx {
 	};
 
 }
-
-// I WAS HERE FOR THREE HOURS
-template <>
-struct magic_enum::customize::enum_range<butane::core::gfx::Texture::OGLTextureWrap> {
-	static constexpr int min = 0x2900;
-	static constexpr int max = 0x8750;
-	// (max - min) must be less than UINT16_MAX.
-};
-template <>
-struct magic_enum::customize::enum_range<butane::core::gfx::Texture::OGLTextureFilter> {
-	static constexpr int min = 0x2600;
-	static constexpr int max = 0x2704;
-	// (max - min) must be less than UINT16_MAX.
-};

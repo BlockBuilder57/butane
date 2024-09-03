@@ -16,9 +16,8 @@ namespace butane::core::gfx {
 	struct Shader;
 
 	struct ShaderProgram {
-		ShaderProgram() { glProgramObject = glCreateProgram(); }
-
-		~ShaderProgram() { glDeleteProgram(glProgramObject); }
+		ShaderProgram();
+		~ShaderProgram();
 
 		void AttachShader(Shader& shader);
 
@@ -33,40 +32,30 @@ namespace butane::core::gfx {
 		GLuint GetID() { return glProgramObject; }
 
 		struct Uniform {
-			enum class Type {
-				Unknown = 0,
-				Int,
-				Float,
-				Vec2,
-				Vec3,
-				Vec4,
-				Color,
-				Texture,
-			};
-
 			void ImGuiDebug();
 
 			std::string name {};
-			Type type {};
+			OGLType type {};
 		};
 
 		std::vector<Uniform> uniforms;
 
 		// TODO:
 		// (proper) float2/float3 overloads
-		// vec3/vec4 overloads
-		// mat3/mat4 overloads
 
 		void SetUniform(const std::string& uniform, int value);
 		void SetUniform(const std::string& uniform, float value);
 		void SetUniform(const std::string& uniform, const glm::vec2& vec);
 		void SetUniform(const std::string& uniform, const glm::vec3& vec);
 		void SetUniform(const std::string& uniform, const glm::vec4& vec);
+		void SetUniform(const std::string& uniform, const glm::quat& quat);
+		void SetUniform(const std::string& uniform, const glm::mat3& mat);
 		void SetUniform(const std::string& uniform, const glm::mat4& mat);
 		// void SetUniform(const std::string& uniform, double value);
 
 	   private:
 		u32 glProgramObject {};
+		std::string name {};
 		std::vector<Shader*> shaderObjects;
 		core::filesystem::Watch* fileWatch {};
 	};

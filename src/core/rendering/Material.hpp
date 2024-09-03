@@ -38,25 +38,26 @@ namespace butane::core::gfx {
 
 		class UniformData {
 		   public:
-			ShaderProgram::Uniform* uniform {};
-
+			UniformData() = default;
 			UniformData(ShaderProgram::Uniform* ptr);
 			~UniformData();
 
-			void SetUniform(ShaderProgram::Uniform* ptr);
+			void SetByUniform(ShaderProgram::Uniform* ptr);
+
+			std::string GetName() { return name; };
+			OGLType GetType() { return type; };
 
 			template <class T>
 			T GetData(T fallback);
 			template <class T>
 			void SetData(T value);
+			void ClearData();
 
 			void ImGuiDebug();
 
-			std::string GetCachedName() { return cachedName; };
-
 		   private:
-			// Cached name of the uniform, for hotloading
-			std::string cachedName {};
+			std::string name {};
+			OGLType type {};
 			void* data {};
 		};
 

@@ -49,12 +49,11 @@ namespace butane::core::gfx {
 		glm::mat4 submesh = matModel * transform;
 
 		mat->BindAndSetUniforms();
-		scene::LightManager::The().SetUniforms(mat->shaderProgram);
 
-		mat->shaderProgram->SetUniform("time", glm::vec2(core::TimeSystem::The().NowTime(), std::chrono::system_clock::now().time_since_epoch().count()));
-		mat->shaderProgram->SetUniform("matProjection", core::scene::Scene::The().GetCameraProjection());
-		mat->shaderProgram->SetUniform("matView", core::scene::Scene::The().GetCameraView());
-		mat->shaderProgram->SetUniform("matModel", submesh);
+		mat->shaderProgram->SetUniform("gTime", glm::vec2(core::TimeSystem::The().NowTime(), std::chrono::system_clock::now().time_since_epoch().count()));
+		mat->shaderProgram->SetUniform("gMatProjection", core::scene::Scene::The().GetCameraProjection());
+		mat->shaderProgram->SetUniform("gMatView", core::scene::Scene::The().GetCameraView());
+		mat->shaderProgram->SetUniform("gMatModel", submesh);
 
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);

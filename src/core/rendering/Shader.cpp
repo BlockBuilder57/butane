@@ -7,6 +7,15 @@
 
 namespace butane::core::gfx {
 
+	ShaderProgram::ShaderProgram() {
+		glProgramObject = glCreateProgram();
+		name = "Shader #" + std::to_string(glProgramObject);
+	}
+
+	ShaderProgram::~ShaderProgram() {
+		glDeleteProgram(glProgramObject);
+	}
+
 	void ShaderProgram::AttachShader(butane::core::gfx::Shader& shader) {
 		shader.AddProgram(this);
 		shaderObjects.push_back(&shader);
@@ -19,6 +28,31 @@ namespace butane::core::gfx {
 			shader->Done();
 
 		shaderObjects.resize(0);*/
+
+		// let's collect our uniforms
+
+		GLint uniformCount = 0;
+		const GLsizei bufSize = 64; // maximum name length
+		char name[bufSize]; // variable name in GLSL
+
+		GLint size; // size of the variable
+		OGLType type; // type of the variable (float, vec3 or mat4, etc)
+
+		glGetProgramiv(glProgramObject, GL_ACTIVE_UNIFORMS, &uniformCount);
+		//LogDebug("Shader {} has {} uniforms", glProgramObject, uniformCount);
+
+		uniforms.clear();
+		for (int i = 0; i < uniformCount; i++) {
+			glGetActiveUniform(glProgramObject, i, bufSize, nullptr, &size, reinterpret_cast<GLenum*>(&type), &name[0]);
+
+			// skip globals and privates
+			if (name[0] == 'g' || (name[0] == 'm' && name[1] == '_'))
+				continue;
+
+			//LogDebug("Uniform {} ({}): a {} (size {})", name, i, magic_enum::enum_name<OGLType>(type), size);
+
+			uniforms.emplace_back(name, type);
+		}
 	}
 
 	void ShaderProgram::SetPath(const std::filesystem::path& path) {
@@ -51,17 +85,6 @@ namespace butane::core::gfx {
 			hotloading = true;
 			MaterialSystem::The().GetMaterialsUsingProgram(this, materials);
 			uniforms.clear();
-		}
-
-		if (table["uniforms"].type() == toml::node_type::table) {
-			toml::table unis = *table["uniforms"].as_table();
-			for (auto key : unis) {
-				auto thing = magic_enum::enum_cast<ShaderProgram::Uniform::Type>(key.second.value_or("Unknown"), magic_enum::case_insensitive);
-				if (thing.has_value()) {
-					//LogInfo("Adding key {}, {}", key.first.str(), magic_enum::enum_name(thing.value()));
-					uniforms.emplace_back(std::string(key.first.str()), thing.value());
-				}
-			}
 		}
 
 		// hotloading will break everything!
@@ -114,6 +137,12 @@ namespace butane::core::gfx {
 	}
 	void ShaderProgram::SetUniform(const std::string& uniform, const glm::vec4& vec) {
 		glUniform4f(glGetUniformLocation(glProgramObject, uniform.c_str()), vec.x, vec.y, vec.z, vec.w);
+	}
+	void ShaderProgram::SetUniform(const std::string& uniform, const glm::quat& quat) {
+		glUniform4f(glGetUniformLocation(glProgramObject, uniform.c_str()), quat.x, quat.y, quat.z, quat.w);
+	}
+	void ShaderProgram::SetUniform(const std::string& uniform, const glm::mat3& mat) {
+		glUniformMatrix3fv(glGetUniformLocation(glProgramObject, uniform.c_str()), 1, false, &mat[0][0]);
 	}
 	void ShaderProgram::SetUniform(const std::string& uniform, const glm::mat4& mat) {
 		glUniformMatrix4fv(glGetUniformLocation(glProgramObject, uniform.c_str()), 1, false, &mat[0][0]);

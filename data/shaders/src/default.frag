@@ -4,11 +4,8 @@ in vec3 NORMAL;
 in vec2 TEXCOORD;
 in vec3 FRAGPOS;
 
-uniform vec2 time;
-uniform sampler2D texture1;
-uniform sampler2D texture2;
-
-uniform vec3 viewPos;
+uniform vec2 gTime;
+uniform vec3 m_viewPos;
 
 struct DirLight {
     vec3 direction;
@@ -17,7 +14,7 @@ struct DirLight {
     vec3 diffuse;
     vec3 specular;
 };
-uniform DirLight dirLight;
+uniform DirLight m_dirLight;
 
 struct PointLight {
     vec3 position;
@@ -31,7 +28,7 @@ struct PointLight {
     vec3 specular;
 };
 #define NR_POINT_LIGHTS 4
-uniform PointLight pointLights[NR_POINT_LIGHTS];
+uniform PointLight m_pointLights[NR_POINT_LIGHTS];
 
 struct SpotLight {
     vec3 position;
@@ -47,7 +44,7 @@ struct SpotLight {
     vec3 diffuse;
     vec3 specular;
 };
-uniform SpotLight spotLight;
+uniform SpotLight m_spotLight;
 
 struct Material {
     sampler2D diffuse;
@@ -117,16 +114,16 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
 void main() {
     // properties
     vec3 norm = normalize(NORMAL);
-    vec3 viewDir = normalize(viewPos - FRAGPOS);
+    vec3 viewDir = normalize(m_viewPos - FRAGPOS);
     vec3 result = vec3(0.0);
 
     // phase 1: Directional lighting
-    result += clamp(CalcDirLight(dirLight, norm, viewDir), 0, 999);
+    result += clamp(CalcDirLight(m_dirLight, norm, viewDir), 0, 999);
     // phase 2: Point lights
     for (int i = 0; i < NR_POINT_LIGHTS; i++)
-        result += clamp(CalcPointLight(pointLights[i], norm, FRAGPOS, viewDir), 0, 999);
+        result += clamp(CalcPointLight(m_pointLights[i], norm, FRAGPOS, viewDir), 0, 999);
     // phase 3: Spot light
-    result += clamp(CalcSpotLight(spotLight, norm, FRAGPOS, viewDir), 0, 999);
+    result += clamp(CalcSpotLight(m_spotLight, norm, FRAGPOS, viewDir), 0, 999);
 
     // emission
     vec4 emission_full = texture(material.emission, TEXCOORD);

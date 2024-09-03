@@ -66,31 +66,31 @@ namespace butane::core::scene {
 		if (program == nullptr)
 			return;
 
-		program->SetUniform("dirLight.direction", environment.direction);
-		program->SetUniform("dirLight.ambient", environment.ambient);
-		program->SetUniform("dirLight.diffuse", environment.diffuse);
-		program->SetUniform("dirLight.specular", environment.specular);
+		program->SetUniform("m_dirLight.direction", environment.direction);
+		program->SetUniform("m_dirLight.ambient", environment.ambient);
+		program->SetUniform("m_dirLight.diffuse", environment.diffuse);
+		program->SetUniform("m_dirLight.specular", environment.specular);
 
 		for (int i = 0; i < 4; i++) {
-			program->SetUniform(std::format("pointLights[{}].position", i), points[i].transform.metaPos);
-			program->SetUniform(std::format("pointLights[{}].ambient", i), points[i].ambient);
-			program->SetUniform(std::format("pointLights[{}].diffuse", i), points[i].diffuse);
-			program->SetUniform(std::format("pointLights[{}].specular", i), points[i].specular);
-			program->SetUniform(std::format("pointLights[{}].constant", i), points[i].constant);
-			program->SetUniform(std::format("pointLights[{}].linear", i), points[i].linear);
-			program->SetUniform(std::format("pointLights[{}].quadratic", i), points[i].quadratic);
+			program->SetUniform(std::format("m_pointLights[{}].position", i), points[i].transform.metaPos);
+			program->SetUniform(std::format("m_pointLights[{}].ambient", i), points[i].ambient);
+			program->SetUniform(std::format("m_pointLights[{}].diffuse", i), points[i].diffuse);
+			program->SetUniform(std::format("m_pointLights[{}].specular", i), points[i].specular);
+			program->SetUniform(std::format("m_pointLights[{}].constant", i), points[i].constant);
+			program->SetUniform(std::format("m_pointLights[{}].linear", i), points[i].linear);
+			program->SetUniform(std::format("m_pointLights[{}].quadratic", i), points[i].quadratic);
 		}
 
-		program->SetUniform("spotLight.position", spot.transform.metaPos);
-		program->SetUniform("spotLight.direction", spot.transform.metaForward);
-		program->SetUniform("spotLight.ambient", spot.ambient);
-		program->SetUniform("spotLight.diffuse", spot.diffuse);
-		program->SetUniform("spotLight.specular", spot.specular);
-		program->SetUniform("spotLight.constant", spot.constant);
-		program->SetUniform("spotLight.linear", spot.linear);
-		program->SetUniform("spotLight.quadratic", spot.quadratic);
-		program->SetUniform("spotLight.cutOff", spot.cutOff);
-		program->SetUniform("spotLight.outerCutOff", spot.outerCutOff);
+		program->SetUniform("m_spotLight.position", spot.transform.metaPos);
+		program->SetUniform("m_spotLight.direction", spot.transform.metaForward);
+		program->SetUniform("m_spotLight.ambient", spot.ambient);
+		program->SetUniform("m_spotLight.diffuse", spot.diffuse);
+		program->SetUniform("m_spotLight.specular", spot.specular);
+		program->SetUniform("m_spotLight.constant", spot.constant);
+		program->SetUniform("m_spotLight.linear", spot.linear);
+		program->SetUniform("m_spotLight.quadratic", spot.quadratic);
+		program->SetUniform("m_spotLight.cutOff", spot.cutOff);
+		program->SetUniform("m_spotLight.outerCutOff", spot.outerCutOff);
 	}
 
 	void LightManager::ImGuiDebug() {}

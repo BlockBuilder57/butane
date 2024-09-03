@@ -2,7 +2,7 @@ name = "Container"
 program = "shaders/default.program"
 
 [uniforms]
-diffuse = "textures/container2.png"
-specular = "textures/container2_specular.png"
-emission = "textures/matrix.jpg"
-shininess = 32.0
+"material.diffuse" = "textures/container2.png"
+"material.specular" = "textures/container2_specular.png"
+"material.emission" = "textures/matrix.jpg"
+"material.shininess" = 32.0

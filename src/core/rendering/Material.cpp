@@ -1,6 +1,7 @@
 // Created by block on 2/8/24.
 
 #include <core/filesystem/TomlLoader.hpp>
+#include <core/scene/Light.hpp>
 #include "Material.hpp"
 
 #include <utility>
@@ -64,48 +65,48 @@ namespace butane::core::gfx {
 			auto data = new Material::UniformData(&shader_uni);
 			std::string uni_name = shader_uni.name;
 
-			switch (data->uniform->type) {
+			switch (data->GetType()) {
 				default:
-				case ShaderProgram::Uniform::Type::Unknown: { LogError("Attempting to set uniform data with unknown type"); break; };
+				case OGLType::Unknown: { LogError("Attempting to set uniform data with unknown type"); break; };
 
-				case ShaderProgram::Uniform::Type::Int: {
+				case OGLType::Int: {
 					data->SetData(table[uni_name].value_or(MATERIAL_DEFAULT_INT));
 					break;
 				};
-				case ShaderProgram::Uniform::Type::Float: {
+				case OGLType::Float: {
 					data->SetData(table[uni_name].value_or(MATERIAL_DEFAULT_FLOAT));
 					break;
 				};
-				case ShaderProgram::Uniform::Type::Vec2: {
+				case OGLType::Vec2: {
 					glm::vec2 vec = {};
 					if (table[uni_name].type() == toml::node_type::array)
 						vec = {table[uni_name][0].value_or(MATERIAL_DEFAULT_FLOAT), table[uni_name][1].value_or(MATERIAL_DEFAULT_FLOAT)};
 					data->SetData(vec);
 					break;
 				};
-				case ShaderProgram::Uniform::Type::Vec3: {
+				case OGLType::Vec3: {
 					glm::vec3 vec = {};
 					if (table[uni_name].type() == toml::node_type::array)
 						vec = {table[uni_name][0].value_or(MATERIAL_DEFAULT_FLOAT), table[uni_name][1].value_or(MATERIAL_DEFAULT_FLOAT), table[uni_name][2].value_or(MATERIAL_DEFAULT_FLOAT)};
 					data->SetData(vec);
 					break;
 				};
-				case ShaderProgram::Uniform::Type::Vec4: {
+				case OGLType::Vec4: {
 					glm::vec4 vec = {};
 					if (table[uni_name].type() == toml::node_type::array)
 						vec = {table[uni_name][0].value_or(MATERIAL_DEFAULT_FLOAT), table[uni_name][1].value_or(MATERIAL_DEFAULT_FLOAT), table[uni_name][2].value_or(MATERIAL_DEFAULT_FLOAT), table[uni_name][3].value_or(MATERIAL_DEFAULT_FLOAT)};
 					data->SetData(vec);
 					break;
 				};
-				case ShaderProgram::Uniform::Type::Color: {
+				case OGLType::Color: {
 					glm::vec4 vec = {}; // RGBA
 					if (table[uni_name].type() == toml::node_type::array)
 						vec = {table[uni_name][0].value_or(MATERIAL_DEFAULT_COLOR), table[uni_name][1].value_or(MATERIAL_DEFAULT_COLOR), table[uni_name][2].value_or(MATERIAL_DEFAULT_COLOR), table[uni_name][3].value_or(MATERIAL_DEFAULT_COLOR)};
 					data->SetData(vec);
 					break;
 				};
-				case ShaderProgram::Uniform::Type::Texture: {
-					data->SetData(TextureSystem::The().GetTexture(table[uni_name].value_or("butt")));
+				case OGLType::Texture2D: {
+					data->SetData(TextureSystem::The().GetTexture(table[uni_name].value_or("defaultMissing")));
 					break;
 				}
 			}
@@ -120,127 +121,90 @@ namespace butane::core::gfx {
 		// searching our uniform data first
 		for (UniformData* data : uniforms) {
 			// set the uniform to null just in case a match isn't found
-			data->uniform = nullptr;
+			std::string name = data->GetName();
 
-			for (ShaderProgram::Uniform& uni : shader_uniforms)
-				if (data->GetCachedName() == uni.name)
-					data->SetUniform(&uni);
+		   for (ShaderProgram::Uniform& uni : shader_uniforms)
+				if (name == uni.name)
+					data->SetByUniform(&uni);
 		}
 
-		uniforms.erase(std::remove_if(uniforms.begin(), uniforms.end(), [](UniformData* i) { return i->uniform == nullptr; }), uniforms.end());
+		uniforms.erase(std::remove_if(uniforms.begin(), uniforms.end(), [](UniformData* i) { return i->GetType() == OGLType::Unknown; }), uniforms.end());
 	}
 
+	static Material* lastBoundMaterial = nullptr;
 	void Material::BindAndSetUniforms() {
 		if (shaderProgram == nullptr)
 			return;
 
-		const std::string prefix = "material.";
-		auto texindex = 0;
-
-		// textures need to be set and bound
-		for (auto data : uniforms) {
-			if (data->uniform == nullptr)
-				continue;
-			if (data->uniform->type != ShaderProgram::Uniform::Type::Texture)
-				continue;
-
-			std::string uniform_name = prefix + data->uniform->name;
-
-			glActiveTexture(GL_TEXTURE0 + texindex++);
-			auto tex = data->GetData(MATERIAL_DEFAULT_TEXTURE_PTR);
-			tex->Bind();
-		}
+		// very lazy attempt at batching
+		if (lastBoundMaterial == this)
+			return;
+		lastBoundMaterial = this;
 
 		shaderProgram->Bind();
-		texindex = 0;
+		auto texindex = 0;
 
 		for (auto& data : uniforms) {
-			if (data->uniform == nullptr)
-				continue;
+			std::string uniform_name = data->GetName();
 
-			std::string uniform_name = prefix + data->uniform->name;
-
-			switch (data->uniform->type) {
+			switch (data->GetType()) {
 				default:
-				case ShaderProgram::Uniform::Type::Unknown: { LogError("Attepmting to bind uniform with unknown type"); break; };
+				case OGLType::Unknown: { LogError("Attempting to bind uniform with unknown type"); break; };
 
-				case ShaderProgram::Uniform::Type::Int: {
+				case OGLType::Int: {
 					shaderProgram->SetUniform(uniform_name, data->GetData<int>(MATERIAL_DEFAULT_INT));
 					break;
 				};
-				case ShaderProgram::Uniform::Type::Float: {
+				case OGLType::Float: {
 					shaderProgram->SetUniform(uniform_name, data->GetData<float>(MATERIAL_DEFAULT_FLOAT));
 					break;
 				};
-				case ShaderProgram::Uniform::Type::Vec2: {
+				case OGLType::Vec2: {
 					shaderProgram->SetUniform(uniform_name, data->GetData<glm::vec2>({MATERIAL_DEFAULT_FLOAT, MATERIAL_DEFAULT_FLOAT}));
 					break;
 				};
-				case ShaderProgram::Uniform::Type::Vec3: {
-					shaderProgram->SetUniform(uniform_name,
-											  data->GetData<glm::vec3>({MATERIAL_DEFAULT_FLOAT, MATERIAL_DEFAULT_FLOAT, MATERIAL_DEFAULT_FLOAT}));
+				case OGLType::Vec3: {
+					shaderProgram->SetUniform(uniform_name, data->GetData<glm::vec3>({MATERIAL_DEFAULT_FLOAT, MATERIAL_DEFAULT_FLOAT, MATERIAL_DEFAULT_FLOAT}));
 					break;
 				};
-				case ShaderProgram::Uniform::Type::Vec4: {
+				case OGLType::Vec4: {
 					shaderProgram->SetUniform(uniform_name, data->GetData<glm::vec4>({MATERIAL_DEFAULT_FLOAT, MATERIAL_DEFAULT_FLOAT, MATERIAL_DEFAULT_FLOAT, MATERIAL_DEFAULT_FLOAT}));
 					break;
 				};
-				case ShaderProgram::Uniform::Type::Color: {
+				case OGLType::Color: {
 					shaderProgram->SetUniform(uniform_name, data->GetData<glm::vec4>({MATERIAL_DEFAULT_COLOR, MATERIAL_DEFAULT_COLOR, MATERIAL_DEFAULT_COLOR, MATERIAL_DEFAULT_COLOR}));
 					break;
 				};
-				case ShaderProgram::Uniform::Type::Texture: {
+				case OGLType::Texture2D: {
+					glActiveTexture(GL_TEXTURE0 + texindex);
+					Texture* tex = data->GetData(MATERIAL_DEFAULT_TEXTURE_PTR);
+					tex->Bind();
 					shaderProgram->SetUniform(uniform_name, texindex++);
 				};
 			}
 		}
+
+		scene::LightManager::The().SetUniforms(shaderProgram);
 	}
 
 	Material::UniformData::UniformData(ShaderProgram::Uniform* ptr) {
-		SetUniform(ptr);
+		SetByUniform(ptr);
 	}
 
 	Material::UniformData::~UniformData() {
-		switch(uniform->type) {
-			default:
-			case ShaderProgram::Uniform::Type::Unknown: {
-				break;
-			};
-
-			case ShaderProgram::Uniform::Type::Int: {
-				delete static_cast<int*>(data);
-				break;
-			};
-			case ShaderProgram::Uniform::Type::Float: {
-				delete static_cast<float*>(data);
-				break;
-			};
-			case ShaderProgram::Uniform::Type::Vec2: {
-				delete static_cast<glm::vec2*>(data);
-				break;
-			};
-			case ShaderProgram::Uniform::Type::Vec3: {
-				delete static_cast<glm::vec3*>(data);
-				break;
-			};
-			case ShaderProgram::Uniform::Type::Vec4:
-			case ShaderProgram::Uniform::Type::Color: {
-				delete static_cast<glm::vec4*>(data);
-				break;
-			};
-			case ShaderProgram::Uniform::Type::Texture: {
-				// we don't delete texture data!!
-				//delete static_cast<Texture*>(data);
-				break;
-			}
-		}
+		ClearData();
 	}
 
-	void Material::UniformData::SetUniform(ShaderProgram::Uniform* ptr) {
-		if (ptr != nullptr) {
-			uniform = ptr;
-			cachedName = ptr->name;
-		}
+	void Material::UniformData::SetByUniform(ShaderProgram::Uniform* ptr) {
+		if (ptr == nullptr)
+			return;
+
+		// clear our data just in case
+		if (type != ptr->type)
+			ClearData();
+
+		name = ptr->name;
+		type = ptr->type;
 	}
 
 	template <class T>
@@ -267,64 +231,102 @@ namespace butane::core::gfx {
 		}
 	}
 
+	void Material::UniformData::ClearData() {
+		if (data == nullptr)
+			return;
+
+		switch(type) {
+			default:
+			case OGLType::Unknown: {
+				break;
+			};
+			case OGLType::Int: {
+				delete static_cast<int*>(data);
+				break;
+			};
+			case OGLType::Float: {
+				delete static_cast<float*>(data);
+				break;
+			};
+			case OGLType::Vec2: {
+				delete static_cast<glm::vec2*>(data);
+				break;
+			};
+			case OGLType::Vec3: {
+				delete static_cast<glm::vec3*>(data);
+				break;
+			};
+			case OGLType::Vec4:
+			case OGLType::Color: {
+				delete static_cast<glm::vec4*>(data);
+				break;
+			};
+			case OGLType::Texture2D: {
+				// we don't delete texture data!!
+				//delete static_cast<Texture*>(data);
+				break;
+			}
+		}
+	}
+
 	void Material::UniformData::ImGuiDebug() {
 		// we're in a table!
 		ImGui::TableSetColumnIndex(0);
 
-		if (data == nullptr) {
-			ImGui::TextDisabled("%s: null", uniform->name.c_str());
-			return;
-		}
-
-		ImGui::Text("%s", uniform->name.c_str());
+		ImGui::Text("%s", name.c_str());
 
 		ImGui::TableSetColumnIndex(1);
-		ImGui::Text("%s", magic_enum::enum_name(uniform->type).data());
+		ImGui::Text("%s", magic_enum::enum_name(type).data());
 
 		ImGui::TableSetColumnIndex(2);
 
-		ImGui::PushItemWidth(150.f);
-
-		std::string name = "##" + uniform->name;
-
-		switch(uniform->type) {
-			default:
-			case ShaderProgram::Uniform::Type::Unknown: {
-				ImGui::TextDisabled("???");
-				break;
-			};
-
-			case ShaderProgram::Uniform::Type::Int: {
-				ImGui::DragInt(name.c_str(), static_cast<int*>(data));
-				break;
-			};
-			case ShaderProgram::Uniform::Type::Float: {
-				ImGui::DragFloat(name.c_str(), static_cast<float*>(data));
-				break;
-			};
-			case ShaderProgram::Uniform::Type::Vec2: {
-				ImGui::DragFloat2(name.c_str(), static_cast<float*>(data));
-				break;
-			};
-			case ShaderProgram::Uniform::Type::Vec3: {
-				ImGui::DragFloat3(name.c_str(), static_cast<float*>(data));
-				break;
-			};
-			case ShaderProgram::Uniform::Type::Vec4: {
-				ImGui::DragFloat4(name.c_str(), static_cast<float*>(data));
-				break;
-			};
-			case ShaderProgram::Uniform::Type::Color: {
-				ImGui::ColorEdit4(name.c_str(), static_cast<float*>(data));
-				break;
-			};
-			case ShaderProgram::Uniform::Type::Texture: {
-				Texture* tex = static_cast<Texture*>(data);
-				ImGui::TextDisabled("%s", tex->GetName().c_str());
-			}
+		if (data == nullptr) {
+			ImGui::TextDisabled("nullptr");
 		}
+		else {
+			ImGui::PushItemWidth(150.f);
 
-		ImGui::PopItemWidth();
+			std::string control_name = "##" + this->name;
+
+			switch(type) {
+				default:
+				case OGLType::Unknown: {
+					ImGui::TextDisabled("???");
+					break;
+				};
+
+				case OGLType::Int: {
+					ImGui::DragInt(control_name.c_str(), static_cast<int*>(data));
+					break;
+				};
+				case OGLType::Float: {
+					ImGui::DragFloat(control_name.c_str(), static_cast<float*>(data));
+					break;
+				};
+				case OGLType::Vec2: {
+					ImGui::DragFloat2(control_name.c_str(), static_cast<float*>(data));
+					break;
+				};
+				case OGLType::Vec3: {
+					ImGui::DragFloat3(control_name.c_str(), static_cast<float*>(data));
+					break;
+				};
+				case OGLType::Vec4: {
+					ImGui::DragFloat4(control_name.c_str(), static_cast<float*>(data));
+					break;
+				};
+				case OGLType::Color: {
+					ImGui::ColorEdit4(control_name.c_str(), static_cast<float*>(data));
+					break;
+				};
+				case OGLType::Texture2D: {
+					Texture* tex = static_cast<Texture*>(data);
+					ImGui::TextDisabled("%s", tex->GetName().c_str());
+				}
+			}
+
+			ImGui::PopItemWidth();
+		}
 	}
 
 }

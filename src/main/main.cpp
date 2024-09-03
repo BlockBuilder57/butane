@@ -351,8 +351,8 @@ int main(int argc, char** argv) {
 
 			if (ImGui::BeginMenu("SSTV")) {
 				auto sstv = core::experiments::SSTV::The();
-				for (auto i = 0; i < sstv.MODES.size(); i++) {
-					auto* mode = &sstv.MODES[i];
+				for (size_t i = 0; i < sstv.MODES.size(); i++) {
+					core::experiments::SSTV::Mode* mode = &sstv.MODES[i];
 					if (ImGui::Button(mode->name.c_str())) {
 						sstv.SetMode(mode);
 						sstv.DoTheThing(windowRect);
@@ -391,7 +391,7 @@ int main(int argc, char** argv) {
 
 		// cubes
 		materialCube->shaderProgram->Bind();
-		materialCube->shaderProgram->SetUniform("viewPos", theCam->transform.metaPos);
+		materialCube->shaderProgram->SetUniform("m_viewPos", theCam->transform.metaPos);
 
 		for(int i = 0; i < 10; i++) {
 			glm::mat4 model = glm::mat4(1.0f);
@@ -407,11 +407,11 @@ int main(int argc, char** argv) {
 
 		for(int i = 0; i < 4; i++) {
 			auto* light = &core::scene::LightManager::The().points[i];
+
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, light->transform.metaPos);
-
 			model = glm::scale(model, glm::vec3(0.1f));
-			materialLight->shaderProgram->SetUniform("matModel", model);
+
 			materialLight->shaderProgram->SetUniform("lightColor", light->GetColor());
 
 			modelCube->Draw(materialLight, model);

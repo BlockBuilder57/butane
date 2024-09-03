@@ -72,7 +72,7 @@ namespace butane::core::experiments {
 		}
 
 		for (int i = 0; i < lines; i++) {
-			for (auto j = mode->instruction_loop_start; j < mode->instructions_looping.size(); j++) {
+			for (size_t j = mode->instruction_loop_start; j < mode->instructions_looping.size(); j++) {
 				// found an extra line, but we don't use them - skip
 				Instruction ins = mode->instructions_looping[j];
 				if (!mode->uses_extra_lines && ins.flags & InstructionFlags::ExtraLine)
@@ -267,6 +267,9 @@ namespace butane::core::experiments {
 	}
 
 	float SSTV::ScanMonochrome(Instruction* ins, int pos_x, int pos_y, std::uint8_t* sampled_pixel) {
+		if (ins == nullptr)
+			return 0;
+
 		float pitch = 1500.f;
 
 		if(sampled_pixel == nullptr) {
@@ -283,6 +286,9 @@ namespace butane::core::experiments {
 	}
 
 	float SSTV::ScanRGB(Instruction* ins, int pos_x, int pos_y, std::uint8_t* sampled_pixel) {
+		if (ins == nullptr)
+			return 0;
+
 		float pitch = 1500.f;
 		int pass = std::clamp((int)ins->pitch, 0, 2); // modes 0-2 correspond to Y/R-Y/B-Y
 

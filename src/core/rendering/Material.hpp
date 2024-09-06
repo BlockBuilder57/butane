@@ -12,21 +12,19 @@
 
 namespace butane::core::gfx {
 
-#define MATERIAL_DEFAULT_INT 0
-#define MATERIAL_DEFAULT_FLOAT 0.f
-#define MATERIAL_DEFAULT_COLOR 1.f
-#define MATERIAL_DEFAULT_TEXTURE_PTR TextureSystem::GetDefaultTexture(TextureSystem::DefaultTexture::White)
+	namespace MaterialDefaults {
+		const int Int = 0;
+		const float Float = 0.f;
+		const glm::vec2 Vec2 = {};
+		const glm::vec3 Vec3 = {};
+		const glm::vec4 Vec4 = {};
+		const glm::quat Quat = glm::identity<glm::quat>();
+		const glm::vec4 Color = {1.f, 1.f, 1.f, 1.f};
+		Texture** const Texture2D = TextureSystem::GetDefaultTexturePtrPtr(TextureSystem::DefaultTexture::White);
+	}
 
-	class Material {
+	struct Material {
 		friend struct MaterialSystem;
-
-	   public:
-		struct Defaults {
-			static int Int;
-			static float Float;
-			static glm::vec4 Color;
-			static Texture* Tex;
-		};
 
 		Material();
 		Material(std::string material_name, ShaderProgram* shader);
@@ -36,8 +34,7 @@ namespace butane::core::gfx {
 
 		std::string GetName() { return name; }
 
-		class UniformData {
-		   public:
+		struct UniformData {
 			UniformData() = default;
 			UniformData(ShaderProgram::Uniform* ptr);
 			~UniformData();

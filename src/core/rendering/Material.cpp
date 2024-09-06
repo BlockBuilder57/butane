@@ -70,43 +70,46 @@ namespace butane::core::gfx {
 				case OGLType::Unknown: { LogError("Attempting to set uniform data with unknown type"); break; };
 
 				case OGLType::Int: {
-					data->SetData(table[uni_name].value_or(MATERIAL_DEFAULT_INT));
+					data->SetData(table[uni_name].value_or(MaterialDefaults::Int));
 					break;
 				};
 				case OGLType::Float: {
-					data->SetData(table[uni_name].value_or(MATERIAL_DEFAULT_FLOAT));
+					data->SetData(table[uni_name].value_or(MaterialDefaults::Float));
 					break;
 				};
 				case OGLType::Vec2: {
-					glm::vec2 vec = {};
+					glm::vec2 vec = MaterialDefaults::Vec2;
 					if (table[uni_name].type() == toml::node_type::array)
-						vec = {table[uni_name][0].value_or(MATERIAL_DEFAULT_FLOAT), table[uni_name][1].value_or(MATERIAL_DEFAULT_FLOAT)};
+						vec = {table[uni_name][0].value_or(vec.x), table[uni_name][1].value_or(vec.y)};
 					data->SetData(vec);
 					break;
 				};
 				case OGLType::Vec3: {
-					glm::vec3 vec = {};
+					glm::vec3 vec = MaterialDefaults::Vec3;
 					if (table[uni_name].type() == toml::node_type::array)
-						vec = {table[uni_name][0].value_or(MATERIAL_DEFAULT_FLOAT), table[uni_name][1].value_or(MATERIAL_DEFAULT_FLOAT), table[uni_name][2].value_or(MATERIAL_DEFAULT_FLOAT)};
+						vec = {table[uni_name][0].value_or(vec.x), table[uni_name][1].value_or(vec.y), table[uni_name][2].value_or(vec.z)};
 					data->SetData(vec);
 					break;
 				};
 				case OGLType::Vec4: {
-					glm::vec4 vec = {};
+					glm::vec4 vec = MaterialDefaults::Vec4;
 					if (table[uni_name].type() == toml::node_type::array)
-						vec = {table[uni_name][0].value_or(MATERIAL_DEFAULT_FLOAT), table[uni_name][1].value_or(MATERIAL_DEFAULT_FLOAT), table[uni_name][2].value_or(MATERIAL_DEFAULT_FLOAT), table[uni_name][3].value_or(MATERIAL_DEFAULT_FLOAT)};
+						vec = {table[uni_name][0].value_or(vec.x), table[uni_name][1].value_or(vec.y), table[uni_name][2].value_or(vec.z), table[uni_name][3].value_or(vec.w)};
 					data->SetData(vec);
 					break;
 				};
 				case OGLType::Color: {
-					glm::vec4 vec = {}; // RGBA
+					glm::vec4 vec = MaterialDefaults::Color; // RGBA
 					if (table[uni_name].type() == toml::node_type::array)
-						vec = {table[uni_name][0].value_or(MATERIAL_DEFAULT_COLOR), table[uni_name][1].value_or(MATERIAL_DEFAULT_COLOR), table[uni_name][2].value_or(MATERIAL_DEFAULT_COLOR), table[uni_name][3].value_or(MATERIAL_DEFAULT_COLOR)};
+						vec = {table[uni_name][0].value_or(vec.x), table[uni_name][1].value_or(vec.y), table[uni_name][2].value_or(vec.z), table[uni_name][3].value_or(vec.w)};
 					data->SetData(vec);
 					break;
 				};
 				case OGLType::Texture2D: {
-					data->SetData(TextureSystem::The().GetTexture(table[uni_name].value_or("defaultMissing")));
+					if (table[uni_name].type() == toml::node_type::string)
+						data->SetData(TextureSystem::The().GetTexture(table[uni_name].value_or("defaultMissing")));
+					else
+						data->SetData(*MaterialDefaults::Texture2D);
 					break;
 				}
 			}
@@ -152,33 +155,36 @@ namespace butane::core::gfx {
 				case OGLType::Unknown: { LogError("Attempting to bind uniform with unknown type"); break; };
 
 				case OGLType::Int: {
-					shaderProgram->SetUniform(uniform_name, data->GetData<int>(MATERIAL_DEFAULT_INT));
+					shaderProgram->SetUniform(uniform_name, data->GetData<int>(MaterialDefaults::Int));
 					break;
 				};
 				case OGLType::Float: {
-					shaderProgram->SetUniform(uniform_name, data->GetData<float>(MATERIAL_DEFAULT_FLOAT));
+					shaderProgram->SetUniform(uniform_name, data->GetData<float>(MaterialDefaults::Float));
 					break;
 				};
 				case OGLType::Vec2: {
-					shaderProgram->SetUniform(uniform_name, data->GetData<glm::vec2>({MATERIAL_DEFAULT_FLOAT, MATERIAL_DEFAULT_FLOAT}));
+					shaderProgram->SetUniform(uniform_name, data->GetData<glm::vec2>(MaterialDefaults::Vec2));
 					break;
 				};
 				case OGLType::Vec3: {
-					shaderProgram->SetUniform(uniform_name, data->GetData<glm::vec3>({MATERIAL_DEFAULT_FLOAT, MATERIAL_DEFAULT_FLOAT, MATERIAL_DEFAULT_FLOAT}));
+					shaderProgram->SetUniform(uniform_name, data->GetData<glm::vec3>(MaterialDefaults::Vec3));
 					break;
 				};
 				case OGLType::Vec4: {
-					shaderProgram->SetUniform(uniform_name, data->GetData<glm::vec4>({MATERIAL_DEFAULT_FLOAT, MATERIAL_DEFAULT_FLOAT, MATERIAL_DEFAULT_FLOAT, MATERIAL_DEFAULT_FLOAT}));
+					shaderProgram->SetUniform(uniform_name, data->GetData<glm::vec4>(MaterialDefaults::Vec4));
 					break;
 				};
 				case OGLType::Color: {
-					shaderProgram->SetUniform(uniform_name, data->GetData<glm::vec4>({MATERIAL_DEFAULT_COLOR, MATERIAL_DEFAULT_COLOR, MATERIAL_DEFAULT_COLOR, MATERIAL_DEFAULT_COLOR}));
+					shaderProgram->SetUniform(uniform_name, data->GetData<glm::vec4>(MaterialDefaults::Color));
 					break;
 				};
 				case OGLType::Texture2D: {
 					glActiveTexture(GL_TEXTURE0 + texindex);
-					Texture* tex = data->GetData(MATERIAL_DEFAULT_TEXTURE_PTR);
-					tex->Bind();
+					Texture* tex = data->GetData(*MaterialDefaults::Texture2D);
+					if (tex != nullptr)
+						tex->Bind();
+					else
+						LogError("Attempted to bind null texture!");
 					shaderProgram->SetUniform(uniform_name, texindex++);
 				};
 			}

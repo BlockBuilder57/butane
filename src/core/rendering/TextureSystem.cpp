@@ -126,19 +126,22 @@ namespace butane::core::gfx {
 		ImGui::End();
 	}
 
-	Texture* TextureSystem::GetDefaultTexture(DefaultTexture type) {
+	Texture** TextureSystem::GetDefaultTexturePtrPtr(DefaultTexture type) {
 		switch (type) {
 			case DefaultTexture::Missing:
-				return defaultMissing;
+				return &defaultMissing;
 			case DefaultTexture::White:
-				return defaultWhite;
+				return &defaultWhite;
 			case DefaultTexture::Black:
-				return defaultBlack;
+				return &defaultBlack;
 			default:
-				return defaultMissing;
+				return &defaultMissing;
 		}
 	}
 
+	Texture* TextureSystem::GetDefaultTexturePtr(DefaultTexture type) {
+		return *GetDefaultTexturePtrPtr(type);
+	}
 
 	Texture* TextureSystem::GetTexture(const filesystem::stdfs::path &path) {
 		if (textureDict.contains(path))

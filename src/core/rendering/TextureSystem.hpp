@@ -25,7 +25,9 @@ namespace butane::core::gfx {
 			Black
 		};
 
-		static Texture* GetDefaultTexture(DefaultTexture type);
+		// A dumb hack for early initializers...
+		static Texture** GetDefaultTexturePtrPtr(DefaultTexture type);
+		static Texture* GetDefaultTexturePtr(DefaultTexture type);
 
 		Texture* GetTexture(const filesystem::stdfs::path& path);
 

@@ -14,3 +14,6 @@
 [submodule "third_party/assimp"]
 	path = third_party/assimp
 	url = https://github.com/assimp/assimp
+[submodule "third_party/fasstv"]
+	path = third_party/fasstv
+	url = https://github.com/BlockBuilder57/fasstv

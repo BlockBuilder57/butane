@@ -26,6 +26,7 @@ namespace butane::core {
 		float UpdateRate() { return updateRate; }
 		float NowTime() { return nowTime; }
 		float DeltaTime() { return deltaTime; }
+		float Ticks() { return ticks; }
 
 		bool IsInTick() { return inTick; }
 		bool TickNextReady();

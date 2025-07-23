@@ -118,6 +118,8 @@ namespace butane::core {
 			keyModifiers = modifiers;
 		}
 
+		std::string AsString();
+
 		bool Down() {
 			for(SDL_Scancode key : keyArray) {
 				if(!InputSystem::The().ButtonDown(key, keyModifiers))

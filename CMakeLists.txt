@@ -53,6 +53,7 @@ add_subdirectory(third_party/glm)
 add_subdirectory(third_party/tomlpp)
 add_subdirectory(third_party/magic_enum)
 add_subdirectory(third_party/assimp)
+add_subdirectory(third_party/fasstv)
 
 add_subdirectory(src/core)
 add_subdirectory(src/main)

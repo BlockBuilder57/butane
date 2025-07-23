@@ -3,8 +3,6 @@ add_library(butane_core
 		debug/ImGuiExtensions.cpp
 
 		# various experiments
-		experiments/Oscillator.cpp
-		experiments/SSTV.cpp
 
 		Logger.cpp
 		StdoutSink.cpp

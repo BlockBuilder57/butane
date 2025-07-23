@@ -48,27 +48,7 @@ namespace butane::core {
 				ImGui::TextUnformatted(bind->name.c_str());
 
 				ImGui::TableSetColumnIndex(1);
-				std::string keystr = "";
-
-				if ((bind->keyModifiers & SDL_Keymod::KMOD_CTRL) != 0)
-					keystr += "CTRL+";
-				if ((bind->keyModifiers & SDL_Keymod::KMOD_SHIFT) != 0)
-					keystr += "SHIFT+";
-				if ((bind->keyModifiers & SDL_Keymod::KMOD_ALT) != 0)
-					keystr += "ALT+";
-				if ((bind->keyModifiers & SDL_Keymod::KMOD_GUI) != 0)
-					keystr += "GUI+";
-
-				for(size_t i = 0; i < bind->keyArray.size(); i++) {
-					keystr += SDL_GetKeyName(SDL_GetKeyFromScancode(bind->keyArray[i]));
-					keystr += "+";
-				}
-
-				// lazy stripping
-				if (keystr.ends_with('+'))
-					keystr = keystr.substr(0, keystr.size() - 1);
-
-				ImGui::TextUnformatted(keystr.c_str());
+				ImGui::TextUnformatted(bind->AsString().c_str());
 
 				ImGui::TableSetColumnIndex(2);
 				ImGui::Text(bind->Down() ? "x" : "-");
@@ -151,6 +131,30 @@ namespace butane::core {
 
 	Bind* InputSystem::RegisterBind(std::string name, std::vector<SDL_Scancode> keys, SDL_Keymod modifiers /*= SDL_Keymod::KMOD_NONE*/) {
 		return registeredBinds.emplace_back(new Bind(name, keys, modifiers));
+	}
+
+	std::string Bind::AsString() {
+		std::string keystr = "";
+
+		if ((keyModifiers & SDL_Keymod::KMOD_CTRL) != 0)
+			keystr += "CTRL+";
+		if ((keyModifiers & SDL_Keymod::KMOD_SHIFT) != 0)
+			keystr += "SHIFT+";
+		if ((keyModifiers & SDL_Keymod::KMOD_ALT) != 0)
+			keystr += "ALT+";
+		if ((keyModifiers & SDL_Keymod::KMOD_GUI) != 0)
+			keystr += "GUI+";
+
+		for(auto& key : keyArray) {
+			keystr += SDL_GetKeyName(SDL_GetKeyFromScancode(key));
+			keystr += "+";
+		}
+
+		// lazy stripping
+		if (keystr.ends_with('+'))
+			keystr = keystr.substr(0, keystr.size() - 1);
+
+		return keystr;
 	}
 
 } // namespace butane::core

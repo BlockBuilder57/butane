@@ -4,8 +4,9 @@
 #include <backends/imgui_impl_sdl2.h>
 #include <imgui.h>
 #include <SDL2/SDL.h>
+#include <libfasstv/libfasstv.hpp>
+#include <libfasstv/ExportUtils.hpp>
 
-#include <core/experiments/SSTV.hpp>
 #include <core/filesystem/Filesystem.hpp>
 #include <core/filesystem/WatchSystem.hpp>
 #include <core/rendering/GLHeaders.hpp>
@@ -46,6 +47,67 @@ void DumpOglInfo() {
 	glGetIntegerv(GL_MAJOR_VERSION, &maj);
 	glGetIntegerv(GL_MINOR_VERSION, &min);
 	core::LogInfo("OpenGL   : {}.{}", maj, min);
+}
+
+std::uint8_t colorHolder[4] = {};
+std::uint32_t lastSample = -1;
+std::uint64_t lastTick = 0;
+std::vector<std::uint8_t> pixels;
+
+void UpdatePixels() {
+	std::uint64_t ticks = core::TimeSystem::The().Ticks();
+	if (ticks <= lastTick)
+		return;
+
+	lastTick = ticks;
+
+	fasstv::SSTV::Mode* mode = fasstv::SSTVEncode::The().GetMode();
+
+	SDL_Rect rect = {0, 0, 1280, 720};
+	if (sdl::Window::CurrentWindow != nullptr)
+		rect = sdl::Window::CurrentWindow->GetRect();
+
+	if (pixels.capacity() != 4 * rect.w * rect.h) {
+		core::LogDebug("upping pixel buffer");
+		pixels.clear();
+		pixels.resize(4 * rect.w * rect.h);
+	}
+
+	core::LogDebug("Getting shit");
+	glReadPixels(0, 0, rect.w, rect.h, GL_RGBA, GL_UNSIGNED_BYTE, &pixels[0]);
+}
+
+std::uint8_t* GetSampleFromSurface(int sample_x, int sample_y) {
+	std::uint32_t curSample = sample_x | (sample_y << 16);
+
+	if (curSample != lastSample) {
+		UpdatePixels();
+		fasstv::SSTV::Mode* mode = fasstv::SSTVEncode::The().GetMode();
+
+		SDL_Rect rect = {0, 0, 1280, 720};
+		if (sdl::Window::CurrentWindow != nullptr)
+			rect = sdl::Window::CurrentWindow->GetRect();
+
+		// get pixel at sample (no nice filtering...)
+		int pixel_idx = sample_x + (((rect.h - 1) - sample_y) * rect.w);
+		pixel_idx = std::clamp(pixel_idx, 0, (rect.w * rect.h) - 1);
+		//memcpy(&colorHolder[0], &pixels[pixel_idx * 4], 4);
+
+		for (int i = 0; i < 3; i++) {
+			colorHolder[i] = pixels[(pixel_idx * 4) + i];
+		}
+		colorHolder[3] = 255;
+
+		//SDL_ReadSurfacePixel(SampleSurface, sample_x, sample_y, &colorHolder[0], &colorHolder[1], &colorHolder[2], &colorHolder[3]);
+		//core::LogDebug("Sample ({}, {}) read #{:02x}{:02x}{:02x}{:02x}", sample_x, sample_y, colorHolder[0], colorHolder[1], colorHolder[2], colorHolder[3]);
+		lastSample = curSample;
+	}
+
+	// lazy alpha application
+	for (int i = 0; i < 3; i++)
+		colorHolder[i] *= (colorHolder[3] / 255.f);
+
+	return &colorHolder[0];
 }
 
 int main(int argc, char** argv) {
@@ -224,6 +286,11 @@ int main(int argc, char** argv) {
 	glm::quat camRot = glm::identity<glm::quat>();
 	float camSpeed = 5.f;
 
+	auto& sstvenc = fasstv::SSTVEncode::The();
+	sstvenc.SetSampleRate(44100);
+	sstvenc.SetPixelProvider(&GetSampleFromSurface);
+	std::vector<float> samples;
+
 	const glm::vec3 cubePositions[] = {
 			glm::vec3( 0.0f,  0.0f,  8.0f),
 			glm::vec3( 2.0f,  5.0f, -15.0f),
@@ -259,8 +326,9 @@ int main(int argc, char** argv) {
 			}
 
 			if (bind_sstv->Down()) {
-				auto sstv = core::experiments::SSTV::The();
-				sstv.DoTheThing(windowRect);
+				sstvenc.RunAllInstructions(samples, {0, 0, windowRect.w, windowRect.h});
+				std::ofstream file(core::filesystem::Filesystem::GetDataDir() / "sstv" / "sstv.wav", std::ios::binary);
+				fasstv::SamplesToWAV(samples, 44100, file);
 			}
 
 			if(core::InputSystem::The().IsMouseLocked()) {
@@ -350,13 +418,26 @@ int main(int argc, char** argv) {
 			}
 
 			if (ImGui::BeginMenu("SSTV")) {
-				auto sstv = core::experiments::SSTV::The();
-				for (size_t i = 0; i < sstv.MODES.size(); i++) {
-					core::experiments::SSTV::Mode* mode = &sstv.MODES[i];
-					if (ImGui::Button(mode->name.c_str())) {
-						sstv.SetMode(mode);
-						sstv.DoTheThing(windowRect);
+				auto& sstv = fasstv::SSTV::The();
+
+				if (ImGui::CollapsingHeader("Modes")) {
+					for(auto i = 0; i < sstv.MODES.size(); i++) {
+						fasstv::SSTV::Mode& mode = sstv.MODES[i];
+						if(ImGui::Button(mode.name.c_str())) {
+							sstvenc.SetMode(&mode);
+							sstvenc.SetLetterbox(fasstv::Rect::CreateLetterbox(mode.width, mode.lines, { 0, 0, windowRect.w, windowRect.h }));
+						}
+
+						if(i % 6 != 5 && i != sstv.MODES.size() - 1)
+							ImGui::SameLine();
 					}
+				}
+
+				ImGui::LabelText("Current SSTV Mode", "%s", sstvenc.GetMode() ? sstvenc.GetMode()->name.c_str() : "<none>");
+				if (ImGui::Button(bind_sstv->AsString().c_str())) {
+					sstvenc.RunAllInstructions(samples, {0, 0, windowRect.w, windowRect.h});
+					std::ofstream file(core::filesystem::Filesystem::GetDataDir() / "sstv" / "sstv.wav", std::ios::binary);
+					fasstv::SamplesToWAV(samples, 44100, file);
 				}
 
 				ImGui::EndMenu();

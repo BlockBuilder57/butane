@@ -1,7 +1,5 @@
 // Created by block on 8/14/23.
 
-#include <backends/imgui_impl_opengl3.h>
-#include <backends/imgui_impl_sdl2.h>
 #include <imgui.h>
 #include <SDL2/SDL.h>
 #include <libfasstv/libfasstv.hpp>
@@ -26,89 +24,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "wrap/Wrap.hpp"
+
 namespace core = butane::core;
+namespace wrap = butane::wrap;
 namespace sdl = core::sdl;
 namespace gfx = core::gfx;
-
-void DumpOglInfo() {
-	int maj;
-	int min;
-
-	core::LogInfo("OpenGL Information:");
-	core::LogInfo("Vendor   : {}", reinterpret_cast<const char*>(glGetString(GL_VENDOR)));
-	core::LogInfo("Renderer : {}", reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
-	core::LogInfo("Version  : {}", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
-	core::LogInfo("GLSL     : {}", reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)));
-
-	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &maj);
-	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &min);
-	core::LogInfo("Context  : {}.{}", maj, min);
-
-	glGetIntegerv(GL_MAJOR_VERSION, &maj);
-	glGetIntegerv(GL_MINOR_VERSION, &min);
-	core::LogInfo("OpenGL   : {}.{}", maj, min);
-}
-
-std::uint8_t colorHolder[4] = {};
-std::uint32_t lastSample = -1;
-std::uint64_t lastTick = 0;
-std::vector<std::uint8_t> pixels;
-
-void UpdatePixels() {
-	std::uint64_t ticks = core::TimeSystem::The().Ticks();
-	if (ticks <= lastTick)
-		return;
-
-	lastTick = ticks;
-
-	fasstv::SSTV::Mode* mode = fasstv::SSTVEncode::The().GetMode();
-
-	SDL_Rect rect = {0, 0, 1280, 720};
-	if (sdl::Window::CurrentWindow != nullptr)
-		rect = sdl::Window::CurrentWindow->GetRect();
-
-	if (pixels.capacity() != 4 * rect.w * rect.h) {
-		core::LogDebug("upping pixel buffer");
-		pixels.clear();
-		pixels.resize(4 * rect.w * rect.h);
-	}
-
-	core::LogDebug("Getting shit");
-	glReadPixels(0, 0, rect.w, rect.h, GL_RGBA, GL_UNSIGNED_BYTE, &pixels[0]);
-}
-
-std::uint8_t* GetSampleFromSurface(int sample_x, int sample_y) {
-	std::uint32_t curSample = sample_x | (sample_y << 16);
-
-	if (curSample != lastSample) {
-		UpdatePixels();
-		fasstv::SSTV::Mode* mode = fasstv::SSTVEncode::The().GetMode();
-
-		SDL_Rect rect = {0, 0, 1280, 720};
-		if (sdl::Window::CurrentWindow != nullptr)
-			rect = sdl::Window::CurrentWindow->GetRect();
-
-		// get pixel at sample (no nice filtering...)
-		int pixel_idx = sample_x + (((rect.h - 1) - sample_y) * rect.w);
-		pixel_idx = std::clamp(pixel_idx, 0, (rect.w * rect.h) - 1);
-		//memcpy(&colorHolder[0], &pixels[pixel_idx * 4], 4);
-
-		for (int i = 0; i < 3; i++) {
-			colorHolder[i] = pixels[(pixel_idx * 4) + i];
-		}
-		colorHolder[3] = 255;
-
-		//SDL_ReadSurfacePixel(SampleSurface, sample_x, sample_y, &colorHolder[0], &colorHolder[1], &colorHolder[2], &colorHolder[3]);
-		//core::LogDebug("Sample ({}, {}) read #{:02x}{:02x}{:02x}{:02x}", sample_x, sample_y, colorHolder[0], colorHolder[1], colorHolder[2], colorHolder[3]);
-		lastSample = curSample;
-	}
-
-	// lazy alpha application
-	for (int i = 0; i < 3; i++)
-		colorHolder[i] *= (colorHolder[3] / 255.f);
-
-	return &colorHolder[0];
-}
 
 int main(int argc, char** argv) {
 	static_cast<void>(argc);
@@ -116,111 +37,17 @@ int main(int argc, char** argv) {
 
 	core::LoggerAttachStdout();
 
-	if(SDL_Init(SDL_INIT_EVERYTHING) > 0) {
-		core::LogFatal("Failed to initialize SDL; giving up");
-		return 1;
-	}
+	int res = wrap::sdl::Init();
+	if (res != 0)
+		return res;
 
-	// Create time system
-	core::SystemManager::The().Add(static_cast<core::System*>(&core::TimeSystem::The()));
+	sdl::Window* window = wrap::sdl::CreateWindow();
 
-	// Create input system
-	core::SystemManager::The().Add(static_cast<core::PerTickSystem*>(&core::InputSystem::The()));
-
-	// Create file watch system
-	core::filesystem::watchSystem = new core::filesystem::WatchSystem;
-	core::SystemManager::The().Add(static_cast<core::PerTickSystem*>(core::filesystem::watchSystem));
-
-	// Create shader, texture, and material systems
-	core::SystemManager::The().Add(static_cast<core::System*>(&core::gfx::ShaderSystem::The()));
-	core::SystemManager::The().Add(static_cast<core::System*>(&core::gfx::TextureSystem::The()));
-	core::SystemManager::The().Add(static_cast<core::System*>(&core::gfx::MaterialSystem::The()));
-
-	// Create systems for the scene
-	core::SystemManager::The().Add(static_cast<core::PerTickSystem*>(&core::scene::LightManager::The()));
-
-	auto window = sdl::Window { "butane", 1280, 720 };
-	sdl::Window::CurrentWindow = &window;
-
-	// By this point the Window class has setup OpenGL and made the context it created current,
-	// so now we can load OpenGL APIs.
-	gladLoadGLLoader(SDL_GL_GetProcAddress);
-
-	// Init all registered systems
-	core::SystemManager::The().Init();
-
-	DumpOglInfo();
+	wrap::systems::RegisterSystemsAndInit();
 
 	// imgui init
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
+	wrap::imgui::Init();
 	ImGuiIO& io = ImGui::GetIO();
-	io.IniFilename = "data/imgui.ini";
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-
-	//ImGui::StyleColorsDark();
-
-	ImGuiStyle& style = ImGui::GetStyle();
-
-	style.Colors[ImGuiCol_Text]                   = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-	style.Colors[ImGuiCol_TextDisabled]           = ImVec4(0.86f, 0.81f, 0.75f, 0.60f);
-	style.Colors[ImGuiCol_WindowBg]               = ImVec4(0.24f, 0.22f, 0.17f, 0.90f);
-	style.Colors[ImGuiCol_ChildBg]                = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-	style.Colors[ImGuiCol_PopupBg]                = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
-	style.Colors[ImGuiCol_Border]                 = ImVec4(0.57f, 0.51f, 0.45f, 0.50f);
-	style.Colors[ImGuiCol_BorderShadow]           = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-	style.Colors[ImGuiCol_FrameBg]                = ImVec4(0.29f, 0.27f, 0.25f, 1.00f);
-	style.Colors[ImGuiCol_FrameBgHovered]         = ImVec4(0.56f, 0.53f, 0.46f, 0.40f);
-	style.Colors[ImGuiCol_FrameBgActive]          = ImVec4(0.79f, 0.76f, 0.72f, 0.67f);
-	style.Colors[ImGuiCol_TitleBg]                = ImVec4(0.04f, 0.04f, 0.04f, 1.00f);
-	style.Colors[ImGuiCol_TitleBgActive]          = ImVec4(0.42f, 0.28f, 0.22f, 1.00f);
-	style.Colors[ImGuiCol_TitleBgCollapsed]       = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
-	style.Colors[ImGuiCol_MenuBarBg]              = ImVec4(0.13f, 0.13f, 0.12f, 0.78f);
-	style.Colors[ImGuiCol_ScrollbarBg]            = ImVec4(0.02f, 0.02f, 0.02f, 0.53f);
-	style.Colors[ImGuiCol_ScrollbarGrab]          = ImVec4(0.31f, 0.31f, 0.31f, 1.00f);
-	style.Colors[ImGuiCol_ScrollbarGrabHovered]   = ImVec4(0.41f, 0.41f, 0.41f, 1.00f);
-	style.Colors[ImGuiCol_ScrollbarGrabActive]    = ImVec4(0.51f, 0.51f, 0.51f, 1.00f);
-	style.Colors[ImGuiCol_CheckMark]              = ImVec4(0.90f, 0.94f, 0.30f, 0.78f);
-	style.Colors[ImGuiCol_SliderGrab]             = ImVec4(0.60f, 0.57f, 0.52f, 1.00f);
-	style.Colors[ImGuiCol_SliderGrabActive]       = ImVec4(0.79f, 0.76f, 0.72f, 1.00f);
-	style.Colors[ImGuiCol_Button]                 = ImVec4(0.32f, 0.30f, 0.28f, 1.00f);
-	style.Colors[ImGuiCol_ButtonHovered]          = ImVec4(0.69f, 0.64f, 0.12f, 1.00f);
-	style.Colors[ImGuiCol_ButtonActive]           = ImVec4(0.91f, 0.97f, 0.50f, 1.00f);
-	style.Colors[ImGuiCol_Header]                 = ImVec4(0.80f, 0.24f, 0.24f, 0.31f);
-	style.Colors[ImGuiCol_HeaderHovered]          = ImVec4(0.80f, 0.24f, 0.24f, 0.66f);
-	style.Colors[ImGuiCol_HeaderActive]           = ImVec4(0.69f, 0.64f, 0.12f, 0.76f);
-	style.Colors[ImGuiCol_Separator]              = ImVec4(0.43f, 0.43f, 0.50f, 0.50f);
-	style.Colors[ImGuiCol_SeparatorHovered]       = ImVec4(0.10f, 0.40f, 0.75f, 0.78f);
-	style.Colors[ImGuiCol_SeparatorActive]        = ImVec4(0.10f, 0.40f, 0.75f, 1.00f);
-	style.Colors[ImGuiCol_ResizeGrip]             = ImVec4(0.55f, 0.27f, 0.15f, 0.20f);
-	style.Colors[ImGuiCol_ResizeGripHovered]      = ImVec4(0.55f, 0.27f, 0.15f, 0.67f);
-	style.Colors[ImGuiCol_ResizeGripActive]       = ImVec4(0.69f, 0.64f, 0.12f, 0.76f);
-	style.Colors[ImGuiCol_Tab]                    = ImVec4(0.29f, 0.27f, 0.24f, 0.46f);
-	style.Colors[ImGuiCol_TabHovered]             = ImVec4(0.75f, 0.87f, 0.31f, 0.80f);
-	style.Colors[ImGuiCol_TabActive]              = ImVec4(0.55f, 0.27f, 0.15f, 1.00f);
-	style.Colors[ImGuiCol_TabUnfocused]           = ImVec4(0.07f, 0.10f, 0.15f, 0.97f);
-	style.Colors[ImGuiCol_TabUnfocusedActive]     = ImVec4(0.13f, 0.26f, 0.42f, 1.00f);
-	style.Colors[ImGuiCol_DockingPreview]         = ImVec4(0.26f, 0.59f, 0.98f, 0.70f);
-	style.Colors[ImGuiCol_DockingEmptyBg]         = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
-	style.Colors[ImGuiCol_PlotLines]              = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
-	style.Colors[ImGuiCol_PlotLinesHovered]       = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
-	style.Colors[ImGuiCol_PlotHistogram]          = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
-	style.Colors[ImGuiCol_PlotHistogramHovered]   = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
-	style.Colors[ImGuiCol_TableHeaderBg]          = ImVec4(0.19f, 0.19f, 0.20f, 1.00f);
-	style.Colors[ImGuiCol_TableBorderStrong]      = ImVec4(0.31f, 0.31f, 0.35f, 1.00f);
-	style.Colors[ImGuiCol_TableBorderLight]       = ImVec4(0.23f, 0.23f, 0.25f, 1.00f);
-	style.Colors[ImGuiCol_TableRowBg]             = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-	style.Colors[ImGuiCol_TableRowBgAlt]          = ImVec4(1.00f, 1.00f, 1.00f, 0.06f);
-	style.Colors[ImGuiCol_TextSelectedBg]         = ImVec4(0.26f, 0.59f, 0.98f, 0.35f);
-	style.Colors[ImGuiCol_DragDropTarget]         = ImVec4(1.00f, 1.00f, 0.00f, 0.90f);
-	style.Colors[ImGuiCol_NavHighlight]           = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-	style.Colors[ImGuiCol_NavWindowingHighlight]  = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
-	style.Colors[ImGuiCol_NavWindowingDimBg]      = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
-	style.Colors[ImGuiCol_ModalWindowDimBg]       = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
-
-	ImGui_ImplSDL2_InitForOpenGL(window.Raw(), window.GlContext());
-	ImGui_ImplOpenGL3_Init("#version 330 core");
 
 	// init stuff
 
@@ -246,20 +73,10 @@ int main(int argc, char** argv) {
 	bool run = true;
 
 	// Assign window event handlers
-	window.On(SDL_QUIT, [&](SDL_Event& ev) {
-		static_cast<void>(ev);
-		run = false;
-	});
+	wrap::sdl::SetupEventHandlers();
 
-	window.On(SDL_KEYDOWN, [&](SDL_Event& ev) {
-		core::InputSystem::The().KeyEvent(ev.key);
-	});
-	window.On(SDL_KEYUP, [&](SDL_Event& ev) {
-		core::InputSystem::The().KeyEvent(ev.key);
-	});
-
-	//SDL_Surface* windowSurface = SDL_GetWindowSurface(window.Raw());
-	SDL_Rect windowRect = window.GetRect();
+	//SDL_Surface* windowSurface = SDL_GetWindowSurface(window->Raw());
+	SDL_Rect windowRect = window->GetRect();
 
 	glClearColor(0.05f, 0.05f, 0.05f, 1.f);
 	glViewport(0, 0, windowRect.w, windowRect.h);
@@ -288,7 +105,7 @@ int main(int argc, char** argv) {
 
 	auto& sstvenc = fasstv::SSTVEncode::The();
 	sstvenc.SetSampleRate(44100);
-	sstvenc.SetPixelProvider(&GetSampleFromSurface);
+	sstvenc.SetPixelProvider(&butane::wrap::fasstv::GetSampleFromSurface);
 	std::vector<float> samples;
 
 	const glm::vec3 cubePositions[] = {
@@ -384,10 +201,7 @@ int main(int argc, char** argv) {
 			timeSystem.EndTick();
 		}
 
-		core::debug::ImGuiExtensions::IdIndex = 0;
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplSDL2_NewFrame();
-		ImGui::NewFrame();
+		wrap::imgui::NewFrame();
 
 		//core::LogDebug("Render delta time: {}", timeSystem.DeltaTime());
 
@@ -452,7 +266,7 @@ int main(int argc, char** argv) {
 			ImGui::EndMainMenuBar();
 		}
 
-		ImGui::Render();
+		wrap::imgui::Render();
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -499,16 +313,13 @@ int main(int argc, char** argv) {
 		}
 
 
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-		window.Swap();
+		wrap::imgui::RenderDrawData();
+		window->Swap();
 		// Run the SDL window event loop last
-		window.Poll();
+		window->Poll();
 	}
 
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplSDL2_Shutdown();
-	ImGui::DestroyContext();
-
-	SDL_Quit();
+	wrap::imgui::Shutdown();
+	wrap::sdl::Shutdown();
 	return 0;
 }

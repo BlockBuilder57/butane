@@ -1,4 +1,9 @@
 add_executable(butane
+		wrap/fasstv.cpp
+		wrap/ImGui.cpp
+		wrap/SDL.cpp
+		wrap/Systems.cpp
+
 		main.cpp
 		)
 

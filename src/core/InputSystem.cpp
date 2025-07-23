@@ -21,6 +21,7 @@ namespace butane::core {
 
 	void InputSystem::Shutdown() {
 		SetMouseLock(false);
+		// clear binds out
 	}
 
 	void InputSystem::ImGuiDebug() {

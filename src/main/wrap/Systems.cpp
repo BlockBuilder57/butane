@@ -9,6 +9,7 @@
 #include <core/rendering/TextureSystem.hpp>
 #include <core/rendering/ShaderSystem.hpp>
 #include <core/scene/Light.hpp>
+#include <core/scene/SceneManager.hpp>
 #include <core/TimeSystem.hpp>
 
 namespace butane::wrap::systems {
@@ -30,6 +31,7 @@ namespace butane::wrap::systems {
 		core::SystemManager::The().Add(static_cast<core::System*>(&core::gfx::MaterialSystem::The()));
 
 		// Create systems for the scene
+		core::SystemManager::The().Add(static_cast<core::PerTickSystem*>(&core::scene::SceneManager::The()));
 		core::SystemManager::The().Add(static_cast<core::PerTickSystem*>(&core::scene::LightManager::The()));
 
 		// Init all registered systems

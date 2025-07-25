@@ -4,11 +4,6 @@
 
 namespace butane::core::scene {
 
-	Scene& Scene::The() {
-		static Scene the;
-		return the;
-	}
-
 	glm::mat4 Scene::GetCameraView() {
 		if(cam != nullptr)
 			return cam->GetView();

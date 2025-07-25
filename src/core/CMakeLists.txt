@@ -31,6 +31,7 @@ add_library(butane_core
 
 		# Scene
 		scene/Scene.cpp
+		scene/SceneManager.cpp
 		scene/Transform.cpp
 		scene/Camera.cpp
 		scene/Light.cpp

@@ -11,8 +11,20 @@ namespace butane::core::scene {
 		using SmartType = std::unique_ptr<T>;
 		using ListType = std::vector<SmartType>;
 
+		inline void SetParent(T* toBeParent) {
+			if (parent != nullptr) {
+				std::erase(parent->children, this);
+			}
+
+			parent = toBeParent;
+
+			if (toBeParent != nullptr) {
+				children.push_back(this);
+			}
+		}
+
 		template <class TOther = T, class... Args>
-		inline SmartType& AddParent(const std::string& name, Args&&... args) {
+		inline SmartType& AddChild(const std::string& name, Args&&... args) {
 			static_assert(std::is_base_of_v<T, TOther>, "TOther must inherit from root scene graph type");
 			auto& back = children.template emplace_back(std::make_unique<TOther>(std::forward(args)...));
 

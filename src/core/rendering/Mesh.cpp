@@ -2,7 +2,7 @@
 
 #include <core/rendering/GLHeaders.hpp>
 #include <core/rendering/Mesh.hpp>
-#include <core/scene/Scene.hpp>
+#include <core/scene/SceneManager.hpp>
 #include <core/scene/Light.hpp>
 #include <core/TimeSystem.hpp>
 
@@ -51,8 +51,8 @@ namespace butane::core::gfx {
 		mat->BindAndSetUniforms();
 
 		mat->shaderProgram->SetUniform("gTime", glm::vec2(core::TimeSystem::The().NowTime(), std::chrono::system_clock::now().time_since_epoch().count()));
-		mat->shaderProgram->SetUniform("gMatProjection", core::scene::Scene::The().GetCameraProjection());
-		mat->shaderProgram->SetUniform("gMatView", core::scene::Scene::The().GetCameraView());
+		mat->shaderProgram->SetUniform("gMatProjection", core::scene::SceneManager::The().GetCameraProjection());
+		mat->shaderProgram->SetUniform("gMatView", core::scene::SceneManager::The().GetCameraView());
 		mat->shaderProgram->SetUniform("gMatModel", submesh);
 
 		glBindVertexArray(VAO);

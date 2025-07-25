@@ -15,10 +15,8 @@ namespace butane::core::scene {
 	/// root class for all scene graph nodes
 	struct Node : public SGNodeMixin<Node> {};
 
-	class Scene {
+	class Scene : public SGNodeMixin<Node> {
 	   public:
-		static Scene& The();
-
 		glm::mat4 GetCameraView();
 		glm::mat4 GetCameraProjection();
 		Transform* GetCameraTransform();

@@ -15,7 +15,7 @@
 #include <core/InputSystem.hpp>
 #include <core/TimeSystem.hpp>
 #include <core/Logger.hpp>
-#include <core/scene/Scene.hpp>
+#include <core/scene/SceneManager.hpp>
 #include <core/scene/Light.hpp>
 #include <core/sdl/Window.hpp>
 #include <core/StdoutSink.hpp>
@@ -52,11 +52,14 @@ int main(int argc, char** argv) {
 	// init stuff
 
 	core::TimeSystem& timeSystem = core::TimeSystem::The();
+	core::scene::SceneManager& sceneManager = core::scene::SceneManager::The();
 
-	auto& theScene = core::scene::Scene::The();
+	auto theScene = new core::scene::Scene();
 	auto theCam = new core::scene::Camera();
 
-	theScene.SetCamera(theCam);
+	sceneManager.AddScene(theScene);
+	//theCam->SetParent(theScene);
+	theScene->SetCamera(theCam);
 
 	theCam->transform.SetPosRot({0.f, 0.7f, 0.f}, glm::identity<glm::quat>());
 	theCam->SetFovNearFar(70.f, 0.1f, 1000.f);

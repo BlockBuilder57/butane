@@ -21,6 +21,11 @@ namespace butane::wrap {
 		void RenderDrawData();
 	};
 
+	namespace physfs {
+		void Init(int argc, char** argv);
+		void Shutdown();
+	};
+
 	namespace sdl {
 		void DumpOGLInfo();
 

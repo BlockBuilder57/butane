@@ -54,7 +54,9 @@ namespace butane::wrap::sdl {
 
 		window->On(SDL_QUIT, [&](SDL_Event& ev) {
 			static_cast<void>(ev);
-			//run = false;
+
+			if (core::sdl::Window::CurrentWindow)
+				core::sdl::Window::CurrentWindow->SetKeepOpen(false);
 		});
 
 		window->On(SDL_KEYDOWN, [&](SDL_Event& ev) {

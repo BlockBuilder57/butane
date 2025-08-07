@@ -1,6 +1,7 @@
 add_executable(butane
 		wrap/fasstv.cpp
 		wrap/ImGui.cpp
+		wrap/physfs.cpp
 		wrap/SDL.cpp
 		wrap/Systems.cpp
 
@@ -19,4 +20,5 @@ target_link_libraries(butane
 		SDL2_image::SDL2_image
 		imgui
 		fasstv
+		murmur3
 		)

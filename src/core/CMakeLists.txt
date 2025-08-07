@@ -11,6 +11,10 @@ add_library(butane_core
 		InputSystem.cpp
 		TimeSystem.cpp
 
+		# Assets
+		assets/AssetSystem.cpp
+
+		# Filesystem
 		filesystem/Filesystem.cpp
 		filesystem/WatchSystem.cpp
 		filesystem/TomlLoader.cpp

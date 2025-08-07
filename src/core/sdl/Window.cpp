@@ -16,6 +16,8 @@ namespace butane::core::sdl {
 
 		// Enable VSync by default; later on this probably should be configurable
 		SDL_GL_SetSwapInterval(1);
+
+		keepOpen = true;
 	}
 
 	Window::~Window() {

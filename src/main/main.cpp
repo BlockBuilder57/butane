@@ -32,10 +32,9 @@ namespace sdl = core::sdl;
 namespace gfx = core::gfx;
 
 int main(int argc, char** argv) {
-	static_cast<void>(argc);
-	static_cast<void>(argv);
-
 	core::LoggerAttachStdout();
+
+	wrap::physfs::Init(argc, argv);
 
 	int res = wrap::sdl::Init();
 	if (res != 0)
@@ -71,9 +70,6 @@ int main(int argc, char** argv) {
 	// models
 	gfx::Model* modelCube = new gfx::Model(core::filesystem::Filesystem::GetDataDir() / "models/defaults/cube.obj");
 	gfx::Model* modelBackpack = new gfx::Model(core::filesystem::Filesystem::GetDataDir() / "models/backpack/backpack.obj");
-
-	// loop variables
-	bool run = true;
 
 	// Assign window event handlers
 	wrap::sdl::SetupEventHandlers();
@@ -124,7 +120,7 @@ int main(int argc, char** argv) {
 			glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
 
-	while(run) {
+	while (window->GetKeepOpen()) {
 		timeSystem.SystemsUpdate();
 
 		// Fixed timestep updates.
@@ -324,5 +320,6 @@ int main(int argc, char** argv) {
 
 	wrap::imgui::Shutdown();
 	wrap::sdl::Shutdown();
+	wrap::physfs::Shutdown();
 	return 0;
 }

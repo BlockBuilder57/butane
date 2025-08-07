@@ -33,10 +33,14 @@ namespace butane::core::sdl {
 
 		void On(SDL_EventType ev, const EventHandlerFn& fn);
 
+		void SetKeepOpen(bool b) { keepOpen = b; }
+		bool GetKeepOpen() { return keepOpen; }
+
 	   private:
 		SDL_Window* window {};
 		SDL_GLContext context {};
 		std::unordered_map<u32, EventHandlerFn> events {};
+		bool keepOpen;
 	};
 
 

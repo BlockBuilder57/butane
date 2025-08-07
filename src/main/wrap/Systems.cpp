@@ -2,6 +2,7 @@
 
 #include "Wrap.hpp"
 
+#include <core/assets/AssetSystem.hpp>
 #include <core/filesystem/WatchSystem.hpp>
 #include <core/InputSystem.hpp>
 #include <core/rendering/GLHeaders.hpp>
@@ -15,15 +16,18 @@
 namespace butane::wrap::systems {
 
 	void RegisterSystemsAndInit() {
+		// Create file watch system
+		core::filesystem::watchSystem = new core::filesystem::WatchSystem;
+		core::SystemManager::The().Add(static_cast<core::PerTickSystem*>(core::filesystem::watchSystem));
+
+		// Create filesystem
+		core::SystemManager::The().Add(static_cast<core::System*>(&core::assets::AssetSystem::The()));
+
 		// Create time system
 		core::SystemManager::The().Add(static_cast<core::System*>(&core::TimeSystem::The()));
 
 		// Create input system
 		core::SystemManager::The().Add(static_cast<core::PerTickSystem*>(&core::InputSystem::The()));
-
-		// Create file watch system
-		core::filesystem::watchSystem = new core::filesystem::WatchSystem;
-		core::SystemManager::The().Add(static_cast<core::PerTickSystem*>(core::filesystem::watchSystem));
 
 		// Create shader, texture, and material systems
 		core::SystemManager::The().Add(static_cast<core::System*>(&core::gfx::ShaderSystem::The()));

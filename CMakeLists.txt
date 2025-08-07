@@ -18,6 +18,7 @@ find_package(Threads REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(SDL2_mixer REQUIRED)
 find_package(SDL2_image REQUIRED)
+find_package(PhysFS REQUIRED)
 
 set(IMGUI_DIR "${CMAKE_SOURCE_DIR}/third_party/imgui")
 
@@ -32,7 +33,7 @@ add_library(imgui
 		"${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp"
 		)
 
-target_link_libraries(imgui SDL2::SDL2)
+target_link_libraries(imgui SDL2::SDL2 physfs)
 target_include_directories(imgui PRIVATE ${IMGUI_DIR})
 
 # default linker
@@ -54,6 +55,7 @@ add_subdirectory(third_party/tomlpp)
 add_subdirectory(third_party/magic_enum)
 add_subdirectory(third_party/assimp)
 add_subdirectory(third_party/fasstv)
+add_subdirectory(third_party/murmur3)
 
 add_subdirectory(src/core)
 add_subdirectory(src/main)
